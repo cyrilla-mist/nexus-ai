@@ -16,6 +16,16 @@ function jsonResponse(data, status = 200) {
   });
 }
 
+function badRequest(code, message) {
+  return jsonResponse(
+    {
+      ok: false,
+      error: { code, message }
+    },
+    400
+  );
+}
+
 export default {
   async fetch(request) {
     const url = new URL(request.url);
@@ -37,8 +47,25 @@ export default {
     }
 
     if (request.method === "POST" && url.pathname === "/api/nexus") {
+      let payload;
+
       try {
-        const payload = await request.json();
+        payload = await request.json();
+      } catch {
+        return badRequest(
+          "INVALID_JSON",
+          "Request body must be valid JSON."
+        );
+      }
+
+      if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+        return badRequest(
+          "INVALID_PAYLOAD",
+          "Request body must be a JSON object."
+        );
+      }
+
+      try {
         const result = await runNexusCore(payload);
         return jsonResponse(result, result.ok ? 200 : 400);
       } catch (error) {
