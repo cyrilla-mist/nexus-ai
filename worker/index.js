@@ -27,7 +27,7 @@ function badRequest(code, message) {
 }
 
 export default {
-  async fetch(request) {
+  async fetch(request, env = {}) {
     const url = new URL(request.url);
 
     if (request.method === "OPTIONS") {
@@ -42,7 +42,7 @@ export default {
         ok: true,
         service: "nexus-ai-core",
         version: "0.1.0-skeleton",
-        mode: "mock"
+        mode: env.DEEPSEEK_API_KEY ? "deepseek" : "mock"
       });
     }
 
@@ -66,7 +66,11 @@ export default {
       }
 
       try {
-        const result = await runNexusCore(payload);
+        const result = await runNexusCore(payload, {
+          model: {
+            apiKey: env.DEEPSEEK_API_KEY
+          }
+        });
         return jsonResponse(result, result.ok ? 200 : 400);
       } catch (error) {
         return jsonResponse(
