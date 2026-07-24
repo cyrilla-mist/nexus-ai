@@ -6,7 +6,8 @@
   "description": "Nexus AI Genesis Build — Nexus Core and Atlas Agent framework.",
   "scripts": {
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "test": "node --test"
   },
   "devDependencies": {
     "wrangler": "^4.0.0"
