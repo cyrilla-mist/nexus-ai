@@ -87,16 +87,42 @@ h2 {
   margin-bottom: 24px;
 }
 
-.status-pill {
+.status-group {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.status-pill,
+.model-pill {
   display: inline-flex;
   align-items: center;
   min-height: 32px;
   padding: 0 12px;
   border-radius: 999px;
-  background: #eeeafd;
-  color: #5748c6;
   font-size: 0.86rem;
   font-weight: 700;
+}
+
+.status-pill {
+  background: #eeeafd;
+  color: #5748c6;
+}
+
+.model-pill[data-mode="mock"] {
+  background: #e9edf5;
+  color: #445067;
+}
+
+.model-pill[data-mode="deepseek"] {
+  background: #dcf7eb;
+  color: #176b4a;
+}
+
+.model-pill[data-mode="fallback"] {
+  background: #fff0d7;
+  color: #985f08;
 }
 
 label {
@@ -206,6 +232,15 @@ code {
   grid-column: 1 / -1;
 }
 
+.structured-output {
+  margin: 0;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: #465269;
+  font: 0.9rem/1.65 ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
 @media (max-width: 680px) {
   .shell {
     width: min(100% - 20px, 960px);
@@ -220,6 +255,10 @@ code {
 
   .workspace-heading {
     flex-direction: column;
+  }
+
+  .status-group {
+    justify-content: flex-start;
   }
 
   .result-grid {
