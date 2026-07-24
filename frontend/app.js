@@ -4,6 +4,7 @@ const input = document.querySelector("#idea-input");
 const submitButton = document.querySelector("#submit-button");
 const clearButton = document.querySelector("#clear-button");
 const status = document.querySelector("#system-status");
+const modelMode = document.querySelector("#model-mode");
 const emptyState = document.querySelector("#empty-state");
 const resultContent = document.querySelector("#result-content");
 
@@ -24,6 +25,28 @@ function renderList(items = []) {
   return `<ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
 }
 
+function renderJson(value) {
+  if (!value || typeof value !== "object") {
+    return "<p>暂无</p>";
+  }
+
+  return `<pre class="structured-output">${escapeHtml(
+    JSON.stringify(value, null, 2)
+  )}</pre>`;
+}
+
+function updateModelMode(model = {}) {
+  const mode = model.mode ?? "mock";
+  const labels = {
+    mock: "Mock Mode",
+    deepseek: "DeepSeek Mode",
+    fallback: "Fallback Mode"
+  };
+
+  modelMode.textContent = labels[mode] ?? "Mock Mode";
+  modelMode.dataset.mode = mode;
+}
+
 function renderResult(data) {
   const nexus = data?.nexus ?? {};
   const response = data?.response ?? {};
@@ -31,6 +54,7 @@ function renderResult(data) {
 
   emptyState.hidden = true;
   resultContent.hidden = false;
+  updateModelMode(response.model);
   resultContent.innerHTML = `
     <article class="result-card">
       <h3>Nexus Core</h3>
@@ -45,9 +69,35 @@ function renderResult(data) {
       <p><strong>下一步：</strong>${escapeHtml(response.nextStep ?? "")}</p>
     </article>
 
+    <article class="result-card">
+      <h3>模型状态</h3>
+      <p><strong>模式：</strong>${escapeHtml(modelMode.textContent)}</p>
+      <p><strong>模型：</strong>${escapeHtml(response.model?.model ?? "本地模拟")}</p>
+      ${
+        response.model?.fallbackReason
+          ? `<p><strong>降级原因：</strong>${escapeHtml(response.model.fallbackReason.code)}</p>`
+          : ""
+      }
+    </article>
+
     <article class="result-card wide">
       <h3>Nexus 任务计划</h3>
       ${renderList(nexus.plan)}
+    </article>
+
+    <article class="result-card wide">
+      <h3>项目画像</h3>
+      ${renderJson(response.ideaProfile)}
+    </article>
+
+    <article class="result-card wide">
+      <h3>Project Blueprint</h3>
+      ${renderJson(response.projectBlueprint)}
+    </article>
+
+    <article class="result-card wide">
+      <h3>主要风险</h3>
+      ${renderJson(response.risks)}
     </article>
 
     <article class="result-card wide">
@@ -117,6 +167,7 @@ function clearWorkspace() {
   emptyState.textContent =
     "输入目标后，这里会显示 Nexus Core 的意图判断、Atlas 调度与下一步建议。";
   status.textContent = "待输入";
+  updateModelMode();
   input.focus();
 }
 

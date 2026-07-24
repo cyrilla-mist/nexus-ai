@@ -20,7 +20,7 @@ function buildPlan(intentName) {
   ];
 }
 
-export async function runNexusCore(payload = {}) {
+export async function runNexusCore(payload = {}, runtime = {}) {
   const message = String(payload.message ?? "").trim();
   const memory = normalizeMemory(payload.memory);
 
@@ -68,7 +68,8 @@ export async function runNexusCore(payload = {}) {
     case "project-atlas":
       atlasResult = await runProjectAtlas({
         message,
-        context: payload.context ?? {}
+        context: payload.context ?? {},
+        model: runtime.model ?? {}
       });
       break;
     default:

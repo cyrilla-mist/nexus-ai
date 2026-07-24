@@ -4,63 +4,52 @@
 
 Nexus AI is an AI collaboration platform powered by specialized Atlas Agents.
 
-## Vision
-
-Nexus AI aims to build a new generation of AI work partners.
-
-Instead of only answering questions, Nexus helps users understand problems, explore ideas, design solutions, and move toward execution.
-
-## Core Concept
+## Current Flow
 
 ```text
-Nexus AI
-    ↓
-Nexus Core
-    ↓
-Atlas Framework
-    ↓
-Specialized Atlas Agents
+Frontend
+  → Cloudflare Worker
+  → Nexus Core
+  → Router
+  → Project Atlas
+  → Model Router
+  → DeepSeek Client (when configured)
+  → Project Atlas result normalization
+  → Reflection
+  → Memory
 ```
 
-Nexus Core acts as the Agent Manager. It understands the user's goal, creates a plan, selects an Atlas, reviews the result, and updates memory. The human user keeps the final decision.
+Project Atlas transforms an early idea into a structured project analysis. The
+current implementation keeps the human user as the final decision-maker and
+does not invent evidence or user resources.
 
-## Atlas Agents
+## Model Modes
 
-### Project Atlas
+- **Mock Mode**: `DEEPSEEK_API_KEY` is not configured. Project Atlas returns the
+  local deterministic skeleton result.
+- **DeepSeek Mode**: the key is configured and DeepSeek returns valid structured
+  JSON.
+- **Fallback Mode**: the key is configured, but the request times out, the API
+  returns an error, or the model output fails validation. Project Atlas safely
+  falls back to the local result.
 
-**Idea → Execution**
-
-An AI project navigation partner that helps transform early ideas into structured, executable projects.
-
-Current skeleton capabilities:
-
-- project-intent detection
-- clarification questions
-- preliminary workflow planning
-- basic reflection checks
-- initial project-memory updates
-
-### Evidence Atlas
-
-**Project → Evidence**
-
-An experimental Atlas focused on understanding relationships between project claims, evidence, and supporting materials. It is currently in the design stage.
+The DeepSeek key is only read from the Cloudflare Worker environment. It is
+never sent to the frontend or stored in source code.
 
 ## Repository Structure
 
 ```text
 nexus-ai/
-├── atlas/
-│   ├── project-atlas/
-│   └── evidence-atlas/
+├── atlas/project-atlas/
 ├── core/
-│   ├── nexus-core.js
-│   ├── reflection.js
-│   └── router.js
-├── docs/
 ├── frontend/
 ├── memory/
+├── model/
+│   ├── deepseek-client.js
+│   └── model-router.js
+├── tests/
 ├── worker/
+├── .dev.vars.example
 ├── package.json
 └── wrangler.toml
 ```
@@ -72,20 +61,83 @@ Requirements:
 - Node.js
 - npm
 
-Install dependencies and start the Cloudflare Worker:
+Install dependencies:
 
 ```bash
 npm install
+```
+
+### Mock Mode
+
+Do not create `.dev.vars`, or leave `DEEPSEEK_API_KEY` unconfigured:
+
+```bash
 npm run dev
 ```
 
-The API will be available at:
+### DeepSeek Mode
+
+Copy the example file:
+
+```bash
+cp .dev.vars.example .dev.vars
+```
+
+On Windows PowerShell:
+
+```powershell
+Copy-Item .dev.vars.example .dev.vars
+```
+
+Edit `.dev.vars` locally:
+
+```dotenv
+DEEPSEEK_API_KEY=...
+```
+
+Then start the Worker:
+
+```bash
+npm run dev
+```
+
+The API is available at:
 
 ```text
 http://localhost:8787/api/nexus
 ```
 
-Open `frontend/index.html` with a local static server, then submit an idea. The current version runs in skeleton mode and does not call a paid model API yet.
+Serve the frontend in a second terminal:
+
+```bash
+python -m http.server 4173 --directory frontend
+```
+
+Open `http://localhost:4173`.
+
+## Production Secret
+
+Set the production secret interactively. Do not put the value in
+`wrangler.toml` or a shell command:
+
+```bash
+npx wrangler secret put DEEPSEEK_API_KEY
+```
+
+## Tests
+
+```bash
+npm test
+```
+
+The test suite covers:
+
+- Mock Mode without an API key
+- successful structured model output
+- invalid model JSON
+- missing required fields
+- request timeout
+- DeepSeek HTTP error
 
 Health check:
 
@@ -93,37 +145,24 @@ Health check:
 GET http://localhost:8787/health
 ```
 
-## Development Roadmap
+Project analysis:
 
-### v0.1 Genesis Build
+```http
+POST /api/nexus
+Content-Type: application/json
 
-- [x] Nexus Core architecture skeleton
-- [x] Project Atlas skeleton
-- [x] Initial memory model
-- [x] Cloudflare Worker API skeleton
-- [x] Frontend workspace skeleton
-- [ ] DeepSeek API integration
-- [ ] Structured Project Blueprint generation
-- [ ] Persistent Cloudflare memory
+{"message":"我想做一个帮助大学生提高学习效率的 AI 项目"}
+```
 
-### v0.2 Memory Layer
+For a routed project request, verify:
 
-- Nexus Memory
-- Project history
-- User context
+- `nexus.selectedAtlas` is `project-atlas`
+- `response.model.mode` is `mock`, `deepseek`, or `fallback`
+- `response.projectBlueprint` is present
+- `response.risks` is an array
+- `response.nextAction` is present
 
-### v0.3 Knowledge Layer
+## Scope
 
-- RAG
-- Agent knowledge bases
-- Tool integration
-
-### v1.0 Atlas Ecosystem
-
-- Multiple specialized agents
-- Multi-agent collaboration
-- Continuous evolution
-
-## Status
-
-🚧 **v0.1 Genesis Build — Core Skeleton Available**
+This build intentionally does not include a database, login system, RAG, MCP,
+or a frontend framework.
