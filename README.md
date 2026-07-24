@@ -2,57 +2,56 @@
 
 **Connect ideas. Create possibilities.**
 
-Nexus AI is an AI collaboration platform powered by specialized Atlas Agents.
+Nexus AI v0.1.1 turns Project Atlas from a single technical JSON demo into a
+small, readable project collaboration workspace.
 
 ## Current Flow
 
 ```text
-Frontend
+Frontend session
   → Cloudflare Worker
   → Nexus Core
   → Router
   → Project Atlas
   → Model Router
   → DeepSeek Client (when configured)
-  → Project Atlas result normalization
+  → Structured result validation
+  → Explainable project-stage evaluation
   → Reflection
-  → Memory
+  → Temporary browser session
 ```
 
-Project Atlas transforms an early idea into a structured project analysis. The
-current implementation keeps the human user as the final decision-maker and
-does not invent evidence or user resources.
+The frontend keeps at most three analysis turns in the current browser tab.
+There is no account, database, durable chat history, or remote project storage.
+
+## Product Experience
+
+Project Atlas displays:
+
+- a readable project profile
+- a Project Blueprint
+- risk, basis, and mitigation cards
+- the current stage and next target stage
+- a highlighted next action
+- answerable clarification questions
+- raw JSON inside a collapsed developer section
+
+The supported stages are:
+
+```text
+Idea → Explore → Design → Validate → Execute
+```
+
+The stage is calculated locally from explicit result signals. It does not
+trigger another model call.
 
 ## Model Modes
 
-- **Mock Mode**: `DEEPSEEK_API_KEY` is not configured. Project Atlas returns the
-  local deterministic skeleton result.
-- **DeepSeek Mode**: the key is configured and DeepSeek returns valid structured
-  JSON.
-- **Fallback Mode**: the key is configured, but the request times out, the API
-  returns an error, or the model output fails validation. Project Atlas safely
-  falls back to the local result.
-
-The DeepSeek key is only read from the Cloudflare Worker environment. It is
-never sent to the frontend or stored in source code.
-
-## Repository Structure
-
-```text
-nexus-ai/
-├── atlas/project-atlas/
-├── core/
-├── frontend/
-├── memory/
-├── model/
-│   ├── deepseek-client.js
-│   └── model-router.js
-├── tests/
-├── worker/
-├── .dev.vars.example
-├── package.json
-└── wrangler.toml
-```
+- **Mock Mode**: `DEEPSEEK_API_KEY` is not configured.
+- **DeepSeek Mode**: DeepSeek returns valid structured JSON.
+- **Fallback Mode**: the model request times out, returns an HTTP error, or
+  produces invalid output. Project Atlas falls back safely while preserving
+  the previous analysis and clarification answers.
 
 ## Local Development
 
@@ -67,102 +66,171 @@ Install dependencies:
 npm install
 ```
 
-### Mock Mode
+### 1. Configure DeepSeek locally
 
-Do not create `.dev.vars`, or leave `DEEPSEEK_API_KEY` unconfigured:
+Mock Mode works without `.dev.vars`.
 
-```bash
-npm run dev
-```
-
-### DeepSeek Mode
-
-Copy the example file:
-
-```bash
-cp .dev.vars.example .dev.vars
-```
-
-On Windows PowerShell:
+For DeepSeek Mode:
 
 ```powershell
 Copy-Item .dev.vars.example .dev.vars
 ```
 
-Edit `.dev.vars` locally:
+Then edit `.dev.vars`:
 
 ```dotenv
 DEEPSEEK_API_KEY=...
 ```
 
-Then start the Worker:
+### 2. Start the Worker
 
-```bash
+```powershell
 npm run dev
 ```
 
-The API is available at:
+The local endpoint is:
 
 ```text
 http://localhost:8787/api/nexus
 ```
 
-Serve the frontend in a second terminal:
+### 3. Start the static frontend
 
-```bash
-python -m http.server 4173 --directory frontend
+Open a second terminal:
+
+```powershell
+npx.cmd --yes serve frontend -l 4173
 ```
 
 Open `http://localhost:4173`.
 
-## Production Secret
+## Multi-turn Acceptance
 
-Set the production secret interactively. Do not put the value in
-`wrangler.toml` or a shell command:
+1. Enter an initial project idea and select **开始分析**.
+2. Confirm the page shows the project profile, Blueprint, risks, stage, and
+   next action.
+3. Answer every displayed clarification question.
+4. Select **继续完善项目**.
+5. Confirm the turn number increases, the previous Blueprint is refined, the
+   provided answers appear as known facts, and the answered question is not
+   repeated.
+6. Refresh the tab and confirm the current session is restored.
+7. Select **清空** and confirm the idea, analysis, answers, and temporary
+   session are removed.
+
+The automated two-turn Mock Mode acceptance script is:
+
+```bash
+npm run verify:multiturn
+```
+
+## Frontend API Configuration
+
+The frontend reads this element in `frontend/index.html`:
+
+```html
+<meta name="nexus-api-endpoint" content="" />
+```
+
+Resolution rules:
+
+- blank on `localhost`: `http://localhost:8787/api/nexus`
+- blank in production: same-origin `/api/nexus`
+- explicit `content`: use that complete Worker endpoint
+
+For a separate Cloudflare Pages frontend and Worker backend, set `content` to
+the deployed Worker endpoint before publishing the static frontend:
+
+```html
+<meta
+  name="nexus-api-endpoint"
+  content="https://your-worker.your-subdomain.workers.dev/api/nexus"
+/>
+```
+
+## Cloudflare Deployment Preparation
+
+This repository does not create or modify Cloudflare projects automatically.
+
+Set the Worker production secret interactively:
 
 ```bash
 npx wrangler secret put DEEPSEEK_API_KEY
 ```
 
-## Tests
+Validate the Worker bundle without deployment:
+
+```bash
+npx wrangler deploy --dry-run
+```
+
+Deployment options:
+
+- deploy `worker/` through the existing Wrangler configuration
+- publish `frontend/` as static assets on Cloudflare Pages
+- use a same-origin route for `/api/nexus`, or configure the complete Worker
+  URL in the frontend meta element
+
+## API Context
+
+First turn:
+
+```json
+{
+  "message": "initial idea",
+  "context": {
+    "clarificationAnswers": [],
+    "previousAnalysis": null,
+    "turn": 1
+  }
+}
+```
+
+Following turn:
+
+```json
+{
+  "message": "the same initial idea",
+  "context": {
+    "clarificationAnswers": [
+      {
+        "question": "question from Project Atlas",
+        "answer": "user answer"
+      }
+    ],
+    "previousAnalysis": {
+      "ideaProfile": {},
+      "projectBlueprint": {},
+      "risks": [],
+      "clarificationQuestions": [],
+      "nextAction": ""
+    },
+    "turn": 2
+  }
+}
+```
+
+The maximum turn is currently `3`.
+
+## Validation
 
 ```bash
 npm test
+npm run check
+npm run verify:multiturn
+npx wrangler deploy --dry-run
 ```
 
-The test suite covers:
+## Current Scope
 
-- Mock Mode without an API key
-- successful structured model output
-- invalid model JSON
-- missing required fields
-- request timeout
-- DeepSeek HTTP error
+This version intentionally does not include:
 
-Health check:
-
-```text
-GET http://localhost:8787/health
-```
-
-Project analysis:
-
-```http
-POST /api/nexus
-Content-Type: application/json
-
-{"message":"我想做一个帮助大学生提高学习效率的 AI 项目"}
-```
-
-For a routed project request, verify:
-
-- `nexus.selectedAtlas` is `project-atlas`
-- `response.model.mode` is `mock`, `deepseek`, or `fallback`
-- `response.projectBlueprint` is present
-- `response.risks` is an array
-- `response.nextAction` is present
-
-## Scope
-
-This build intentionally does not include a database, login system, RAG, MCP,
-or a frontend framework.
+- D1, KV, or other persistent storage
+- registration or login
+- RAG or MCP
+- DataHub
+- Evidence Atlas implementation
+- multi-model expansion
+- file uploads
+- a complete chat system
+- React, Vue, or another frontend framework

@@ -5,12 +5,20 @@ export function reflectOnResult(result) {
     issues.push("Atlas result is missing or invalid.");
   }
 
-  if (!result?.nextStep) {
-    issues.push("The result does not provide a concrete next step.");
+  if (!result?.nextAction && !result?.nextStep) {
+    issues.push("The result does not provide a concrete next action.");
   }
 
-  if (!Array.isArray(result?.questions) || result.questions.length === 0) {
-    issues.push("The result does not actively request missing information.");
+  if (
+    result?.status === "needs_clarification" &&
+    (!Array.isArray(result?.clarificationQuestions) ||
+      result.clarificationQuestions.length === 0)
+  ) {
+    issues.push("The result requests clarification but provides no questions.");
+  }
+
+  if (!result?.stageProgress?.current) {
+    issues.push("The result does not provide an explainable project stage.");
   }
 
   return {
@@ -19,6 +27,7 @@ export function reflectOnResult(result) {
     checkedAt: new Date().toISOString(),
     principles: [
       "Do not invent evidence or user resources.",
+      "Keep facts and assumptions separate.",
       "Keep the human user as the final decision-maker.",
       "Always provide a clear next action."
     ]

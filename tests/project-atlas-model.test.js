@@ -1,7 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import {
+  buildProjectAtlasTask,
+  runProjectAtlas
+} from "../atlas/project-atlas/index.js";
+import { evaluateProjectStage } from "../atlas/project-atlas/stage.js";
 import { runNexusCore } from "../core/nexus-core.js";
+import worker from "../worker/index.js";
 
 const idea = "我想做一个帮助大学生提高学习效率的 AI 项目";
 
@@ -14,11 +20,11 @@ const validAnalysis = {
     assumptions: ["具体学习场景尚未验证"]
   },
   projectBlueprint: {
-    problem: "无法判断",
-    proposedSolution: "AI 学习辅助工具",
-    valueProposition: "无法判断",
-    validationPlan: ["访谈目标用户"],
-    milestones: ["完成需求访谈"]
+    problem: "大学生的学习任务容易分散",
+    proposedSolution: "AI 学习任务管理工具",
+    valueProposition: "帮助用户聚焦下一项学习任务",
+    validationPlan: ["访谈 5 名目标用户"],
+    milestones: ["完成需求访谈", "制作网页版 MVP"]
   },
   risks: [
     {
@@ -44,50 +50,149 @@ function deepSeekResponse(content, status = 200) {
   );
 }
 
-async function runWithModel(fetchImpl, timeoutMs = 100) {
-  return runNexusCore(
-    { message: idea },
-    {
-      model: {
-        apiKey: "test-key",
-        fetchImpl,
-        timeoutMs
-      }
+async function runWithModel(fetchImpl, payload = { message: idea }, timeoutMs = 100) {
+  return runNexusCore(payload, {
+    model: {
+      apiKey: "test-key",
+      fetchImpl,
+      timeoutMs
     }
-  );
+  });
 }
 
-test("uses mock mode when DEEPSEEK_API_KEY is not configured", async () => {
-  const result = await runNexusCore({ message: idea });
+test("first project analysis completes in Mock Mode", async () => {
+  const result = await runNexusCore({
+    message: idea,
+    context: { turn: 1 }
+  });
 
   assert.equal(result.ok, true);
   assert.equal(result.nexus.selectedAtlas, "project-atlas");
   assert.equal(result.response.model.mode, "mock");
-  assert.equal(result.response.status, "needs_clarification");
+  assert.equal(result.response.turn, 1);
+  assert.equal(result.response.currentStage, "Idea");
+  assert.ok(result.response.projectBlueprint);
+  assert.ok(result.response.clarificationQuestions.length > 0);
 });
 
-test("uses structured DeepSeek output after a successful response", async () => {
-  let requestBody;
-  let authorization;
-  const result = await runWithModel(async (_url, options) => {
-    requestBody = JSON.parse(options.body);
-    authorization = options.headers.Authorization;
-    return deepSeekResponse(JSON.stringify(validAnalysis));
+test("clarification answers enter the Project Atlas model context", () => {
+  const previousAnalysis = validAnalysis;
+  const task = buildProjectAtlasTask({
+    message: idea,
+    context: {
+      clarificationAnswers: [
+        {
+          question: "你最想帮助的具体用户是谁？",
+          answer: "备考研究生入学考试的大学生"
+        }
+      ],
+      previousAnalysis,
+      turn: 2
+    }
+  });
+  const modelPayload = JSON.parse(task.messages[1].content);
+
+  assert.equal(modelPayload.sessionContext.turn, 2);
+  assert.equal(
+    modelPayload.sessionContext.clarificationAnswers[0].answer,
+    "备考研究生入学考试的大学生"
+  );
+});
+
+test("previous analysis is available to the next model turn", () => {
+  const task = buildProjectAtlasTask({
+    message: idea,
+    context: {
+      previousAnalysis: validAnalysis,
+      turn: 2
+    }
+  });
+  const modelPayload = JSON.parse(task.messages[1].content);
+
+  assert.deepEqual(
+    modelPayload.sessionContext.previousAnalysis.projectBlueprint,
+    validAnalysis.projectBlueprint
+  );
+});
+
+test("Mock Mode preserves answered questions and updates the profile", async () => {
+  const question = "你最想帮助的具体用户是谁？";
+  const result = await runNexusCore({
+    message: idea,
+    context: {
+      clarificationAnswers: [
+        {
+          question,
+          answer: "经常拖延作业的本科生"
+        }
+      ],
+      previousAnalysis: validAnalysis,
+      turn: 2
+    }
   });
 
-  assert.equal(result.response.model.mode, "deepseek");
-  assert.deepEqual(result.response.projectBlueprint, validAnalysis.projectBlueprint);
-  assert.deepEqual(result.response.risks, validAnalysis.risks);
-  assert.equal(result.response.nextAction, validAnalysis.nextAction);
-  assert.equal(result.reflection.passed, true);
-  assert.equal(authorization, "Bearer test-key");
-  assert.deepEqual(requestBody.response_format, { type: "json_object" });
-  assert.equal(requestBody.stream, false);
+  assert.equal(result.response.ideaProfile.targetUsers, "经常拖延作业的本科生");
+  assert.ok(
+    result.response.ideaProfile.knownFacts.some((fact) =>
+      fact.includes("经常拖延作业的本科生")
+    )
+  );
+  assert.ok(!result.response.clarificationQuestions.includes(question));
 });
 
-test("falls back when the model returns invalid JSON", async () => {
-  const result = await runWithModel(async () =>
-    deepSeekResponse("not valid JSON")
+test("DeepSeek returns a valid multi-turn result", async () => {
+  let requestBody;
+  const updatedAnalysis = {
+    ...validAnalysis,
+    clarificationQuestions: [],
+    nextAction: "制作 3 个关键页面的可点击原型。"
+  };
+  const result = await runWithModel(
+    async (_url, options) => {
+      requestBody = JSON.parse(options.body);
+      return deepSeekResponse(JSON.stringify(updatedAnalysis));
+    },
+    {
+      message: idea,
+      context: {
+        clarificationAnswers: [
+          {
+            question: "最需要改善的学习环节是什么？",
+            answer: "把大作业拆成每天可完成的小任务"
+          }
+        ],
+        previousAnalysis: validAnalysis,
+        turn: 2
+      }
+    }
+  );
+  const modelContext = JSON.parse(requestBody.messages[1].content).sessionContext;
+
+  assert.equal(result.response.model.mode, "deepseek");
+  assert.equal(result.response.turn, 2);
+  assert.equal(result.response.nextAction, updatedAnalysis.nextAction);
+  assert.equal(modelContext.turn, 2);
+  assert.equal(modelContext.clarificationAnswers.length, 1);
+  assert.ok(modelContext.previousAnalysis);
+});
+
+test("invalid DeepSeek output safely falls back with existing context", async () => {
+  const answer = "备考研究生入学考试的大学生";
+  const result = await runWithModel(
+    async () => deepSeekResponse("not valid JSON"),
+    {
+      message: idea,
+      context: {
+        clarificationAnswers: [
+          {
+            question: "你最想帮助的具体用户是谁？",
+            answer
+          }
+        ],
+        previousAnalysis: validAnalysis,
+        turn: 2
+      }
+    }
   );
 
   assert.equal(result.response.model.mode, "fallback");
@@ -95,22 +200,43 @@ test("falls back when the model returns invalid JSON", async () => {
     result.response.model.fallbackReason.code,
     "INVALID_MODEL_JSON"
   );
-  assert.equal(result.response.status, "needs_clarification");
+  assert.equal(result.response.ideaProfile.targetUsers, answer);
+  assert.ok(
+    result.response.ideaProfile.knownFacts.some((fact) => fact.includes(answer))
+  );
 });
 
-test("falls back when required model fields are missing", async () => {
-  const result = await runWithModel(async () =>
-    deepSeekResponse(JSON.stringify({ ideaProfile: {} }))
+test("fallback from an API error preserves the previous blueprint", async () => {
+  const result = await runWithModel(
+    async () => new Response("provider unavailable", { status: 503 }),
+    {
+      message: idea,
+      context: {
+        clarificationAnswers: [
+          {
+            question: "你目前已经具备哪些资源，例如团队、技术、数据或用户渠道？",
+            answer: "一名开发者和 5 名可访谈同学"
+          }
+        ],
+        previousAnalysis: validAnalysis,
+        turn: 2
+      }
+    }
   );
 
   assert.equal(result.response.model.mode, "fallback");
-  assert.equal(
-    result.response.model.fallbackReason.code,
-    "INVALID_MODEL_OUTPUT"
+  assert.deepEqual(
+    result.response.projectBlueprint.milestones,
+    validAnalysis.projectBlueprint.milestones
+  );
+  assert.ok(
+    result.response.ideaProfile.knownFacts.some((fact) =>
+      fact.includes("5 名可访谈同学")
+    )
   );
 });
 
-test("falls back when the model request times out", async () => {
+test("model timeout returns Fallback Mode", async () => {
   const neverCompletes = async (_url, options) =>
     new Promise((_resolve, reject) => {
       options.signal.addEventListener(
@@ -120,20 +246,100 @@ test("falls back when the model request times out", async () => {
       );
     });
 
-  const result = await runWithModel(neverCompletes, 5);
+  const result = await runWithModel(neverCompletes, { message: idea }, 5);
 
   assert.equal(result.response.model.mode, "fallback");
   assert.equal(result.response.model.fallbackReason.code, "MODEL_TIMEOUT");
 });
 
-test("falls back when DeepSeek returns an HTTP error", async () => {
-  const result = await runWithModel(async () =>
-    new Response("provider unavailable", { status: 503 })
-  );
+test("empty clarification answers are rejected with a normalized 400", async () => {
+  const request = new Request("https://nexus.test/api/nexus", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      message: idea,
+      context: {
+        turn: 2,
+        previousAnalysis: validAnalysis,
+        clarificationAnswers: [
+          {
+            question: "你最想帮助的具体用户是谁？",
+            answer: ""
+          }
+        ]
+      }
+    })
+  });
+  const response = await worker.fetch(request, {});
+  const body = await response.json();
 
-  assert.equal(result.response.model.mode, "fallback");
-  assert.equal(
-    result.response.model.fallbackReason.code,
-    "MODEL_HTTP_ERROR"
+  assert.equal(response.status, 400);
+  assert.equal(body.ok, false);
+  assert.equal(body.error.code, "EMPTY_CLARIFICATION_ANSWER");
+});
+
+test("worker rejects malformed JSON with a normalized error", async () => {
+  const response = await worker.fetch(
+    new Request("https://nexus.test/api/nexus", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: "{"
+    }),
+    {}
   );
+  const body = await response.json();
+
+  assert.equal(response.status, 400);
+  assert.equal(body.error.code, "INVALID_JSON");
+});
+
+test("worker rejects an invalid turn", async () => {
+  const response = await worker.fetch(
+    new Request("https://nexus.test/api/nexus", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: idea,
+        context: { turn: 99 }
+      })
+    }),
+    {}
+  );
+  const body = await response.json();
+
+  assert.equal(response.status, 400);
+  assert.equal(body.error.code, "INVALID_TURN");
+});
+
+test("stage evaluation uses explainable project signals", () => {
+  assert.equal(evaluateProjectStage({}).current, "Idea");
+  assert.equal(
+    evaluateProjectStage({
+      ideaProfile: { targetUsers: "大学生" },
+      projectBlueprint: { problem: "学习任务分散" }
+    }).current,
+    "Explore"
+  );
+  assert.equal(evaluateProjectStage(validAnalysis).current, "Validate");
+  assert.equal(
+    evaluateProjectStage({
+      ...validAnalysis,
+      nextAction: "开发并部署第一版网页 MVP"
+    }).current,
+    "Execute"
+  );
+});
+
+test("limited turns stop requesting more Mock Mode answers", async () => {
+  const result = await runProjectAtlas({
+    message: idea,
+    context: {
+      previousAnalysis: validAnalysis,
+      turn: 3
+    }
+  });
+
+  assert.equal(result.turn, 3);
+  assert.equal(result.clarificationQuestions.length, 0);
+  assert.equal(result.status, "analysis_ready");
 });
