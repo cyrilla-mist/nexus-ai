@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Nexus AI — Connect ideas. Create possibilities."
+    />
+    <title>Nexus AI · Genesis Build</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="hero">
+        <p class="eyebrow">Nexus AI · Genesis Build</p>
+        <h1>Connect ideas. Create possibilities.</h1>
+        <p class="hero-copy">
+          Nexus Core 会理解你的目标，并为当前任务选择合适的 Atlas。
+          v0.1 目前开放 Project Atlas 骨架。
+        </p>
+      </header>
+
+      <section class="workspace" aria-labelledby="workspace-title">
+        <div class="workspace-heading">
+          <div>
+            <p class="eyebrow">Project Atlas</p>
+            <h2 id="workspace-title">从一个想法开始</h2>
+          </div>
+          <span class="status-pill" id="system-status">待输入</span>
+        </div>
+
+        <label for="idea-input">告诉 Nexus 你想完成什么</label>
+        <textarea
+          id="idea-input"
+          rows="6"
+          placeholder="例如：我想做一个帮助大学生提高学习效率的 AI 项目。"
+        ></textarea>
+
+        <div class="actions">
+          <button id="submit-button" type="button">让 Nexus 规划</button>
+          <button id="clear-button" class="secondary" type="button">清空</button>
+        </div>
+
+        <p class="helper">
+          本页面默认连接本地 Worker：<code>http://localhost:8787/api/nexus</code>
+        </p>
+      </section>
+
+      <section class="result" aria-live="polite" aria-labelledby="result-title">
+        <div class="workspace-heading">
+          <div>
+            <p class="eyebrow">Nexus Output</p>
+            <h2 id="result-title">调度结果</h2>
+          </div>
+        </div>
+
+        <div id="empty-state" class="empty-state">
+          输入目标后，这里会显示 Nexus Core 的意图判断、Atlas 调度与下一步建议。
+        </div>
+
+        <div id="result-content" class="result-grid" hidden></div>
+      </section>
+    </main>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
