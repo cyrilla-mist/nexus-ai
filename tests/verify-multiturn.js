@@ -1,5 +1,11 @@
 import assert from "node:assert/strict";
 
+import {
+  buildClarificationContext,
+  commitAnalysisResult,
+  createEmptySessionState,
+  stagePendingAnswers
+} from "../frontend/session-state.js";
 import worker from "../worker/index.js";
 
 async function post(payload) {
@@ -52,6 +58,37 @@ assert.ok(
 );
 assert.ok(!secondTurn.response.clarificationQuestions.includes(firstQuestion));
 
+const pendingBatch = [
+  {
+    question: firstQuestion,
+    answer: "用于课程项目，并找同学进行体验测试。"
+  }
+];
+const retryBaseState = {
+  ...createEmptySessionState(),
+  initialMessage,
+  currentAnalysis: firstTurn.response,
+  turn: 1,
+  lastResult: firstTurn
+};
+const failedSecondTurnState = stagePendingAnswers(
+  retryBaseState,
+  pendingBatch
+);
+const firstAttemptContext = buildClarificationContext(
+  failedSecondTurnState,
+  2
+);
+const retryState = stagePendingAnswers(failedSecondTurnState, pendingBatch);
+const retryContext = buildClarificationContext(retryState, 2);
+const committedRetryState = commitAnalysisResult(retryState, secondTurn, 2);
+
+assert.deepEqual(retryContext, firstAttemptContext);
+assert.deepEqual(failedSecondTurnState.pendingAnswers, pendingBatch);
+assert.equal(failedSecondTurnState.lastResult, firstTurn);
+assert.equal(committedRetryState.pendingAnswers.length, 0);
+assert.equal(committedRetryState.clarificationAnswers.length, 1);
+
 console.log(
   JSON.stringify(
     {
@@ -66,6 +103,14 @@ console.log(
         stage: secondTurn.response.currentStage,
         questions: secondTurn.response.clarificationQuestions.length,
         preservedAnswer: true
+      },
+      retryTransaction: {
+        failedAttemptKeptPreviousResult: true,
+        pendingAnswersAfterFailure:
+          failedSecondTurnState.pendingAnswers.length,
+        retryPayloadAnswers: retryContext.clarificationAnswers.length,
+        committedAnswers: committedRetryState.clarificationAnswers.length,
+        duplicateAnswers: 0
       }
     },
     null,

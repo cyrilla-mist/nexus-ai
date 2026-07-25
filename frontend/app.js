@@ -1,3 +1,10 @@
+import {
+  buildClarificationContext,
+  commitAnalysisResult,
+  createEmptySessionState,
+  stagePendingAnswers
+} from "./session-state.js";
+
 const SESSION_KEY = "nexus-ai-project-session-v0.1.1";
 const REQUEST_TIMEOUT_MS = 25_000;
 const MAX_TURNS = 3;
@@ -16,13 +23,7 @@ const turnIndicator = document.querySelector("#turn-indicator");
 const connectionHint = document.querySelector("#connection-hint");
 
 function createEmptySession() {
-  return {
-    initialMessage: "",
-    currentAnalysis: null,
-    clarificationAnswers: [],
-    turn: 0,
-    lastResult: null
-  };
+  return createEmptySessionState();
 }
 
 let sessionState = createEmptySession();
@@ -108,6 +109,9 @@ function restoreSession() {
       clarificationAnswers: Array.isArray(stored.clarificationAnswers)
         ? stored.clarificationAnswers
         : [],
+      pendingAnswers: Array.isArray(stored.pendingAnswers)
+        ? stored.pendingAnswers
+        : [],
       turn: Number.parseInt(stored.turn, 10) || 0,
       lastResult: stored.lastResult ?? null
     };
@@ -147,7 +151,11 @@ function renderStageProgress(stageProgress = {}) {
           }
         </p>
       </div>
-      <ol class="stage-track" aria-label="项目阶段进度">
+      <ol
+        class="stage-track"
+        aria-label="项目阶段进度"
+        style="--stage-progress: ${(currentIndex / (STAGES.length - 1)) * 80}%"
+      >
         ${STAGES.map((stage, index) => {
           const state =
             index < currentIndex
@@ -155,7 +163,14 @@ function renderStageProgress(stageProgress = {}) {
               : index === currentIndex
                 ? "current"
                 : "upcoming";
-          return `<li data-state="${state}"><span>${index + 1}</span>${stage}</li>`;
+          const currentAttribute =
+            state === "current" ? ' aria-current="step"' : "";
+          return `
+            <li data-state="${state}"${currentAttribute}>
+              <span aria-hidden="true">${index + 1}</span>
+              <strong>${stage}</strong>
+            </li>
+          `;
         }).join("")}
       </ol>
       <p class="stage-rationale">${escapeHtml(
@@ -250,7 +265,11 @@ function renderRisks(risks = []) {
   `;
 }
 
-function renderClarificationForm(questions = [], turn = 1) {
+function renderClarificationForm(
+  questions = [],
+  turn = 1,
+  pendingAnswers = []
+) {
   if (!Array.isArray(questions) || questions.length === 0) {
     return "";
   }
@@ -272,8 +291,12 @@ function renderClarificationForm(questions = [], turn = 1) {
       <p class="muted">你的回答会与上一轮分析一起交给 Project Atlas，不会被当成新项目。</p>
       <form id="clarification-form" novalidate>
         ${questions
-          .map(
-            (question, index) => `
+          .map((question, index) => {
+            const pendingAnswer =
+              pendingAnswers.find((item) => item.question === question)
+                ?.answer ?? "";
+
+            return `
               <label class="question-field">
                 <span>${index + 1}. ${escapeHtml(question)}</span>
                 <textarea
@@ -281,10 +304,10 @@ function renderClarificationForm(questions = [], turn = 1) {
                   data-question="${escapeHtml(question)}"
                   placeholder="请填写具体回答"
                   required
-                ></textarea>
+                >${escapeHtml(pendingAnswer)}</textarea>
               </label>
-            `
-          )
+            `;
+          })
           .join("")}
         <p class="form-error" id="clarification-error" hidden></p>
         <button id="continue-button" type="submit">继续完善项目</button>
@@ -325,7 +348,8 @@ function renderResult(data) {
       </section>
       ${renderClarificationForm(
         response.clarificationQuestions ?? response.questions,
-        response.turn ?? sessionState.turn
+        response.turn ?? sessionState.turn,
+        sessionState.pendingAnswers
       )}
       ${
         reflection.passed === false
@@ -346,11 +370,18 @@ function renderResult(data) {
   }
 }
 
-function renderError(message) {
+function renderError(message, { preserveResult = false } = {}) {
+  showFeedback(message, "error");
+
+  if (preserveResult && sessionState.lastResult) {
+    emptyState.hidden = true;
+    resultContent.hidden = false;
+    return;
+  }
+
   emptyState.hidden = false;
   resultContent.hidden = true;
   emptyState.textContent = message;
-  showFeedback(message, "error");
 }
 
 function setLoading(loading, label = "正在分析") {
@@ -426,7 +457,11 @@ async function requestAnalysis(payload) {
   }
 }
 
-async function submitPayload(payload, loadingLabel) {
+async function submitPayload(
+  payload,
+  loadingLabel,
+  { preserveResultOnError = false } = {}
+) {
   if (isSubmitting) {
     return;
   }
@@ -436,14 +471,18 @@ async function submitPayload(payload, loadingLabel) {
 
   try {
     const data = await requestAnalysis(payload);
-    sessionState.currentAnalysis = data.response;
-    sessionState.turn = data.response?.turn ?? payload.context?.turn ?? 1;
-    sessionState.lastResult = data;
+    sessionState = commitAnalysisResult(
+      sessionState,
+      data,
+      payload.context?.turn ?? 1
+    );
     saveSession();
     renderResult(data);
     status.textContent = "分析完成";
   } catch (error) {
-    renderError(friendlyRequestError(error));
+    renderError(friendlyRequestError(error), {
+      preserveResult: preserveResultOnError
+    });
     status.textContent =
       error?.name === "AbortError" ? "请求超时" : "分析失败";
   } finally {
@@ -498,22 +537,16 @@ async function continueProject(form) {
 
   errorElement.hidden = true;
   const nextTurn = Math.min(MAX_TURNS, sessionState.turn + 1);
-  sessionState.clarificationAnswers = [
-    ...sessionState.clarificationAnswers,
-    ...currentAnswers
-  ];
+  sessionState = stagePendingAnswers(sessionState, currentAnswers);
   saveSession();
 
   await submitPayload(
     {
       message: sessionState.initialMessage,
-      context: {
-        clarificationAnswers: sessionState.clarificationAnswers,
-        previousAnalysis: sessionState.currentAnalysis,
-        turn: nextTurn
-      }
+      context: buildClarificationContext(sessionState, nextTurn)
     },
-    "正在完善"
+    "正在完善",
+    { preserveResultOnError: true }
   );
 }
 
