@@ -1,5 +1,6 @@
 import {
   createMemoryRecord,
+  MEMORY_TYPES,
   updateMemoryRecord
 } from "./schema.js";
 import {
@@ -58,6 +59,30 @@ export class MemoryManager {
 
   retrieve(id) {
     return this.store.getMemory(id);
+  }
+
+  retrieveContext({ projectId, userId, atlasId } = {}) {
+    const selectById = (id, type) => {
+      if (typeof id !== "string" || !id.trim()) {
+        return [];
+      }
+
+      const memory = this.store.getMemory(id.trim());
+      return memory?.type === type ? [memory] : [];
+    };
+
+    const atlasMemory =
+      typeof atlasId === "string" && atlasId.trim()
+        ? this.store
+            .listMemory(MEMORY_TYPES.ATLAS)
+            .filter((memory) => memory.data.atlasId === atlasId.trim())
+        : [];
+
+    return {
+      userMemory: selectById(userId, MEMORY_TYPES.USER),
+      projectMemory: selectById(projectId, MEMORY_TYPES.PROJECT),
+      atlasMemory
+    };
   }
 
   update(id, data) {

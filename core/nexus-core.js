@@ -20,6 +20,28 @@ function buildPlan(intentName) {
   ];
 }
 
+function emptyMemoryContext() {
+  return {
+    userMemory: [],
+    projectMemory: [],
+    atlasMemory: []
+  };
+}
+
+async function retrieveMemoryContext(memoryManager, query) {
+  if (!memoryManager) {
+    return emptyMemoryContext();
+  }
+
+  if (typeof memoryManager.retrieveContext !== "function") {
+    throw new TypeError(
+      "runtime.memoryManager must provide retrieveContext()."
+    );
+  }
+
+  return memoryManager.retrieveContext(query);
+}
+
 export async function runNexusCore(payload = {}, runtime = {}) {
   const message = String(payload.message ?? "").trim();
   const memory = normalizeMemory(payload.memory);
@@ -63,12 +85,20 @@ export async function runNexusCore(payload = {}, runtime = {}) {
   }
 
   let atlasResult;
+  const memoryContext = await retrieveMemoryContext(runtime.memoryManager, {
+    projectId: payload.context?.projectId,
+    userId: payload.context?.userId,
+    atlasId
+  });
 
   switch (atlasId) {
     case "project-atlas":
       atlasResult = await runProjectAtlas({
         message,
-        context: payload.context ?? {},
+        context: {
+          ...(payload.context ?? {}),
+          memoryContext
+        },
         model: runtime.model ?? {}
       });
       break;

@@ -158,6 +158,48 @@ test("list filters Memory records by type", () => {
   assert.equal(manager.list().length, 3);
 });
 
+test("retrieveContext returns scoped copies without changing Memory", () => {
+  const manager = createManager({
+    ids: ["user-1", "project-1", "atlas-1"],
+    timestamps: [CREATED_AT, CREATED_AT, CREATED_AT]
+  });
+
+  manager.create({
+    type: MEMORY_TYPES.USER,
+    data: { preferences: { language: "zh-CN" } }
+  });
+  manager.create({
+    type: MEMORY_TYPES.PROJECT,
+    data: { title: "Campus sustainability project", stage: "Explore" }
+  });
+  manager.create({
+    type: MEMORY_TYPES.ATLAS,
+    data: {
+      atlasId: "project-atlas",
+      version: "0.1.1",
+      capabilities: ["project analysis"]
+    }
+  });
+
+  const beforeCount = manager.list().length;
+  const context = manager.retrieveContext({
+    userId: "user-1",
+    projectId: "project-1",
+    atlasId: "project-atlas"
+  });
+
+  context.projectMemory[0].data.title = "changed outside the Store";
+
+  assert.equal(context.userMemory.length, 1);
+  assert.equal(context.projectMemory.length, 1);
+  assert.equal(context.atlasMemory.length, 1);
+  assert.equal(
+    manager.retrieve("project-1").data.title,
+    "Campus sustainability project"
+  );
+  assert.equal(manager.list().length, beforeCount);
+});
+
 test("manager validates types, sensitive fields, and missing updates", () => {
   const manager = createManager();
 

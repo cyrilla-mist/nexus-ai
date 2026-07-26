@@ -7,6 +7,9 @@ import {
 } from "../atlas/project-atlas/index.js";
 import { evaluateProjectStage } from "../atlas/project-atlas/stage.js";
 import { runNexusCore } from "../core/nexus-core.js";
+import { MemoryManager } from "../memory/memory-manager.js";
+import { MemoryStore } from "../memory/memory-store.js";
+import { MEMORY_TYPES } from "../memory/schema.js";
 import worker from "../worker/index.js";
 
 const idea = "我想做一个帮助大学生提高学习效率的 AI 项目";
@@ -50,8 +53,14 @@ function deepSeekResponse(content, status = 200) {
   );
 }
 
-async function runWithModel(fetchImpl, payload = { message: idea }, timeoutMs = 100) {
+async function runWithModel(
+  fetchImpl,
+  payload = { message: idea },
+  timeoutMs = 100,
+  runtime = {}
+) {
   return runNexusCore(payload, {
+    ...runtime,
     model: {
       apiKey: "test-key",
       fetchImpl,
@@ -113,6 +122,70 @@ test("previous analysis is available to the next model turn", () => {
     modelPayload.sessionContext.previousAnalysis.projectBlueprint,
     validAnalysis.projectBlueprint
   );
+});
+
+test("Nexus Core passes retrieved Project Memory to Project Atlas", async () => {
+  const memoryManager = new MemoryManager({
+    store: new MemoryStore()
+  });
+  const projectMemory = memoryManager.create({
+    id: "project-campus",
+    type: MEMORY_TYPES.PROJECT,
+    data: {
+      title: "Campus sustainability project",
+      stage: "Explore"
+    }
+  });
+
+  let requestBody;
+  const result = await runWithModel(
+    async (_url, options) => {
+      requestBody = JSON.parse(options.body);
+      return deepSeekResponse(JSON.stringify(validAnalysis));
+    },
+    {
+      message: "Continue my campus sustainability project",
+      context: {
+        projectId: projectMemory.id,
+        turn: 2
+      }
+    },
+    100,
+    { memoryManager }
+  );
+  const memoryContext = JSON.parse(
+    requestBody.messages[1].content
+  ).sessionContext.memoryContext;
+
+  assert.equal(result.ok, true);
+  assert.equal(
+    memoryContext.projectMemory[0].data.title,
+    "Campus sustainability project"
+  );
+  assert.equal(memoryContext.projectMemory[0].data.stage, "Explore");
+  assert.deepEqual(memoryContext.userMemory, []);
+  assert.deepEqual(memoryContext.atlasMemory, []);
+  assert.deepEqual(
+    memoryManager.retrieve(projectMemory.id),
+    projectMemory
+  );
+  assert.equal(memoryManager.list().length, 1);
+});
+
+test("Project Atlas receives empty Memory Context when none is configured", () => {
+  const task = buildProjectAtlasTask({
+    message: idea,
+    context: {}
+  });
+  const memoryContext = JSON.parse(
+    task.messages[1].content
+  ).sessionContext.memoryContext;
+
+  assert.deepEqual(memoryContext, {
+    userMemory: [],
+    projectMemory: [],
+    atlasMemory: []
+  });
 });
 
 test("Mock Mode preserves answered questions and updates the profile", async () => {

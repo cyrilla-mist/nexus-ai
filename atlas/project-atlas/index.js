@@ -65,6 +65,39 @@ function normalizeAnalysis(value) {
   };
 }
 
+function normalizeMemoryList(value, type) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .filter(
+      (memory) =>
+        isPlainObject(memory) &&
+        memory.type === type &&
+        isPlainObject(memory.data)
+    )
+    .map((memory) => ({
+      id: String(memory.id ?? "").trim(),
+      type,
+      data: structuredClone(memory.data)
+    }))
+    .filter((memory) => memory.id);
+}
+
+function normalizeMemoryContext(value) {
+  const memoryContext = isPlainObject(value) ? value : {};
+
+  return {
+    userMemory: normalizeMemoryList(memoryContext.userMemory, "user"),
+    projectMemory: normalizeMemoryList(
+      memoryContext.projectMemory,
+      "project"
+    ),
+    atlasMemory: normalizeMemoryList(memoryContext.atlasMemory, "atlas")
+  };
+}
+
 export function normalizeProjectContext(context = {}) {
   return {
     goal: String(context?.goal ?? "").trim(),
@@ -72,6 +105,7 @@ export function normalizeProjectContext(context = {}) {
     availableResources: toStringArray(context?.availableResources),
     clarificationAnswers: normalizeAnswers(context?.clarificationAnswers),
     previousAnalysis: normalizeAnalysis(context?.previousAnalysis),
+    memoryContext: normalizeMemoryContext(context?.memoryContext),
     turn: Math.min(
       MAX_PROJECT_TURNS,
       Math.max(1, Number.parseInt(context?.turn, 10) || 1)
@@ -149,12 +183,21 @@ function findAnswer(answers, pattern) {
 function buildMockAnalysis(message, context) {
   const previous = context.previousAnalysis;
   const answers = context.clarificationAnswers;
+  const projectMemory = context.memoryContext.projectMemory[0]?.data ?? {};
   const priorProfile = previous?.ideaProfile ?? {};
   const priorBlueprint = previous?.projectBlueprint ?? {};
   const ideaSummary =
-    String(priorProfile.summary ?? "").trim() || summarizeIdea(message);
+    String(priorProfile.summary ?? "").trim() ||
+    String(projectMemory.title ?? "").trim() ||
+    summarizeIdea(message);
   const knownFacts = [
     ...toStringArray(priorProfile.knownFacts),
+    ...(projectMemory.title
+      ? [`Existing project: ${String(projectMemory.title).trim()}`]
+      : []),
+    ...(projectMemory.stage
+      ? [`Existing project stage: ${String(projectMemory.stage).trim()}`]
+      : []),
     ...answers.map(answerFact)
   ].filter((value, index, all) => all.indexOf(value) === index);
   const goalAnswer = findAnswer(answers, /(目标|最终|比赛|创业|课程|探索)/);
