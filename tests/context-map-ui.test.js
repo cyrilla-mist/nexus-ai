@@ -134,7 +134,7 @@ test("Context Map rendering and interaction binding are read-only", () => {
   assert.deepEqual(contextMap, before);
 });
 
-test("Project Space places Context Map between Overview and Journey", () => {
+test("Project Space places Star Map between Overview and Journey", () => {
   const html = renderProjectSpace({
     projectOverview: { title: "校园环保项目" },
     contextMap: sampleMap(),
@@ -143,14 +143,14 @@ test("Project Space places Context Map between Overview and Journey", () => {
   });
 
   const overviewIndex = html.indexOf("project-overview");
-  const mapIndex = html.indexOf("context-map");
+  const mapIndex = html.indexOf("star-map");
   const journeyIndex = html.indexOf("project-journey");
 
   assert.ok(overviewIndex < mapIndex);
   assert.ok(mapIndex < journeyIndex);
 });
 
-test("Frontend entry binds Context Map interaction and responsive styles", () => {
+test("Frontend entry binds Star Map interaction and responsive styles", () => {
   const app = readFileSync(
     new URL("../frontend/app.js", import.meta.url),
     "utf8"
@@ -160,8 +160,8 @@ test("Frontend entry binds Context Map interaction and responsive styles", () =>
     "utf8"
   );
 
-  assert.match(app, /bindContextMapInteractions\(resultContent/);
-  assert.match(css, /\.context-map-layout/);
-  assert.match(css, /\.context-map-node\[aria-pressed="true"\]/);
+  assert.match(app, /bindStarMapInteractions\(resultContent/);
+  assert.match(css, /\.star-map-layout/);
+  assert.match(css, /\.star-map-node\[aria-pressed="true"\]/);
   assert.match(css, /@media \(max-width: 760px\)/);
 });

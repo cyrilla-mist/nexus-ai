@@ -1,4 +1,4 @@
-import { renderContextMap } from "./context-map.js";
+import { renderStarMap } from "./star-map.js";
 
 const THEME_NAMES = Object.freeze({
   light: "晨雾星图",
@@ -155,7 +155,7 @@ export function renderProjectSpace(experience = {}) {
       </header>
       <div class="project-space-layout">
         ${renderOverview(overview)}
-        ${renderContextMap(contextMap)}
+        ${renderStarMap(contextMap)}
         ${renderJourney(journey)}
         ${renderActionNavigator(actionNavigator)}
       </div>

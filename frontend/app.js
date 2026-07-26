@@ -1,4 +1,4 @@
-import { bindContextMapInteractions } from "./context-map.js";
+import { bindStarMapInteractions } from "./star-map.js";
 import {
   applyTheme,
   getNextTheme,
@@ -353,7 +353,7 @@ function renderResult(data) {
     </div>
   `;
 
-  bindContextMapInteractions(resultContent, data?.experience?.contextMap);
+  bindStarMapInteractions(resultContent, data?.experience?.contextMap);
 
   if (response.model?.mode === "fallback") {
     showFeedback(
