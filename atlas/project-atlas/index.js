@@ -1,3 +1,4 @@
+import { createExecutionPlan } from "../../execution/index.js";
 import { generateProjectAnalysis } from "../../model/model-router.js";
 import { evaluateProjectStage } from "./stage.js";
 
@@ -301,6 +302,11 @@ function buildMockAnalysis(message, context) {
 
 function buildAtlasResult(data, modelResult, context) {
   const stageProgress = evaluateProjectStage(data);
+  const executionPlan = createExecutionPlan({
+    stage: stageProgress.current,
+    analysis: data,
+    turn: context.turn
+  });
   const needsClarification =
     data.clarificationQuestions.length > 0 &&
     context.turn < MAX_PROJECT_TURNS;
@@ -320,6 +326,7 @@ function buildAtlasResult(data, modelResult, context) {
     status: needsClarification ? "needs_clarification" : "analysis_ready",
     currentStage: stageProgress.current,
     stageProgress,
+    executionPlan,
     turn: context.turn,
     maxTurns: MAX_PROJECT_TURNS,
     ideaProfile: data.ideaProfile,
