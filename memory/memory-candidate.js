@@ -1,4 +1,11 @@
 const PROJECT_MEMORY_TYPE = "project";
+const PROJECT_STAGE_ORDER = [
+  "Idea",
+  "Explore",
+  "Design",
+  "Validate",
+  "Execute"
+];
 
 function isPlainObject(value) {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -89,8 +96,18 @@ export function createProjectMemoryCandidates({
   const currentStage = String(currentMemory?.data?.stage ?? "").trim();
   const nextStage = String(atlasResult.currentStage ?? "").trim();
   const modelMode = String(atlasResult.model?.mode ?? "").trim();
+  const currentStageIndex = PROJECT_STAGE_ORDER.indexOf(currentStage);
+  const nextStageIndex = PROJECT_STAGE_ORDER.indexOf(nextStage);
+  const hasConfirmedProgress =
+    context.progressContext?.confirmed === true;
+  const shouldAdvanceStage =
+    !hasConfirmedProgress &&
+    nextStage &&
+    nextStage !== currentStage &&
+    nextStageIndex !== -1 &&
+    (currentStageIndex === -1 || nextStageIndex > currentStageIndex);
 
-  if (nextStage && nextStage !== currentStage) {
+  if (shouldAdvanceStage) {
     const source =
       modelMode === "fallback" ? "fallback_generated" : "system_verified";
 

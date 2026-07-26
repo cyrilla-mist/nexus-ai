@@ -1,5 +1,7 @@
 import { runProjectAtlas } from "../atlas/project-atlas/index.js";
+import { reflectOnExecutionProgress } from "../execution/progress-reflection.js";
 import { createProjectMemoryCandidates } from "../memory/memory-candidate.js";
+import { createProgressMemoryCandidates } from "../memory/progress-candidate.js";
 import { normalizeMemory, updateProjectMemory } from "../memory/memory.js";
 import { MEMORY_TYPES } from "../memory/schema.js";
 import { reflectOnResult } from "./reflection.js";
@@ -147,6 +149,67 @@ function updateProjectMemoryContext({
   };
 }
 
+function updateExecutionProgressMemory({
+  memoryManager,
+  projectId,
+  progressReflection,
+  context
+}) {
+  if (
+    !memoryManager ||
+    typeof memoryManager.updateMemoryFromCandidate !== "function"
+  ) {
+    return {
+      attempted: 0,
+      applied: 0,
+      rejected: 0,
+      results: []
+    };
+  }
+
+  const projectMemory =
+    typeof memoryManager.retrieve === "function" && projectId
+      ? memoryManager.retrieve(projectId)
+      : context.memoryContext.projectMemory.find(
+          (memory) => memory.id === projectId
+        );
+  const candidates = createProgressMemoryCandidates({
+    projectId,
+    currentProjectMemory: projectMemory,
+    progressReflection,
+    turn: context.turn
+  });
+  const results = candidates.map((candidate) => {
+    try {
+      const result = memoryManager.updateMemoryFromCandidate(candidate);
+
+      return {
+        candidateId: candidate.candidateId,
+        kind: candidate.content.kind,
+        updated: result.updated,
+        allowed: result.policy.allowed,
+        reason: result.policy.reason
+      };
+    } catch (error) {
+      return {
+        candidateId: candidate.candidateId,
+        kind: candidate.content.kind,
+        updated: false,
+        allowed: false,
+        reason: "memory_update_failed",
+        error: error instanceof Error ? error.message : String(error)
+      };
+    }
+  });
+
+  return {
+    attempted: results.length,
+    applied: results.filter((result) => result.updated).length,
+    rejected: results.filter((result) => !result.allowed).length,
+    results
+  };
+}
+
 export async function runNexusCore(payload = {}, runtime = {}) {
   const message = String(payload.message ?? "").trim();
   const memory = normalizeMemory(payload.memory);
@@ -233,6 +296,18 @@ export async function runNexusCore(payload = {}, runtime = {}) {
     created: memoryTarget.created,
     ...(memoryTarget.error ? { error: memoryTarget.error } : {})
   };
+  const progressReflection = reflectOnExecutionProgress(
+    atlasResult.progressContext
+  );
+  const progressMemoryUpdate = updateExecutionProgressMemory({
+    memoryManager: runtime.memoryManager,
+    projectId: memoryTarget.projectId,
+    progressReflection,
+    context: {
+      ...(payload.context ?? {}),
+      memoryContext
+    }
+  });
   const updatedMemory = updateProjectMemory(memory, {
     summary: atlasResult.ideaProfile?.summary ?? memory.project.summary,
     stage: atlasResult.currentStage ?? memory.project.stage,
@@ -250,6 +325,8 @@ export async function runNexusCore(payload = {}, runtime = {}) {
     response: atlasResult,
     reflection,
     memoryUpdate,
+    progressReflection,
+    progressMemoryUpdate,
     memory: updatedMemory
   };
 }

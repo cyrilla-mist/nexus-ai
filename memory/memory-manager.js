@@ -176,6 +176,31 @@ export class MemoryManager {
       dataPatch.stage = String(candidate.content.to ?? "").trim();
     }
 
+    if (candidate.category === "progress") {
+      const kind = String(candidate.content.kind ?? "").trim();
+      const summary = String(candidate.content.summary ?? "").trim();
+
+      dataPatch.progress = current.data.progress.includes(summary)
+        ? current.data.progress
+        : [...current.data.progress, summary];
+
+      if (kind === "stage_change") {
+        dataPatch.stage = String(candidate.content.to ?? "").trim();
+      }
+
+      if (kind === "milestone_completed") {
+        const milestoneTitle = String(
+          candidate.content.title ?? ""
+        ).trim();
+
+        dataPatch.milestones = current.data.milestones.includes(
+          milestoneTitle
+        )
+          ? current.data.milestones
+          : [...current.data.milestones, milestoneTitle];
+      }
+    }
+
     const memory = this.update(candidate.recordId, dataPatch);
 
     return {

@@ -11,7 +11,9 @@ const ALLOWED_DATA_FIELDS = Object.freeze({
     "stage",
     "history",
     "decisions",
-    "nextActions"
+    "nextActions",
+    "milestones",
+    "progress"
   ]),
   [MEMORY_TYPES.ATLAS]: new Set([
     "atlasId",
@@ -143,7 +145,9 @@ export function normalizeMemoryData(type, data = {}) {
         stage: data.stage ?? "",
         history: data.history ?? [],
         decisions: data.decisions ?? [],
-        nextActions: data.nextActions ?? []
+        nextActions: data.nextActions ?? [],
+        milestones: data.milestones ?? [],
+        progress: data.progress ?? []
       };
 
       assertString(project.title, "data.title");
@@ -151,6 +155,20 @@ export function normalizeMemoryData(type, data = {}) {
       assertArray(project.history, "data.history");
       assertArray(project.decisions, "data.decisions");
       assertArray(project.nextActions, "data.nextActions");
+      assertArray(project.milestones, "data.milestones");
+      assertArray(project.progress, "data.progress");
+
+      if (!project.milestones.every((item) => typeof item === "string")) {
+        throw new MemoryValidationError(
+          "data.milestones must contain only strings."
+        );
+      }
+
+      if (!project.progress.every((item) => typeof item === "string")) {
+        throw new MemoryValidationError(
+          "data.progress must contain only strings."
+        );
+      }
 
       return cloneValue(project);
     }

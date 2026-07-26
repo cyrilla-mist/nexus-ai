@@ -1,6 +1,12 @@
 const ALLOWED_PROJECT_CATEGORIES = new Set([
   "decision",
-  "stage_change"
+  "stage_change",
+  "progress"
+]);
+const ALLOWED_PROGRESS_KINDS = new Set([
+  "stage_change",
+  "milestone_completed",
+  "task_completed"
 ]);
 
 function hasContent(value) {
@@ -51,6 +57,24 @@ export function evaluateMemoryCandidate(candidate) {
 
   if (candidate.confidence !== "high") {
     return reject("insufficient_confidence");
+  }
+
+  if (candidate.category === "progress") {
+    if (candidate.source !== "execution_confirmed") {
+      return reject("progress_requires_execution_confirmation");
+    }
+
+    const kind = String(candidate.content.kind ?? "").trim();
+    const summary = String(candidate.content.summary ?? "").trim();
+
+    if (!ALLOWED_PROGRESS_KINDS.has(kind) || !summary) {
+      return reject("invalid_progress_content");
+    }
+
+    return {
+      allowed: true,
+      reason: "execution_progress_confirmed"
+    };
   }
 
   if (candidate.category === "decision") {

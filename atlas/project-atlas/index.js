@@ -1,4 +1,5 @@
 import { createExecutionPlan } from "../../execution/index.js";
+import { PROJECT_STAGES } from "../../execution/project-state.js";
 import { generateProjectAnalysis } from "../../model/model-router.js";
 import { evaluateProjectStage } from "./stage.js";
 
@@ -99,6 +100,53 @@ function normalizeMemoryContext(value) {
   };
 }
 
+function normalizeProgressContext(value) {
+  if (!isPlainObject(value)) {
+    return null;
+  }
+
+  const milestone = isPlainObject(value.milestone)
+    ? {
+        id: String(value.milestone.id ?? "").trim(),
+        title: String(value.milestone.title ?? "").trim(),
+        status: String(value.milestone.status ?? "").trim()
+      }
+    : null;
+  const tasks = Array.isArray(value.tasks)
+    ? value.tasks.map((task) => ({
+        id: String(task?.id ?? "").trim(),
+        title: String(task?.title ?? "").trim(),
+        criteria: String(task?.criteria ?? "").trim(),
+        status: String(task?.status ?? "").trim()
+      }))
+    : [];
+
+  return {
+    confirmed: value.confirmed === true,
+    stage: String(value.stage ?? "").trim(),
+    milestone,
+    tasks
+  };
+}
+
+function normalizeProjectStage(value) {
+  const normalized = String(value ?? "").trim().toLowerCase();
+  return (
+    PROJECT_STAGES.find((stage) => stage.toLowerCase() === normalized) ?? ""
+  );
+}
+
+function resolveExecutionStage(stageProgress, context) {
+  const confirmedStage = context.progressContext?.confirmed
+    ? normalizeProjectStage(context.progressContext.stage)
+    : "";
+  const rememberedStage = normalizeProjectStage(
+    context.memoryContext.projectMemory[0]?.data?.stage
+  );
+
+  return confirmedStage || rememberedStage || stageProgress.current;
+}
+
 export function normalizeProjectContext(context = {}) {
   return {
     goal: String(context?.goal ?? "").trim(),
@@ -107,6 +155,7 @@ export function normalizeProjectContext(context = {}) {
     clarificationAnswers: normalizeAnswers(context?.clarificationAnswers),
     previousAnalysis: normalizeAnalysis(context?.previousAnalysis),
     memoryContext: normalizeMemoryContext(context?.memoryContext),
+    progressContext: normalizeProgressContext(context?.progressContext),
     turn: Math.min(
       MAX_PROJECT_TURNS,
       Math.max(1, Number.parseInt(context?.turn, 10) || 1)
@@ -303,7 +352,7 @@ function buildMockAnalysis(message, context) {
 function buildAtlasResult(data, modelResult, context) {
   const stageProgress = evaluateProjectStage(data);
   const executionPlan = createExecutionPlan({
-    stage: stageProgress.current,
+    stage: resolveExecutionStage(stageProgress, context),
     analysis: data,
     turn: context.turn
   });
@@ -327,6 +376,7 @@ function buildAtlasResult(data, modelResult, context) {
     currentStage: stageProgress.current,
     stageProgress,
     executionPlan,
+    progressContext: context.progressContext,
     turn: context.turn,
     maxTurns: MAX_PROJECT_TURNS,
     ideaProfile: data.ideaProfile,
