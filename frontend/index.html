@@ -12,17 +12,26 @@
       留空时：localhost 使用 8787；生产环境使用同源 /api/nexus。
     -->
     <meta name="nexus-api-endpoint" content="" />
-    <title>Nexus AI · Project Atlas</title>
+    <title>Nexus AI · Project Space</title>
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
     <main class="shell">
       <header class="hero">
-        <p class="eyebrow">Nexus AI · Project Atlas</p>
+        <div class="hero-toolbar">
+          <p class="eyebrow">Nexus AI · Project Space</p>
+          <button
+            id="theme-toggle"
+            class="theme-toggle"
+            type="button"
+            aria-pressed="false"
+          >
+            切换至静谧深空
+          </button>
+        </div>
         <h1>让一个想法，<span>逐步成为项目。</span></h1>
         <p class="hero-copy">
-          Nexus Core 会理解你的目标，Project Atlas 会通过有限轮次的澄清，
-          帮你形成更清晰的项目画像、蓝图、风险判断和下一步行动。
+          Nexus 会把项目理解、成长阶段和当前行动组织成一个持续更新的项目空间。
         </p>
       </header>
 
@@ -72,7 +81,7 @@
         <div id="feedback-banner" class="feedback-banner" hidden></div>
 
         <div id="empty-state" class="empty-state">
-          输入想法后，这里会显示项目阶段、项目画像、Blueprint、风险和下一步行动。
+          输入想法后，这里会显示项目概览、成长路径、行动方向和详细分析。
         </div>
 
         <div id="result-content" hidden></div>

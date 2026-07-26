@@ -1,4 +1,10 @@
 import {
+  applyTheme,
+  getNextTheme,
+  getThemeName,
+  renderProjectSpace
+} from "./project-space.js";
+import {
   buildClarificationContext,
   commitAnalysisResult,
   createEmptySessionState,
@@ -6,9 +12,9 @@ import {
 } from "./session-state.js";
 
 const SESSION_KEY = "nexus-ai-project-session-v0.1.1";
+const THEME_KEY = "nexus-ai-theme-v0.4.1";
 const REQUEST_TIMEOUT_MS = 25_000;
 const MAX_TURNS = 3;
-const STAGES = ["Idea", "Explore", "Design", "Validate", "Execute"];
 
 const input = document.querySelector("#idea-input");
 const submitButton = document.querySelector("#submit-button");
@@ -21,6 +27,7 @@ const resultSection = document.querySelector(".result");
 const feedbackBanner = document.querySelector("#feedback-banner");
 const turnIndicator = document.querySelector("#turn-indicator");
 const connectionHint = document.querySelector("#connection-hint");
+const themeToggle = document.querySelector("#theme-toggle");
 
 function createEmptySession() {
   return createEmptySessionState();
@@ -87,6 +94,42 @@ function updateModelMode(model = {}) {
   modelMode.dataset.mode = mode;
 }
 
+function updateThemeControl(theme) {
+  const nextTheme = getNextTheme(theme);
+
+  themeToggle.textContent = `切换至${getThemeName(nextTheme)}`;
+  themeToggle.setAttribute("aria-pressed", String(theme === "dark"));
+}
+
+function setTheme(theme) {
+  const applied = applyTheme(document.documentElement, theme);
+
+  updateThemeControl(applied);
+
+  try {
+    localStorage.setItem(THEME_KEY, applied);
+  } catch {
+    // Theme remains active even when browser storage is unavailable.
+  }
+}
+
+function restoreTheme() {
+  let storedTheme = "";
+
+  try {
+    storedTheme = localStorage.getItem(THEME_KEY) ?? "";
+  } catch {
+    storedTheme = "";
+  }
+
+  const preferredTheme = window.matchMedia?.("(prefers-color-scheme: dark)")
+    .matches
+    ? "dark"
+    : "light";
+
+  setTheme(storedTheme || preferredTheme);
+}
+
 function saveSession() {
   try {
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(sessionState));
@@ -133,53 +176,6 @@ function clearFeedback() {
   feedbackBanner.dataset.type = "";
 }
 
-function renderStageProgress(stageProgress = {}) {
-  const current = stageProgress.current ?? "Idea";
-  const currentIndex = Math.max(0, STAGES.indexOf(current));
-
-  return `
-    <section class="content-card stage-card">
-      <div class="section-heading">
-        <div>
-          <p class="section-kicker">Project Stage</p>
-          <h3>当前阶段：${escapeHtml(current)}</h3>
-        </div>
-        <p class="stage-next">
-          ${
-            stageProgress.next
-              ? `下一目标：${escapeHtml(stageProgress.next)}`
-              : "已进入执行阶段"
-          }
-        </p>
-      </div>
-      <ol
-        class="stage-track"
-        aria-label="项目阶段进度"
-        style="--stage-progress: ${(currentIndex / (STAGES.length - 1)) * 80}%"
-      >
-        ${STAGES.map((stage, index) => {
-          const state =
-            index < currentIndex
-              ? "completed"
-              : index === currentIndex
-                ? "current"
-                : "upcoming";
-          const currentAttribute =
-            state === "current" ? ' aria-current="step"' : "";
-          return `
-            <li data-state="${state}"${currentAttribute}>
-              <span aria-hidden="true">${index + 1}</span>
-              <strong>${stage}</strong>
-            </li>
-          `;
-        }).join("")}
-      </ol>
-      <p class="stage-rationale">${escapeHtml(
-        stageProgress.rationale ?? "正在根据已知项目信息判断阶段。"
-      )}</p>
-    </section>
-  `;
-}
 
 function renderIdeaProfile(profile = {}) {
   return `
@@ -338,15 +334,10 @@ function renderResult(data) {
 
   resultContent.innerHTML = `
     <div class="result-stack">
-      ${renderStageProgress(response.stageProgress)}
+      ${renderProjectSpace(data?.experience)}
       ${renderIdeaProfile(response.ideaProfile)}
       ${renderBlueprint(response.projectBlueprint)}
       ${renderRisks(response.risks)}
-      <section class="next-action-card">
-        <p class="section-kicker">Next Action</p>
-        <h3>下一步行动</h3>
-        <p>${escapeHtml(response.nextAction ?? response.nextStep ?? "等待进一步确认")}</p>
-      </section>
       ${renderClarificationForm(
         response.clarificationQuestions ?? response.questions,
         response.turn ?? sessionState.turn,
@@ -560,7 +551,7 @@ function clearWorkspace() {
   resultContent.hidden = true;
   emptyState.hidden = false;
   emptyState.textContent =
-    "输入想法后，这里会显示项目阶段、项目画像、Blueprint、风险和下一步行动。";
+    "输入想法后，这里会显示项目概览、成长路径、行动方向和详细分析。";
   turnIndicator.hidden = true;
   status.textContent = "待输入";
   updateModelMode();
@@ -570,6 +561,9 @@ function clearWorkspace() {
 
 submitButton.addEventListener("click", submitIdea);
 clearButton.addEventListener("click", clearWorkspace);
+themeToggle.addEventListener("click", () => {
+  setTheme(getNextTheme(document.documentElement.dataset.theme));
+});
 
 input.addEventListener("keydown", (event) => {
   if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
@@ -587,6 +581,7 @@ resultContent.addEventListener("submit", (event) => {
 });
 
 connectionHint.textContent = `当前连接：${API_ENDPOINT}`;
+restoreTheme();
 restoreSession();
 
 if (sessionState.initialMessage) {

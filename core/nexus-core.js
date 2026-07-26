@@ -1,4 +1,5 @@
 import { runProjectAtlas } from "../atlas/project-atlas/index.js";
+import { createContextExperience } from "../experience/index.js";
 import { reflectOnExecutionProgress } from "../execution/progress-reflection.js";
 import { createProjectMemoryCandidates } from "../memory/memory-candidate.js";
 import { createProgressMemoryCandidates } from "../memory/progress-candidate.js";
@@ -313,6 +314,11 @@ export async function runNexusCore(payload = {}, runtime = {}) {
     stage: atlasResult.currentStage ?? memory.project.stage,
     nextAction: atlasResult.nextStep ?? memory.project.nextAction
   });
+  const experience = createContextExperience({
+    atlasOutput: atlasResult,
+    memoryContext,
+    executionState: atlasResult.executionPlan
+  });
 
   return {
     ok: true,
@@ -327,6 +333,7 @@ export async function runNexusCore(payload = {}, runtime = {}) {
     memoryUpdate,
     progressReflection,
     progressMemoryUpdate,
+    experience,
     memory: updatedMemory
   };
 }

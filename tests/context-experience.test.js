@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { runNexusCore } from "../core/nexus-core.js";
 import {
   createActionView,
   createContextExperience,
@@ -136,4 +137,20 @@ test("Context Experience provides stable fallbacks without context", () => {
   assert.equal(experience.actionNavigator.goal, "无法判断");
   assert.deepEqual(experience.actionNavigator.actions, []);
   assert.equal(experience.actionNavigator.criteria, "无法判断");
+});
+
+test("Nexus Core exposes the read-only Context Experience projection", async () => {
+  const result = await runNexusCore({
+    message: "我想做一个校园环保项目",
+    context: { turn: 1 }
+  });
+
+  assert.equal(result.ok, true);
+  assert.ok(result.experience);
+  assert.equal(
+    result.experience.projectOverview.stage,
+    result.response.executionPlan.stage
+  );
+  assert.equal(result.experience.projectJourney.stages.length, 5);
+  assert.ok(result.experience.actionNavigator.actions.length > 0);
 });
