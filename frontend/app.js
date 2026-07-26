@@ -29,6 +29,23 @@ const feedbackBanner = document.querySelector("#feedback-banner");
 const turnIndicator = document.querySelector("#turn-indicator");
 const connectionHint = document.querySelector("#connection-hint");
 const themeToggle = document.querySelector("#theme-toggle");
+const entrySpace = document.querySelector("#entry-space");
+const createProjectPanel = document.querySelector("#create-project-panel");
+const createProjectEntryButton = document.querySelector(
+  "#create-project-entry-button"
+);
+const continueProjectEmpty = document.querySelector("#continue-project-empty");
+const continueProjectSummary = document.querySelector(
+  "#continue-project-summary"
+);
+const continueProjectTitle = document.querySelector("#continue-project-title");
+const continueProjectMeta = document.querySelector("#continue-project-meta");
+const continueProjectEntryButton = document.querySelector(
+  "#continue-project-entry-button"
+);
+const exploreSpaceEntry = document.querySelector("#explore-space-entry");
+const exploreSpaceButton = document.querySelector("#explore-space-button");
+const resultTitle = document.querySelector("#result-title");
 
 function createEmptySession() {
   return createEmptySessionState();
@@ -163,6 +180,89 @@ function restoreSession() {
   } catch {
     sessionStorage.removeItem(SESSION_KEY);
   }
+}
+
+function hasRecoverableSession(state = sessionState) {
+  return Boolean(
+    state.initialMessage &&
+      state.currentAnalysis &&
+      state.lastResult?.response
+  );
+}
+
+function recoverableProjectSummary(state = sessionState) {
+  const response = state.lastResult?.response ?? {};
+  const overview = state.lastResult?.experience?.projectOverview ?? {};
+  const title = String(
+    overview.title ?? response.ideaProfile?.summary ?? state.initialMessage
+  ).trim();
+  const stage = String(overview.stage ?? response.stage ?? "Idea").trim();
+  const turn = Number.parseInt(response.turn ?? state.turn, 10) || 1;
+
+  return {
+    title: title || "未命名项目",
+    stage: stage || "Idea",
+    turn
+  };
+}
+
+function updateEntryExperience({ projectOpen = false } = {}) {
+  const recoverable = hasRecoverableSession();
+
+  entrySpace.dataset.entryState = projectOpen
+    ? "project-open"
+    : recoverable
+      ? "recoverable"
+      : "no-session";
+  continueProjectEmpty.hidden = recoverable;
+  continueProjectSummary.hidden = !recoverable;
+  exploreSpaceEntry.hidden = !projectOpen;
+  continueProjectEntryButton.disabled = !recoverable || isSubmitting;
+  exploreSpaceButton.disabled = !projectOpen || isSubmitting;
+
+  if (recoverable) {
+    const summary = recoverableProjectSummary();
+    continueProjectTitle.textContent = summary.title;
+    continueProjectMeta.textContent = `${summary.stage} 阶段 · 第 ${summary.turn} 轮 · 当前标签页临时进度`;
+  } else {
+    continueProjectTitle.textContent = "未命名项目";
+    continueProjectMeta.textContent = "等待恢复项目状态";
+  }
+}
+
+function openProjectSpace({ moveFocus = true } = {}) {
+  if (!sessionState.lastResult) {
+    showFeedback("当前还没有可探索的 Project Space，请先创建项目。", "info");
+    createProjectPanel.scrollIntoView?.({ block: "start" });
+    input.focus();
+    return;
+  }
+
+  resultSection.hidden = false;
+  updateEntryExperience({ projectOpen: true });
+  resultSection.scrollIntoView?.({ block: "start" });
+
+  if (moveFocus) {
+    resultTitle.focus?.({ preventScroll: true });
+  }
+}
+
+function beginProjectCreation() {
+  if (hasRecoverableSession()) {
+    const confirmed = window.confirm(
+      "创建新项目会清除当前标签页中已恢复的项目进度。是否继续？"
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    clearWorkspace({ focusInput: false });
+  }
+
+  entrySpace.dataset.entryState = "creating";
+  createProjectPanel.scrollIntoView?.({ block: "start" });
+  input.focus();
 }
 
 function showFeedback(message, type = "info") {
@@ -323,7 +423,7 @@ function renderDebugInfo(data) {
   `;
 }
 
-function renderResult(data) {
+function renderResult(data, { revealProjectSpace = true } = {}) {
   const response = data?.response ?? {};
   const reflection = data?.reflection ?? {};
 
@@ -363,9 +463,17 @@ function renderResult(data) {
   } else {
     showFeedback("项目分析已完成，你可以查看结果或回答澄清问题。", "success");
   }
+
+  if (revealProjectSpace) {
+    openProjectSpace();
+  } else {
+    resultSection.hidden = true;
+    updateEntryExperience();
+  }
 }
 
 function renderError(message, { preserveResult = false } = {}) {
+  resultSection.hidden = false;
   showFeedback(message, "error");
 
   if (preserveResult && sessionState.lastResult) {
@@ -395,6 +503,10 @@ function setLoading(loading, label = "正在分析") {
     continueButton.disabled = loading;
     continueButton.textContent = loading ? "正在完善…" : "继续完善项目";
   }
+
+  createProjectEntryButton.disabled = loading;
+  continueProjectEntryButton.disabled = loading || !hasRecoverableSession();
+  exploreSpaceButton.disabled = loading || resultSection.hidden;
 }
 
 function friendlyRequestError(error) {
@@ -495,12 +607,30 @@ async function submitIdea() {
     return;
   }
 
+  if (hasRecoverableSession()) {
+    const confirmed = window.confirm(
+      "提交当前想法会创建新项目并替换本标签页中的已恢复进度。是否继续？"
+    );
+
+    if (!confirmed) {
+      return;
+    }
+  }
+
   sessionState = {
     ...createEmptySession(),
     initialMessage: message,
     turn: 1
   };
   saveSession();
+  resultContent.innerHTML = "";
+  resultContent.hidden = true;
+  emptyState.hidden = false;
+  emptyState.textContent =
+    "Nexus 正在建立新的项目空间，完成后将在这里展示项目上下文。";
+  turnIndicator.hidden = true;
+  resultSection.hidden = true;
+  updateEntryExperience();
 
   await submitPayload(
     {
@@ -545,7 +675,7 @@ async function continueProject(form) {
   );
 }
 
-function clearWorkspace() {
+function clearWorkspace({ focusInput = true } = {}) {
   sessionState = createEmptySession();
   sessionStorage.removeItem(SESSION_KEY);
   input.value = "";
@@ -559,11 +689,19 @@ function clearWorkspace() {
   status.textContent = "待输入";
   updateModelMode();
   clearFeedback();
-  input.focus();
+  resultSection.hidden = true;
+  updateEntryExperience();
+
+  if (focusInput) {
+    input.focus();
+  }
 }
 
 submitButton.addEventListener("click", submitIdea);
-clearButton.addEventListener("click", clearWorkspace);
+clearButton.addEventListener("click", () => clearWorkspace());
+createProjectEntryButton.addEventListener("click", beginProjectCreation);
+continueProjectEntryButton.addEventListener("click", () => openProjectSpace());
+exploreSpaceButton.addEventListener("click", () => openProjectSpace());
 themeToggle.addEventListener("click", () => {
   setTheme(getNextTheme(document.documentElement.dataset.theme));
 });
@@ -586,12 +724,13 @@ resultContent.addEventListener("submit", (event) => {
 connectionHint.textContent = `当前连接：${API_ENDPOINT}`;
 restoreTheme();
 restoreSession();
+updateEntryExperience();
 
 if (sessionState.initialMessage) {
   input.value = sessionState.initialMessage;
 }
 
 if (sessionState.lastResult) {
-  renderResult(sessionState.lastResult);
-  status.textContent = "已恢复进度";
+  renderResult(sessionState.lastResult, { revealProjectSpace: false });
+  status.textContent = "可继续项目";
 }
