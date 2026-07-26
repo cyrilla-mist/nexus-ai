@@ -5,26 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Nexus AI — Connect ideas. Create possibilities."
+      content="Nexus AI Project Atlas — 从想法到可执行项目。"
     />
-    <title>Nexus AI · Genesis Build</title>
+    <!--
+      生产部署时可将 content 改为真实 Worker 地址。
+      留空时：localhost 使用 8787；生产环境使用同源 /api/nexus。
+    -->
+    <meta name="nexus-api-endpoint" content="" />
+    <title>Nexus AI · Project Atlas</title>
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
     <main class="shell">
       <header class="hero">
-        <p class="eyebrow">Nexus AI · Genesis Build</p>
-        <h1>Connect ideas. Create possibilities.</h1>
+        <p class="eyebrow">Nexus AI · Project Atlas</p>
+        <h1>让一个想法，<span>逐步成为项目。</span></h1>
         <p class="hero-copy">
-          Nexus Core 会理解你的目标，并为当前任务选择合适的 Atlas。
-          v0.1 目前开放 Project Atlas。
+          Nexus Core 会理解你的目标，Project Atlas 会通过有限轮次的澄清，
+          帮你形成更清晰的项目画像、蓝图、风险判断和下一步行动。
         </p>
       </header>
 
       <section class="workspace" aria-labelledby="workspace-title">
         <div class="workspace-heading">
           <div>
-            <p class="eyebrow">Project Atlas</p>
+            <p class="eyebrow">Project Workspace</p>
             <h2 id="workspace-title">从一个想法开始</h2>
           </div>
           <div class="status-group" aria-label="系统状态">
@@ -39,32 +44,38 @@
         <textarea
           id="idea-input"
           rows="6"
-          placeholder="例如：我想做一个帮助大学生提高学习效率的 AI 项目。"
+          placeholder="例如：我想做一个帮助大学生管理学习任务的 AI 项目，先完成网页版 MVP。"
         ></textarea>
 
         <div class="actions">
-          <button id="submit-button" type="button">让 Nexus 规划</button>
+          <button id="submit-button" type="button">开始分析</button>
           <button id="clear-button" class="secondary" type="button">清空</button>
         </div>
 
-        <p class="helper">
-          本页面默认连接本地 Worker：<code>http://localhost:8787/api/nexus</code>
-        </p>
+        <p class="helper" id="connection-hint"></p>
       </section>
 
-      <section class="result" aria-live="polite" aria-labelledby="result-title">
+      <section
+        class="result"
+        aria-live="polite"
+        aria-busy="false"
+        aria-labelledby="result-title"
+      >
         <div class="workspace-heading">
           <div>
             <p class="eyebrow">Nexus Output</p>
-            <h2 id="result-title">调度结果</h2>
+            <h2 id="result-title">项目协作结果</h2>
           </div>
+          <span class="turn-pill" id="turn-indicator" hidden></span>
         </div>
+
+        <div id="feedback-banner" class="feedback-banner" hidden></div>
 
         <div id="empty-state" class="empty-state">
-          输入目标后，这里会显示 Nexus Core 的意图判断、Atlas 调度与下一步建议。
+          输入想法后，这里会显示项目阶段、项目画像、Blueprint、风险和下一步行动。
         </div>
 
-        <div id="result-content" class="result-grid" hidden></div>
+        <div id="result-content" hidden></div>
       </section>
     </main>
 

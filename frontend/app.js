@@ -1,4 +1,14 @@
-const API_ENDPOINT = "http://localhost:8787/api/nexus";
+import {
+  buildClarificationContext,
+  commitAnalysisResult,
+  createEmptySessionState,
+  stagePendingAnswers
+} from "./session-state.js";
+
+const SESSION_KEY = "nexus-ai-project-session-v0.1.1";
+const REQUEST_TIMEOUT_MS = 25_000;
+const MAX_TURNS = 3;
+const STAGES = ["Idea", "Explore", "Design", "Validate", "Execute"];
 
 const input = document.querySelector("#idea-input");
 const submitButton = document.querySelector("#submit-button");
@@ -7,6 +17,35 @@ const status = document.querySelector("#system-status");
 const modelMode = document.querySelector("#model-mode");
 const emptyState = document.querySelector("#empty-state");
 const resultContent = document.querySelector("#result-content");
+const resultSection = document.querySelector(".result");
+const feedbackBanner = document.querySelector("#feedback-banner");
+const turnIndicator = document.querySelector("#turn-indicator");
+const connectionHint = document.querySelector("#connection-hint");
+
+function createEmptySession() {
+  return createEmptySessionState();
+}
+
+let sessionState = createEmptySession();
+let isSubmitting = false;
+
+function resolveApiEndpoint() {
+  const configured = document
+    .querySelector('meta[name="nexus-api-endpoint"]')
+    ?.content?.trim();
+
+  if (configured) {
+    return configured;
+  }
+
+  if (["localhost", "127.0.0.1"].includes(window.location.hostname)) {
+    return "http://localhost:8787/api/nexus";
+  }
+
+  return `${window.location.origin}/api/nexus`;
+}
+
+const API_ENDPOINT = resolveApiEndpoint();
 
 function escapeHtml(value = "") {
   return String(value)
@@ -17,22 +56,23 @@ function escapeHtml(value = "") {
     .replaceAll("'", "&#039;");
 }
 
-function renderList(items = []) {
+function renderList(items = [], emptyText = "暂无") {
   if (!Array.isArray(items) || items.length === 0) {
-    return "<p>暂无</p>";
+    return `<p class="muted">${escapeHtml(emptyText)}</p>`;
   }
 
-  return `<ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
+  return `<ul>${items
+    .map((item) => `<li>${escapeHtml(item)}</li>`)
+    .join("")}</ul>`;
 }
 
-function renderJson(value) {
-  if (!value || typeof value !== "object") {
-    return "<p>暂无</p>";
-  }
-
-  return `<pre class="structured-output">${escapeHtml(
-    JSON.stringify(value, null, 2)
-  )}</pre>`;
+function renderField(label, value) {
+  return `
+    <div class="profile-field">
+      <dt>${escapeHtml(label)}</dt>
+      <dd>${escapeHtml(value || "无法判断")}</dd>
+    </div>
+  `;
 }
 
 function updateModelMode(model = {}) {
@@ -47,90 +87,343 @@ function updateModelMode(model = {}) {
   modelMode.dataset.mode = mode;
 }
 
+function saveSession() {
+  try {
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify(sessionState));
+  } catch {
+    showFeedback("当前浏览器无法保存临时进度，但本轮仍可继续使用。", "warning");
+  }
+}
+
+function restoreSession() {
+  try {
+    const stored = JSON.parse(sessionStorage.getItem(SESSION_KEY));
+
+    if (!stored || typeof stored !== "object") {
+      return;
+    }
+
+    sessionState = {
+      initialMessage: String(stored.initialMessage ?? ""),
+      currentAnalysis: stored.currentAnalysis ?? null,
+      clarificationAnswers: Array.isArray(stored.clarificationAnswers)
+        ? stored.clarificationAnswers
+        : [],
+      pendingAnswers: Array.isArray(stored.pendingAnswers)
+        ? stored.pendingAnswers
+        : [],
+      turn: Number.parseInt(stored.turn, 10) || 0,
+      lastResult: stored.lastResult ?? null
+    };
+  } catch {
+    sessionStorage.removeItem(SESSION_KEY);
+  }
+}
+
+function showFeedback(message, type = "info") {
+  feedbackBanner.hidden = false;
+  feedbackBanner.dataset.type = type;
+  feedbackBanner.textContent = message;
+}
+
+function clearFeedback() {
+  feedbackBanner.hidden = true;
+  feedbackBanner.textContent = "";
+  feedbackBanner.dataset.type = "";
+}
+
+function renderStageProgress(stageProgress = {}) {
+  const current = stageProgress.current ?? "Idea";
+  const currentIndex = Math.max(0, STAGES.indexOf(current));
+
+  return `
+    <section class="content-card stage-card">
+      <div class="section-heading">
+        <div>
+          <p class="section-kicker">Project Stage</p>
+          <h3>当前阶段：${escapeHtml(current)}</h3>
+        </div>
+        <p class="stage-next">
+          ${
+            stageProgress.next
+              ? `下一目标：${escapeHtml(stageProgress.next)}`
+              : "已进入执行阶段"
+          }
+        </p>
+      </div>
+      <ol
+        class="stage-track"
+        aria-label="项目阶段进度"
+        style="--stage-progress: ${(currentIndex / (STAGES.length - 1)) * 80}%"
+      >
+        ${STAGES.map((stage, index) => {
+          const state =
+            index < currentIndex
+              ? "completed"
+              : index === currentIndex
+                ? "current"
+                : "upcoming";
+          const currentAttribute =
+            state === "current" ? ' aria-current="step"' : "";
+          return `
+            <li data-state="${state}"${currentAttribute}>
+              <span aria-hidden="true">${index + 1}</span>
+              <strong>${stage}</strong>
+            </li>
+          `;
+        }).join("")}
+      </ol>
+      <p class="stage-rationale">${escapeHtml(
+        stageProgress.rationale ?? "正在根据已知项目信息判断阶段。"
+      )}</p>
+    </section>
+  `;
+}
+
+function renderIdeaProfile(profile = {}) {
+  return `
+    <section class="content-card">
+      <p class="section-kicker">Idea Profile</p>
+      <h3>项目画像</h3>
+      <dl class="profile-grid">
+        ${renderField("想法摘要", profile.summary)}
+        ${renderField("项目目标", profile.goal)}
+        ${renderField("目标用户", profile.targetUsers)}
+      </dl>
+      <div class="split-content">
+        <div>
+          <h4>已知事实</h4>
+          ${renderList(profile.knownFacts, "尚未形成明确事实")}
+        </div>
+        <div>
+          <h4>当前假设</h4>
+          ${renderList(profile.assumptions, "暂无需要记录的假设")}
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function renderBlueprint(blueprint = {}) {
+  return `
+    <section class="content-card">
+      <p class="section-kicker">Project Blueprint</p>
+      <h3>项目蓝图</h3>
+      <dl class="blueprint-grid">
+        ${renderField("需要解决的问题", blueprint.problem)}
+        ${renderField("初步解决方案", blueprint.proposedSolution)}
+        ${renderField("核心价值", blueprint.valueProposition)}
+      </dl>
+      <div class="split-content">
+        <div>
+          <h4>验证计划</h4>
+          ${renderList(blueprint.validationPlan)}
+        </div>
+        <div>
+          <h4>阶段里程碑</h4>
+          ${renderList(blueprint.milestones)}
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function renderRisks(risks = []) {
+  const cards =
+    Array.isArray(risks) && risks.length > 0
+      ? risks
+          .map(
+            (item, index) => `
+              <article class="risk-card">
+                <span class="risk-index">风险 ${index + 1}</span>
+                <div class="risk-detail-grid">
+                  <div>
+                    <h4>风险</h4>
+                    <p>${escapeHtml(item?.risk ?? "无法判断")}</p>
+                  </div>
+                  <div>
+                    <h4>判断依据</h4>
+                    <p>${escapeHtml(item?.basis ?? "无法判断")}</p>
+                  </div>
+                  <div>
+                    <h4>应对措施</h4>
+                    <p>${escapeHtml(item?.mitigation ?? "无法判断")}</p>
+                  </div>
+                </div>
+              </article>
+            `
+          )
+          .join("")
+      : '<p class="muted">当前没有可确认的风险。</p>';
+
+  return `
+    <section class="content-card">
+      <p class="section-kicker">Risk Review</p>
+      <h3>风险与应对</h3>
+      <div class="risk-list">${cards}</div>
+    </section>
+  `;
+}
+
+function renderClarificationForm(
+  questions = [],
+  turn = 1,
+  pendingAnswers = []
+) {
+  if (!Array.isArray(questions) || questions.length === 0) {
+    return "";
+  }
+
+  if (turn >= MAX_TURNS) {
+    return `
+      <section class="content-card">
+        <p class="section-kicker">Clarification</p>
+        <h3>本次协作轮次已完成</h3>
+        <p class="muted">当前版本最多支持 ${MAX_TURNS} 轮。你可以根据下一步行动开始执行，或清空后重新规划。</p>
+      </section>
+    `;
+  }
+
+  return `
+    <section class="content-card clarification-card">
+      <p class="section-kicker">Clarification · 下一轮</p>
+      <h3>回答这些问题，继续完善项目</h3>
+      <p class="muted">你的回答会与上一轮分析一起交给 Project Atlas，不会被当成新项目。</p>
+      <form id="clarification-form" novalidate>
+        ${questions
+          .map((question, index) => {
+            const pendingAnswer =
+              pendingAnswers.find((item) => item.question === question)
+                ?.answer ?? "";
+
+            return `
+              <label class="question-field">
+                <span>${index + 1}. ${escapeHtml(question)}</span>
+                <textarea
+                  rows="3"
+                  data-question="${escapeHtml(question)}"
+                  placeholder="请填写具体回答"
+                  required
+                >${escapeHtml(pendingAnswer)}</textarea>
+              </label>
+            `;
+          })
+          .join("")}
+        <p class="form-error" id="clarification-error" hidden></p>
+        <button id="continue-button" type="submit">继续完善项目</button>
+      </form>
+    </section>
+  `;
+}
+
+function renderDebugInfo(data) {
+  return `
+    <details class="debug-panel">
+      <summary>开发调试信息</summary>
+      <pre>${escapeHtml(JSON.stringify(data, null, 2))}</pre>
+    </details>
+  `;
+}
+
 function renderResult(data) {
-  const nexus = data?.nexus ?? {};
   const response = data?.response ?? {};
   const reflection = data?.reflection ?? {};
 
   emptyState.hidden = true;
   resultContent.hidden = false;
+  turnIndicator.hidden = false;
+  turnIndicator.textContent = `第 ${response.turn ?? sessionState.turn} / ${response.maxTurns ?? MAX_TURNS} 轮`;
   updateModelMode(response.model);
+
   resultContent.innerHTML = `
-    <article class="result-card">
-      <h3>Nexus Core</h3>
-      <p><strong>意图：</strong>${escapeHtml(nexus.intent?.name ?? "unknown")}</p>
-      <p><strong>调度：</strong>${escapeHtml(nexus.selectedAtlas ?? "待确认")}</p>
-      <p><strong>原因：</strong>${escapeHtml(nexus.intent?.reason ?? "")}</p>
-    </article>
-
-    <article class="result-card">
-      <h3>当前阶段</h3>
-      <p>${escapeHtml(response.currentStage ?? response.status ?? "unknown")}</p>
-      <p><strong>下一步：</strong>${escapeHtml(response.nextStep ?? "")}</p>
-    </article>
-
-    <article class="result-card">
-      <h3>模型状态</h3>
-      <p><strong>模式：</strong>${escapeHtml(modelMode.textContent)}</p>
-      <p><strong>模型：</strong>${escapeHtml(response.model?.model ?? "本地模拟")}</p>
+    <div class="result-stack">
+      ${renderStageProgress(response.stageProgress)}
+      ${renderIdeaProfile(response.ideaProfile)}
+      ${renderBlueprint(response.projectBlueprint)}
+      ${renderRisks(response.risks)}
+      <section class="next-action-card">
+        <p class="section-kicker">Next Action</p>
+        <h3>下一步行动</h3>
+        <p>${escapeHtml(response.nextAction ?? response.nextStep ?? "等待进一步确认")}</p>
+      </section>
+      ${renderClarificationForm(
+        response.clarificationQuestions ?? response.questions,
+        response.turn ?? sessionState.turn,
+        sessionState.pendingAnswers
+      )}
       ${
-        response.model?.fallbackReason
-          ? `<p><strong>降级原因：</strong>${escapeHtml(response.model.fallbackReason.code)}</p>`
+        reflection.passed === false
+          ? `<section class="content-card"><h3>质量检查</h3>${renderList(reflection.issues)}</section>`
           : ""
       }
-    </article>
-
-    <article class="result-card wide">
-      <h3>Nexus 任务计划</h3>
-      ${renderList(nexus.plan)}
-    </article>
-
-    <article class="result-card wide">
-      <h3>项目画像</h3>
-      ${renderJson(response.ideaProfile)}
-    </article>
-
-    <article class="result-card wide">
-      <h3>Project Blueprint</h3>
-      ${renderJson(response.projectBlueprint)}
-    </article>
-
-    <article class="result-card wide">
-      <h3>主要风险</h3>
-      ${renderJson(response.risks)}
-    </article>
-
-    <article class="result-card wide">
-      <h3>Project Atlas 澄清问题</h3>
-      ${renderList(response.questions)}
-    </article>
-
-    <article class="result-card wide">
-      <h3>质量检查</h3>
-      <p>${reflection.passed ? "已通过基础检查。" : "存在需要后续改进的问题。"}</p>
-      ${renderList(reflection.issues)}
-    </article>
+      ${renderDebugInfo(data)}
+    </div>
   `;
+
+  if (response.model?.mode === "fallback") {
+    showFeedback(
+      "模型服务本轮未能正常返回，Project Atlas 已保留你提供的内容并使用安全结果继续分析。",
+      "warning"
+    );
+  } else {
+    showFeedback("项目分析已完成，你可以查看结果或回答澄清问题。", "success");
+  }
 }
 
-function renderError(message) {
+function renderError(message, { preserveResult = false } = {}) {
+  showFeedback(message, "error");
+
+  if (preserveResult && sessionState.lastResult) {
+    emptyState.hidden = true;
+    resultContent.hidden = false;
+    return;
+  }
+
   emptyState.hidden = false;
   resultContent.hidden = true;
   emptyState.textContent = message;
 }
 
-async function submitIdea() {
-  const message = input.value.trim();
+function setLoading(loading, label = "正在分析") {
+  isSubmitting = loading;
+  submitButton.disabled = loading;
+  clearButton.disabled = loading;
+  input.disabled = loading;
+  resultSection.setAttribute("aria-busy", String(loading));
 
-  if (!message) {
-    status.textContent = "需要输入";
-    renderError("请先写下一句话形式的想法或目标。");
-    input.focus();
-    return;
+  if (loading) {
+    status.textContent = label;
   }
 
-  submitButton.disabled = true;
-  status.textContent = "Nexus 思考中";
+  const continueButton = document.querySelector("#continue-button");
+  if (continueButton) {
+    continueButton.disabled = loading;
+    continueButton.textContent = loading ? "正在完善…" : "继续完善项目";
+  }
+}
+
+function friendlyRequestError(error) {
+  if (error?.name === "AbortError") {
+    return "请求等待时间过长，请稍后重试。你的当前填写内容仍保留在页面中。";
+  }
+
+  if (error?.code === "HTTP_400") {
+    return error.message || "提交内容不完整，请检查后重试。";
+  }
+
+  if (error?.code === "HTTP_500") {
+    return "Nexus 服务暂时无法完成分析，请稍后再试。";
+  }
+
+  return "无法连接 Nexus Worker，请检查网络或确认本地 Worker 已启动。";
+}
+
+async function requestAnalysis(payload) {
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(
+    () => controller.abort(),
+    REQUEST_TIMEOUT_MS
+  );
 
   try {
     const response = await fetch(API_ENDPOINT, {
@@ -138,36 +431,139 @@ async function submitIdea() {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ message })
+      body: JSON.stringify(payload),
+      signal: controller.signal
     });
+    let data;
 
-    const data = await response.json();
-
-    if (!response.ok || !data.ok) {
-      throw new Error(data?.error?.message ?? "Nexus Core request failed.");
+    try {
+      data = await response.json();
+    } catch {
+      throw Object.assign(new Error("服务返回了无法读取的结果。"), {
+        code: response.status >= 500 ? "HTTP_500" : "INVALID_RESPONSE"
+      });
     }
 
-    renderResult(data);
-    status.textContent = "已完成调度";
-  } catch (error) {
-    renderError(
-      `暂时无法连接 Nexus Core。请确认本地 Worker 已启动。详情：${error.message}`
-    );
-    status.textContent = "连接失败";
+    if (!response.ok || !data.ok) {
+      throw Object.assign(
+        new Error(data?.error?.message ?? "Nexus 无法处理本次请求。"),
+        { code: response.status >= 500 ? "HTTP_500" : "HTTP_400" }
+      );
+    }
+
+    return data;
   } finally {
-    submitButton.disabled = false;
+    window.clearTimeout(timeoutId);
   }
 }
 
+async function submitPayload(
+  payload,
+  loadingLabel,
+  { preserveResultOnError = false } = {}
+) {
+  if (isSubmitting) {
+    return;
+  }
+
+  clearFeedback();
+  setLoading(true, loadingLabel);
+
+  try {
+    const data = await requestAnalysis(payload);
+    sessionState = commitAnalysisResult(
+      sessionState,
+      data,
+      payload.context?.turn ?? 1
+    );
+    saveSession();
+    renderResult(data);
+    status.textContent = "分析完成";
+  } catch (error) {
+    renderError(friendlyRequestError(error), {
+      preserveResult: preserveResultOnError
+    });
+    status.textContent =
+      error?.name === "AbortError" ? "请求超时" : "分析失败";
+  } finally {
+    setLoading(false);
+  }
+}
+
+async function submitIdea() {
+  const message = input.value.trim();
+
+  if (!message) {
+    status.textContent = "需要输入";
+    renderError("请先写下你的项目想法或目标。");
+    input.focus();
+    return;
+  }
+
+  sessionState = {
+    ...createEmptySession(),
+    initialMessage: message,
+    turn: 1
+  };
+  saveSession();
+
+  await submitPayload(
+    {
+      message,
+      context: {
+        clarificationAnswers: [],
+        previousAnalysis: null,
+        turn: 1
+      }
+    },
+    "正在分析"
+  );
+}
+
+async function continueProject(form) {
+  const fields = [...form.querySelectorAll("textarea[data-question]")];
+  const currentAnswers = fields.map((field) => ({
+    question: field.dataset.question,
+    answer: field.value.trim()
+  }));
+  const errorElement = form.querySelector("#clarification-error");
+
+  if (currentAnswers.some((item) => !item.answer)) {
+    errorElement.hidden = false;
+    errorElement.textContent = "请回答全部澄清问题后再继续。";
+    fields.find((field) => !field.value.trim())?.focus();
+    return;
+  }
+
+  errorElement.hidden = true;
+  const nextTurn = Math.min(MAX_TURNS, sessionState.turn + 1);
+  sessionState = stagePendingAnswers(sessionState, currentAnswers);
+  saveSession();
+
+  await submitPayload(
+    {
+      message: sessionState.initialMessage,
+      context: buildClarificationContext(sessionState, nextTurn)
+    },
+    "正在完善",
+    { preserveResultOnError: true }
+  );
+}
+
 function clearWorkspace() {
+  sessionState = createEmptySession();
+  sessionStorage.removeItem(SESSION_KEY);
   input.value = "";
+  input.disabled = false;
   resultContent.innerHTML = "";
   resultContent.hidden = true;
   emptyState.hidden = false;
   emptyState.textContent =
-    "输入目标后，这里会显示 Nexus Core 的意图判断、Atlas 调度与下一步建议。";
+    "输入想法后，这里会显示项目阶段、项目画像、Blueprint、风险和下一步行动。";
+  turnIndicator.hidden = true;
   status.textContent = "待输入";
   updateModelMode();
+  clearFeedback();
   input.focus();
 }
 
@@ -179,3 +575,24 @@ input.addEventListener("keydown", (event) => {
     submitIdea();
   }
 });
+
+resultContent.addEventListener("submit", (event) => {
+  if (event.target.id !== "clarification-form") {
+    return;
+  }
+
+  event.preventDefault();
+  continueProject(event.target);
+});
+
+connectionHint.textContent = `当前连接：${API_ENDPOINT}`;
+restoreSession();
+
+if (sessionState.initialMessage) {
+  input.value = sessionState.initialMessage;
+}
+
+if (sessionState.lastResult) {
+  renderResult(sessionState.lastResult);
+  status.textContent = "已恢复进度";
+}
