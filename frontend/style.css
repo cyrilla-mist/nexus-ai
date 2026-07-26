@@ -514,6 +514,7 @@ button.secondary {
 }
 
 .project-overview,
+.context-map,
 .project-journey,
 .action-navigator {
   min-width: 0;
@@ -533,6 +534,170 @@ button.secondary {
   border-radius: 12px;
 }
 
+.context-map {
+  grid-column: 1 / -1;
+  padding: 24px;
+  border-radius: 14px;
+}
+
+.context-map-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 20px;
+}
+
+.context-map-heading > p {
+  margin: 2px 0 0;
+  color: var(--text-tertiary);
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.context-map-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(260px, 0.75fr);
+  gap: 22px;
+}
+
+.context-map-nodes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  align-content: start;
+}
+
+.context-map-node {
+  display: grid;
+  min-height: 118px;
+  align-content: space-between;
+  gap: 10px;
+  padding: 15px;
+  border: 1px solid var(--border-primary);
+  border-radius: 9px;
+  background: var(--surface-soft);
+  color: var(--text-primary);
+  text-align: left;
+  box-shadow: none;
+}
+
+.context-map-node:hover {
+  border-color: var(--accent);
+  background: var(--surface-accent);
+  transform: none;
+  box-shadow: var(--shadow-soft);
+}
+
+.context-map-node:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.context-map-node[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--surface-accent);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.context-map-node strong {
+  overflow-wrap: anywhere;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.context-node-type,
+.context-node-status {
+  color: var(--text-tertiary);
+  font-size: 0.7rem;
+  font-weight: 760;
+  letter-spacing: 0.04em;
+}
+
+.context-node-status {
+  color: var(--accent-strong);
+  letter-spacing: 0;
+}
+
+.context-map-inspector {
+  display: grid;
+  gap: 18px;
+  align-content: start;
+  padding-left: 20px;
+  border-left: 1px solid var(--border-soft);
+}
+
+.context-map-inspector h4,
+.context-node-detail h4 {
+  margin-bottom: 12px;
+}
+
+.context-relation-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.context-relation-list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  padding: 9px 0;
+  border-top: 1px solid var(--border-soft);
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+}
+
+.context-relation-list li:first-child {
+  border-top: 0;
+}
+
+.context-relation-list span {
+  overflow-wrap: anywhere;
+}
+
+.context-relation-list strong {
+  padding: 3px 7px;
+  border-radius: 5px;
+  background: var(--surface-accent);
+  color: var(--accent-strong);
+  font-size: 0.68rem;
+  text-align: center;
+}
+
+.context-node-detail {
+  padding-top: 18px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.context-node-detail-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.context-node-detail-list div {
+  display: grid;
+  grid-template-columns: 50px minmax(0, 1fr);
+  gap: 10px;
+}
+
+.context-node-detail-list dt {
+  color: var(--text-tertiary);
+  font-size: 0.72rem;
+  font-weight: 760;
+}
+
+.context-node-detail-list dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
 .project-space-heading {
   display: flex;
   align-items: flex-start;
@@ -997,6 +1162,8 @@ button.secondary {
 
 @media (max-width: 760px) {
   .project-space-layout,
+  .context-map-layout,
+  .context-map-nodes,
   .project-overview-details,
   .profile-grid,
   .blueprint-grid,
@@ -1007,6 +1174,13 @@ button.secondary {
 
   .project-overview {
     grid-column: auto;
+  }
+
+  .context-map-inspector {
+    padding-top: 18px;
+    padding-left: 0;
+    border-top: 1px solid var(--border-soft);
+    border-left: 0;
   }
 
   .project-overview-details > div,
@@ -1123,6 +1297,7 @@ button.secondary {
 
   .hero-toolbar,
   .project-space-heading,
+  .context-map-heading,
   .project-space-intro {
     align-items: flex-start;
     flex-direction: column;

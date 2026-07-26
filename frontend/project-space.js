@@ -1,3 +1,5 @@
+import { renderContextMap } from "./context-map.js";
+
 const THEME_NAMES = Object.freeze({
   light: "晨雾星图",
   dark: "静谧深空"
@@ -135,6 +137,9 @@ export function renderProjectSpace(experience = {}) {
   const overview = isPlainObject(normalized.projectOverview)
     ? normalized.projectOverview
     : {};
+  const contextMap = isPlainObject(normalized.contextMap)
+    ? normalized.contextMap
+    : {};
   const journey = isPlainObject(normalized.projectJourney)
     ? normalized.projectJourney
     : {};
@@ -150,6 +155,7 @@ export function renderProjectSpace(experience = {}) {
       </header>
       <div class="project-space-layout">
         ${renderOverview(overview)}
+        ${renderContextMap(contextMap)}
         ${renderJourney(journey)}
         ${renderActionNavigator(actionNavigator)}
       </div>

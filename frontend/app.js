@@ -1,3 +1,4 @@
+import { bindContextMapInteractions } from "./context-map.js";
 import {
   applyTheme,
   getNextTheme,
@@ -351,6 +352,8 @@ function renderResult(data) {
       ${renderDebugInfo(data)}
     </div>
   `;
+
+  bindContextMapInteractions(resultContent, data?.experience?.contextMap);
 
   if (response.model?.mode === "fallback") {
     showFeedback(
