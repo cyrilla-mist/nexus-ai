@@ -1,4 +1,5 @@
 import { createActionView } from "./action-view.js";
+import { createContextMap } from "./context-map.js";
 import { createJourneyView } from "./journey-view.js";
 import { createProjectContext } from "./project-context.js";
 
@@ -25,12 +26,18 @@ export function createContextExperience({
       executionState: execution
     }),
     projectJourney: createJourneyView(execution),
-    actionNavigator: createActionView(execution)
+    actionNavigator: createActionView(execution),
+    contextMap: createContextMap({
+      atlasOutput: atlas,
+      memoryContext,
+      executionState: execution
+    })
   });
 }
 
 export {
   createActionView,
+  createContextMap,
   createJourneyView,
   createProjectContext
 };
