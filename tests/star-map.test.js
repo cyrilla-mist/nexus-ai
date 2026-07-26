@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import {
   bindStarMapInteractions,
+  createStarMapFocusState,
   createStarMapView,
   renderStarMap
 } from "../frontend/star-map.js";
@@ -99,4 +101,131 @@ test("empty Context Graph renders a safe empty state", () => {
   assert.deepEqual(view.edges, []);
   assert.match(html, /暂无可显示的项目星图/);
   assert.doesNotMatch(html, /star-map-canvas/);
+});
+test("Project Core and semantic orbits preserve visual hierarchy", () => {
+  const view = createStarMapView(sampleGraph());
+  const html = renderStarMap(sampleGraph());
+  const byType = (type) => view.nodes.find((node) => node.type === type);
+
+  assert.ok(byType("project").size > byType("milestone").size);
+  assert.ok(byType("milestone").size > byType("task").size);
+  assert.match(html, /class="star-map-project-halo"/);
+  assert.match(html, /data-orbit="understanding"/);
+  assert.match(html, /理解 · 为什么开始/);
+  assert.match(html, /data-orbit="execution"/);
+  assert.match(html, /执行 · 如何推进/);
+  assert.match(html, /data-orbit="growth"/);
+  assert.match(html, /成长 · 如何变化/);
+});
+
+test("focus state identifies selected, related, and quiet context", () => {
+  const graph = sampleGraph();
+  const view = createStarMapView(graph);
+  const focus = createStarMapFocusState(graph, "decision:users");
+  const edgeIndex = (relation) =>
+    view.edges.findIndex((edge) => edge.relation === relation);
+
+  assert.equal(focus.selectedId, "decision:users");
+  assert.equal(focus.nodes["decision:users"], "selected");
+  assert.equal(focus.nodes["project:campus"], "related");
+  assert.equal(focus.nodes["milestone:research"], "dimmed");
+  assert.equal(focus.edges[edgeIndex("supports")], "related");
+  assert.equal(focus.edges[edgeIndex("contains")], "quiet");
+});
+
+test("selection updates related nodes, edges, and relationship details", () => {
+  const graph = sampleGraph();
+  const listeners = new Map();
+  const detail = { innerHTML: "" };
+  const attributes = new Map();
+  const controls = graph.nodes.map((node) => ({
+    dataset: { starNodeId: node.id },
+    setAttribute(name, value) {
+      attributes.set(`${node.id}:${name}`, value);
+    },
+    addEventListener(event, handler) {
+      listeners.set(`${node.id}:${event}`, handler);
+    }
+  }));
+  const visualNodes = controls.map((control) => ({
+    ...control,
+    dataset: { ...control.dataset },
+    setAttribute(name, value) {
+      attributes.set(`visual:${control.dataset.starNodeId}:${name}`, value);
+    }
+  }));
+  const visualEdges = graph.edges.map((_edge, index) => ({
+    dataset: { edgeIndex: String(index) },
+    setAttribute(name, value) {
+      attributes.set(`edge:${index}:${name}`, value);
+    }
+  }));
+  const container = {
+    querySelector: () => detail,
+    querySelectorAll(selector) {
+      if (selector.startsWith(".star-map-node")) {
+        return visualNodes;
+      }
+
+      if (selector.startsWith(".star-map-edge")) {
+        return visualEdges;
+      }
+
+      return controls;
+    }
+  };
+
+  bindStarMapInteractions(container, graph);
+  listeners.get("decision:users:click")();
+
+  assert.equal(
+    attributes.get("visual:decision:users:data-focus-state"),
+    "selected"
+  );
+  assert.equal(
+    attributes.get("visual:project:campus:data-focus-state"),
+    "related"
+  );
+  assert.equal(attributes.get("edge:1:data-focus-state"), "related");
+  assert.match(detail.innerHTML, /关联关系/);
+  assert.match(detail.innerHTML, /支持/);
+  assert.match(detail.innerHTML, /校园环保项目/);
+
+  listeners.get("problem:waste:pointerenter")();
+  assert.equal(
+    attributes.get("visual:problem:waste:data-focus-state"),
+    "hovered"
+  );
+  listeners.get("problem:waste:pointerleave")();
+  assert.equal(
+    attributes.get("visual:decision:users:data-focus-state"),
+    "selected"
+  );
+});
+
+test("theme tokens, reduced motion, and mobile semantic fallback are present", () => {
+  const css = readFileSync(
+    new URL("../frontend/style.css", import.meta.url),
+    "utf8"
+  );
+  const html = renderStarMap(sampleGraph());
+
+  for (const token of [
+    "--star-project-fill",
+    "--star-project-halo",
+    "--star-orbit-understanding",
+    "--star-orbit-execution",
+    "--star-orbit-growth"
+  ]) {
+    assert.match(css, new RegExp(token));
+  }
+
+  assert.match(css, /:root\[data-theme="dark"\]/);
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
+  assert.match(css, /@media \(max-width: 560px\)/);
+  assert.match(css, /\.star-map-canvas\s*\{\s*display: none;/s);
+  assert.match(html, /star-map-outline-group/);
+  assert.match(html, /Understanding · 为什么开始/);
+  assert.match(html, /Execution · 如何推进/);
+  assert.match(html, /Growth · 如何成长/);
 });

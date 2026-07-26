@@ -8,12 +8,12 @@ const ORBITS = Object.freeze({
   growth: 286
 });
 const NODE_SIZES = Object.freeze({
-  project: 40,
-  problem: 22,
-  decision: 24,
-  milestone: 26,
-  task: 18,
-  progress: 14,
+  project: 52,
+  problem: 25,
+  decision: 28,
+  milestone: 30,
+  task: 21,
+  progress: 17,
   context: 18
 });
 const TYPE_LABELS = Object.freeze({
@@ -23,6 +23,25 @@ const TYPE_LABELS = Object.freeze({
   milestone: "里程碑",
   task: "任务",
   progress: "进展"
+});
+const LAYER_LABELS = Object.freeze({
+  core: "Project Core",
+  understanding: "Understanding · 为什么开始",
+  execution: "Execution · 如何推进",
+  growth: "Growth · 如何成长",
+  context: "Other Context"
+});
+const RELATION_LABELS = Object.freeze({
+  addresses: "解决",
+  supports: "支持",
+  contains: "包含",
+  updates: "更新"
+});
+const RELATION_STRENGTH = Object.freeze({
+  addresses: "primary",
+  supports: "primary",
+  contains: "structural",
+  updates: "history"
 });
 
 function isPlainObject(value) {
@@ -55,7 +74,9 @@ function normalizedNodes(contextMap) {
     .filter(isPlainObject)
     .map((node, index) => ({
       ...node,
-      id: normalizeText(node.id) || `${normalizeText(node.type) || "context"}:${index + 1}`,
+      id:
+        normalizeText(node.id) ||
+        `${normalizeText(node.type) || "context"}:${index + 1}`,
       type: normalizeText(node.type) || "context",
       title: normalizeText(node.title) || "未命名节点"
     }));
@@ -150,7 +171,10 @@ export function createStarMapView(contextMap = {}) {
     nodes.filter((node) => ["problem", "decision"].includes(node.type)),
     (left, right) => {
       const priority = { problem: 0, decision: 1 };
-      return priority[left.type] - priority[right.type] || left.id.localeCompare(right.id);
+      return (
+        priority[left.type] - priority[right.type] ||
+        left.id.localeCompare(right.id)
+      );
     }
   );
   const execution = orderExecutionNodes(nodes, sourceEdges);
@@ -171,14 +195,16 @@ export function createStarMapView(contextMap = {}) {
   );
   const laidOut = [
     ...(project
-      ? [{
-          ...project,
-          layer: "core",
-          orbit: 0,
-          size: NODE_SIZES.project,
-          x: CENTER.x,
-          y: CENTER.y
-        }]
+      ? [
+          {
+            ...project,
+            layer: "core",
+            orbit: 0,
+            size: NODE_SIZES.project,
+            x: CENTER.x,
+            y: CENTER.y
+          }
+        ]
       : []),
     ...positionRing(
       understanding,
@@ -221,6 +247,55 @@ export function createStarMapView(contextMap = {}) {
   });
 }
 
+export function createStarMapFocusState(contextMap = {}, selectedId = "") {
+  const view = createStarMapView(contextMap);
+
+  if (view.nodes.length === 0) {
+    return Object.freeze({
+      selectedId: "",
+      nodes: Object.freeze({}),
+      edges: Object.freeze([])
+    });
+  }
+
+  const supportedIds = new Set(view.nodes.map((node) => node.id));
+  const fallbackId =
+    view.nodes.find((node) => node.type === "project")?.id ?? view.nodes[0].id;
+  const activeId = supportedIds.has(selectedId) ? selectedId : fallbackId;
+  const relatedIds = new Set([activeId]);
+
+  view.edges.forEach((edge) => {
+    if (edge.from === activeId) {
+      relatedIds.add(edge.to);
+    }
+
+    if (edge.to === activeId) {
+      relatedIds.add(edge.from);
+    }
+  });
+
+  return Object.freeze({
+    selectedId: activeId,
+    nodes: Object.freeze(
+      Object.fromEntries(
+        view.nodes.map((node) => [
+          node.id,
+          node.id === activeId
+            ? "selected"
+            : relatedIds.has(node.id)
+              ? "related"
+              : "dimmed"
+        ])
+      )
+    ),
+    edges: Object.freeze(
+      view.edges.map((edge) =>
+        edge.from === activeId || edge.to === activeId ? "related" : "quiet"
+      )
+    )
+  });
+}
+
 function shortLabel(value, maximum = 12) {
   const characters = Array.from(normalizeText(value));
   return characters.length > maximum
@@ -228,30 +303,39 @@ function shortLabel(value, maximum = 12) {
     : characters.join("");
 }
 
-function renderOrbit(radius, label) {
+function renderOrbit(radius, { key, title }) {
   return `
-    <circle
-      class="star-map-orbit"
-      cx="${CENTER.x}"
-      cy="${CENTER.y}"
-      r="${radius}"
-      aria-hidden="true"
-    />
-    <text
-      class="star-map-orbit-label"
-      x="${CENTER.x + radius - 8}"
-      y="${CENTER.y - 8}"
-      text-anchor="end"
-    >${escapeMarkup(label)}</text>
+    <g class="star-map-orbit-group" data-orbit="${escapeMarkup(key)}">
+      <circle
+        class="star-map-orbit"
+        cx="${CENTER.x}"
+        cy="${CENTER.y}"
+        r="${radius}"
+        aria-hidden="true"
+      />
+      <text
+        class="star-map-orbit-label"
+        x="${CENTER.x + radius - 8}"
+        y="${CENTER.y - 8}"
+        text-anchor="end"
+      >${escapeMarkup(title)}</text>
+    </g>
   `;
 }
 
-function renderEdge(edge) {
+function renderEdge(edge, index, focusState = "default") {
   const labelX = Number(((edge.x1 + edge.x2) / 2).toFixed(2));
   const labelY = Number(((edge.y1 + edge.y2) / 2).toFixed(2));
+  const strength = RELATION_STRENGTH[edge.relation] ?? "secondary";
 
   return `
-    <g class="star-map-edge" data-relation="${escapeMarkup(edge.relation)}">
+    <g
+      class="star-map-edge"
+      data-edge-index="${index}"
+      data-relation="${escapeMarkup(edge.relation)}"
+      data-strength="${escapeMarkup(strength)}"
+      data-focus-state="${escapeMarkup(focusState)}"
+    >
       <line
         x1="${edge.x1}"
         y1="${edge.y1}"
@@ -259,14 +343,17 @@ function renderEdge(edge) {
         y2="${edge.y2}"
         marker-end="url(#star-map-arrow)"
       />
-      <text x="${labelX}" y="${labelY}">${escapeMarkup(edge.relation)}</text>
+      <text x="${labelX}" y="${labelY}">${escapeMarkup(
+        RELATION_LABELS[edge.relation] ?? edge.relation
+      )}</text>
     </g>
   `;
 }
 
-function renderNode(node, selected) {
+function renderNode(node, focusState = "default") {
   const label = shortLabel(node.title);
   const typeLabel = TYPE_LABELS[node.type] ?? "上下文";
+  const selected = focusState === "selected";
 
   return `
     <g
@@ -274,6 +361,8 @@ function renderNode(node, selected) {
       data-star-node-id="${escapeMarkup(node.id)}"
       data-node-type="${escapeMarkup(node.type)}"
       data-layer="${escapeMarkup(node.layer)}"
+      data-status="${escapeMarkup(normalizeText(node.status) || "unknown")}"
+      data-focus-state="${escapeMarkup(focusState)}"
       transform="translate(${node.x} ${node.y})"
       role="button"
       tabindex="0"
@@ -282,7 +371,12 @@ function renderNode(node, selected) {
       aria-pressed="${selected}"
     >
       <title>${escapeMarkup(`${typeLabel}：${node.title}`)}</title>
-      <circle r="${node.size}" />
+      ${
+        node.type === "project"
+          ? '<circle class="star-map-project-halo" r="68" aria-hidden="true" />'
+          : ""
+      }
+      <circle class="star-map-node-body" r="${node.size}" />
       <text class="star-map-node-type" y="-4" text-anchor="middle">${escapeMarkup(typeLabel)}</text>
       <text class="star-map-node-label" y="${node.size + 17}" text-anchor="middle">${escapeMarkup(label)}</text>
       ${
@@ -295,26 +389,94 @@ function renderNode(node, selected) {
 }
 
 function renderSemanticOutline(nodes) {
+  const groups = ["core", "understanding", "execution", "growth", "context"]
+    .map((layer) => ({
+      layer,
+      nodes: nodes.filter((node) => node.layer === layer)
+    }))
+    .filter((group) => group.nodes.length > 0);
+  let itemIndex = 0;
+
   return `
-    <ol class="star-map-outline" aria-label="项目星图语义结构">
-      ${nodes
+    <div class="star-map-outline" aria-label="项目星图语义结构">
+      ${groups
         .map(
-          (node, index) => `
-            <li>
-              <button
-                type="button"
-                data-star-node-id="${escapeMarkup(node.id)}"
-                aria-controls="star-map-detail"
-                aria-pressed="${index === 0}"
-              >
-                <span>${escapeMarkup(TYPE_LABELS[node.type] ?? "上下文")}</span>
-                <strong>${escapeMarkup(node.title)}</strong>
-              </button>
-            </li>
+          (group) => `
+            <section class="star-map-outline-group" data-layer="${escapeMarkup(group.layer)}">
+              <h4>${escapeMarkup(LAYER_LABELS[group.layer])}</h4>
+              <ol>
+                ${group.nodes
+                  .map((node) => {
+                    const selected = itemIndex === 0;
+                    itemIndex += 1;
+
+                    return `
+                      <li>
+                        <button
+                          type="button"
+                          data-star-node-id="${escapeMarkup(node.id)}"
+                          aria-controls="star-map-detail"
+                          aria-pressed="${selected}"
+                        >
+                          <span>${escapeMarkup(TYPE_LABELS[node.type] ?? "上下文")}</span>
+                          <strong>${escapeMarkup(node.title)}</strong>
+                          ${
+                            node.status
+                              ? `<small>${escapeMarkup(node.status)}</small>`
+                              : ""
+                          }
+                        </button>
+                      </li>
+                    `;
+                  })
+                  .join("")}
+              </ol>
+            </section>
           `
         )
         .join("")}
-    </ol>
+    </div>
+  `;
+}
+
+function relatedEdges(nodeId, edges) {
+  return edges.filter((edge) => edge.from === nodeId || edge.to === nodeId);
+}
+
+function renderStarMapDetail(node, nodes, edges) {
+  const nodesById = new Map(nodes.map((item) => [item.id, item]));
+  const relationships = relatedEdges(node?.id, edges);
+
+  return `
+    ${renderContextNodeDetail(node)}
+    <section class="star-map-detail-relations" aria-label="节点关系">
+      <h5>关联关系</h5>
+      ${
+        relationships.length === 0
+          ? '<p class="project-space-empty">暂无关联关系。</p>'
+          : `
+            <ul>
+              ${relationships
+                .map((edge) => {
+                  const outgoing = edge.from === node.id;
+                  const related = nodesById.get(outgoing ? edge.to : edge.from);
+                  const direction = outgoing ? "指向" : "来自";
+
+                  return `
+                    <li>
+                      <span>${escapeMarkup(direction)}</span>
+                      <strong>${escapeMarkup(
+                        RELATION_LABELS[edge.relation] ?? edge.relation
+                      )}</strong>
+                      <span>${escapeMarkup(related?.title ?? "未知节点")}</span>
+                    </li>
+                  `;
+                })
+                .join("")}
+            </ul>
+          `
+      }
+    </section>
   `;
 }
 
@@ -330,6 +492,10 @@ export function renderStarMap(contextMap = {}) {
       </section>
     `;
   }
+
+  const projectId =
+    view.nodes.find((node) => node.type === "project")?.id ?? view.nodes[0].id;
+  const initialFocus = createStarMapFocusState(contextMap, projectId);
 
   return `
     <section class="star-map" aria-labelledby="star-map-title">
@@ -363,11 +529,26 @@ export function renderStarMap(contextMap = {}) {
                 <path d="M 0 0 L 8 4 L 0 8 z" />
               </marker>
             </defs>
-            ${renderOrbit(ORBITS.understanding, "理解")}
-            ${renderOrbit(ORBITS.execution, "执行")}
-            ${renderOrbit(ORBITS.growth, "成长")}
-            ${view.edges.map(renderEdge).join("")}
-            ${view.nodes.map((node, index) => renderNode(node, index === 0)).join("")}
+            ${renderOrbit(ORBITS.understanding, {
+              key: "understanding",
+              title: "理解 · 为什么开始"
+            })}
+            ${renderOrbit(ORBITS.execution, {
+              key: "execution",
+              title: "执行 · 如何推进"
+            })}
+            ${renderOrbit(ORBITS.growth, {
+              key: "growth",
+              title: "成长 · 如何变化"
+            })}
+            ${view.edges
+              .map((edge, index) =>
+                renderEdge(edge, index, initialFocus.edges[index])
+              )
+              .join("")}
+            ${view.nodes
+              .map((node) => renderNode(node, initialFocus.nodes[node.id]))
+              .join("")}
           </svg>
           ${renderSemanticOutline(view.nodes)}
         </div>
@@ -377,7 +558,11 @@ export function renderStarMap(contextMap = {}) {
           data-star-map-detail
           aria-live="polite"
         >
-          ${renderContextNodeDetail(view.nodes[0])}
+          ${renderStarMapDetail(
+            view.nodes.find((node) => node.id === initialFocus.selectedId),
+            view.nodes,
+            view.edges
+          )}
         </aside>
       </div>
     </section>
@@ -385,40 +570,85 @@ export function renderStarMap(contextMap = {}) {
 }
 
 export function bindStarMapInteractions(container, contextMap = {}) {
-  const nodes = normalizedNodes(contextMap);
-  const nodesById = new Map(nodes.map((node) => [node.id, node]));
+  const view = createStarMapView(contextMap);
+  const nodesById = new Map(view.nodes.map((node) => [node.id, node]));
   const detail = container?.querySelector?.("[data-star-map-detail]");
   const controls = [
     ...(container?.querySelectorAll?.("[data-star-node-id]") ?? [])
   ];
+  const visualNodes = [
+    ...(container?.querySelectorAll?.(
+      ".star-map-node[data-star-node-id]"
+    ) ?? [])
+  ];
+  const visualEdges = [
+    ...(container?.querySelectorAll?.(
+      ".star-map-edge[data-edge-index]"
+    ) ?? [])
+  ];
 
-  if (!detail || controls.length === 0) {
+  if (!detail || controls.length === 0 || view.nodes.length === 0) {
     return;
   }
 
-  const selectNode = (control) => {
-    const node = nodesById.get(String(control.dataset.starNodeId ?? ""));
+  let selectedId =
+    view.nodes.find((node) => node.type === "project")?.id ?? view.nodes[0].id;
+
+  const applyFocus = (nodeId, { commit = false, preview = false } = {}) => {
+    const node = nodesById.get(String(nodeId ?? ""));
 
     if (!node) {
       return;
     }
 
-    controls.forEach((item) => item.setAttribute("aria-pressed", "false"));
-    controls
-      .filter((item) => item.dataset.starNodeId === node.id)
-      .forEach((item) => item.setAttribute("aria-pressed", "true"));
-    detail.innerHTML = renderContextNodeDetail(node);
+    if (commit) {
+      selectedId = node.id;
+    }
+
+    const focus = createStarMapFocusState(contextMap, node.id);
+    controls.forEach((item) =>
+      item.setAttribute(
+        "aria-pressed",
+        String(item.dataset.starNodeId === selectedId)
+      )
+    );
+    visualNodes.forEach((item) => {
+      const itemId = String(item.dataset.starNodeId ?? "");
+      const state = focus.nodes[itemId] ?? "dimmed";
+      item.setAttribute(
+        "data-focus-state",
+        preview && itemId === node.id ? "hovered" : state
+      );
+    });
+    visualEdges.forEach((item) => {
+      const index = Number(item.dataset.edgeIndex);
+      item.setAttribute("data-focus-state", focus.edges[index] ?? "quiet");
+    });
+
+    if (commit) {
+      detail.innerHTML = renderStarMapDetail(node, view.nodes, view.edges);
+    }
+  };
+
+  const restoreSelection = () => {
+    applyFocus(selectedId);
   };
 
   controls.forEach((control) => {
-    control.addEventListener("click", () => selectNode(control));
+    control.addEventListener("click", () =>
+      applyFocus(control.dataset.starNodeId, { commit: true })
+    );
     control.addEventListener("keydown", (event) => {
       if (!["Enter", " "].includes(event.key)) {
         return;
       }
 
       event.preventDefault();
-      selectNode(control);
+      applyFocus(control.dataset.starNodeId, { commit: true });
     });
+    control.addEventListener("pointerenter", () =>
+      applyFocus(control.dataset.starNodeId, { preview: true })
+    );
+    control.addEventListener("pointerleave", restoreSelection);
   });
 }
