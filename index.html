@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Nexus AI 静态产品 Demo：从项目理解到 Context Map 与 Star Map。"
+    />
+    <title>Nexus AI · Demo Experience</title>
+    <link rel="stylesheet" href="./frontend/style.css" />
+    <link rel="stylesheet" href="./demo.css" />
+  </head>
+  <body class="demo-body">
+    <header class="demo-nav" aria-label="Nexus Demo 导航">
+      <a class="demo-brand" href="#top" aria-label="返回 Nexus Demo 顶部">
+        <span class="demo-brand-mark" aria-hidden="true"></span>
+        <span>Nexus AI</span>
+      </a>
+      <div class="demo-nav-actions">
+        <span class="demo-status">Static Demo · No API</span>
+        <button id="demo-theme-toggle" class="theme-toggle" type="button">
+          切换至静谧深空
+        </button>
+      </div>
+    </header>
+
+    <main id="top" class="demo-shell">
+      <section class="demo-hero" aria-labelledby="demo-title">
+        <div class="demo-hero-copy">
+          <p class="eyebrow">Nexus AI · Demo Experience v0.1</p>
+          <h1 id="demo-title">Connect ideas,<br /><span>create possibilities.</span></h1>
+          <p>
+            Nexus 不是一次性回答问题的聊天窗口，而是把项目理解、关键决策、推进路径和成长记录连接起来的认知空间。
+          </p>
+          <div class="demo-hero-actions">
+            <a class="demo-primary-action" href="#project-space">探索项目空间</a>
+            <span>校园环保创新项目 · 静态案例</span>
+          </div>
+        </div>
+
+        <aside class="demo-orientation" aria-label="Nexus 能力路径">
+          <p class="section-kicker">From Idea to Execution</p>
+          <ol>
+            <li><span>01</span><div><strong>Understand</strong><small>理解问题与目标</small></div></li>
+            <li><span>02</span><div><strong>Connect</strong><small>连接决策与依据</small></div></li>
+            <li><span>03</span><div><strong>Navigate</strong><small>形成阶段与行动</small></div></li>
+          </ol>
+        </aside>
+      </section>
+
+      <section class="demo-case-note" aria-label="Demo 说明">
+        <div>
+          <span>CASE 01</span>
+          <strong>校园低碳循环计划</strong>
+        </div>
+        <p>本页面使用预设静态数据，仅展示 Nexus 的 Experience 与 Visual Layer，不调用 Worker 或模型 API。</p>
+      </section>
+
+      <section id="project-space" class="demo-project-space" aria-label="校园环保项目空间">
+        <div id="demo-project-space" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <footer class="demo-footer">
+      <p>Nexus AI · Context over Chat · Human Decision First</p>
+      <a href="#top">返回顶部</a>
+    </footer>
+
+    <script type="module" src="./demo.js"></script>
+  </body>
+</html>
