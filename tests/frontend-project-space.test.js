@@ -47,7 +47,7 @@ test("Project Space renders Experience output without changing it", () => {
   const before = structuredClone(experience);
   const html = renderProjectSpace(experience);
 
-  assert.match(html, /项目认知空间/);
+  assert.match(html, /Read-only Context Workspace/);
   assert.match(html, /校园环保项目/);
   assert.match(html, /Explore/);
   assert.match(html, /完成 20 份用户访谈/);
@@ -101,7 +101,7 @@ test("Frontend entry includes Project Space and both theme foundations", () => {
   assert.match(css, /--accent:/);
   assert.match(css, /--node:/);
   assert.match(css, /:root\[data-theme="dark"\]/);
-  assert.match(css, /\.project-space-layout/);
+  assert.match(css, /\.project-workspace-shell/);
   assert.match(css, /\.journey-track/);
   assert.match(css, /\.action-navigator/);
 });

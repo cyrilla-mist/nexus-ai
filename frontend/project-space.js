@@ -1,9 +1,26 @@
+import { renderContextMap } from "./context-map.js";
 import { renderStarMap } from "./star-map.js";
 
 const THEME_NAMES = Object.freeze({
   light: "晨雾星图",
   dark: "静谧深空"
 });
+
+const STAGE_OBJECTIVES = Object.freeze({
+  Idea: "明确想法",
+  Explore: "验证需求",
+  Design: "形成方案",
+  Validate: "验证可行",
+  Execute: "推进落地"
+});
+
+const SPACE_NAVIGATION = Object.freeze([
+  Object.freeze({ id: "overview", index: "01", label: "Overview", hint: "项目概览" }),
+  Object.freeze({ id: "journey", index: "02", label: "Journey", hint: "成长路径" }),
+  Object.freeze({ id: "context", index: "03", label: "Context", hint: "项目关系" }),
+  Object.freeze({ id: "universe", index: "04", label: "Universe", hint: "项目宇宙" }),
+  Object.freeze({ id: "action", index: "05", label: "Action", hint: "下一步" })
+]);
 
 function isPlainObject(value) {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -37,12 +54,10 @@ function renderOverview(overview) {
           ${escapeHtml(displayText(overview.stage, "Idea"))}
         </span>
       </div>
-      <p class="project-summary">${escapeHtml(
-        displayText(overview.summary)
-      )}</p>
+      <p class="project-summary">${escapeHtml(displayText(overview.summary))}</p>
       <dl class="project-overview-details">
         <div>
-          <dt>项目目标</dt>
+          <dt>核心目标</dt>
           <dd>${escapeHtml(displayText(overview.goal))}</dd>
         </div>
         <div>
@@ -50,6 +65,9 @@ function renderOverview(overview) {
           <dd>${escapeHtml(displayText(overview.description))}</dd>
         </div>
       </dl>
+      <p class="project-overview-note">
+        Nexus 以当前确认的 Context 组织本空间；未知信息保持可见，不会被自动补全。
+      </p>
     </section>
   `;
 }
@@ -61,7 +79,7 @@ function renderJourney(journey) {
     return `
       <section class="project-journey" aria-labelledby="project-journey-title">
         <p class="section-kicker">Project Journey</p>
-        <h3 id="project-journey-title">项目成长路径</h3>
+        <h3 id="project-journey-title">项目成长轨迹</h3>
         <p class="project-space-empty">暂无可显示的项目阶段。</p>
       </section>
     `;
@@ -69,21 +87,25 @@ function renderJourney(journey) {
 
   return `
     <section class="project-journey" aria-labelledby="project-journey-title">
-      <p class="section-kicker">Project Journey</p>
-      <h3 id="project-journey-title">项目成长路径</h3>
+      <div class="space-view-heading">
+        <div>
+          <p class="section-kicker">Project Journey</p>
+          <h3 id="project-journey-title">项目成长轨迹</h3>
+        </div>
+        <p>阶段来自当前项目状态；计划不会自动推进项目。</p>
+      </div>
       <ol class="journey-track" aria-label="项目成长路径">
         ${stages
           .map((stage, index) => {
+            const name = displayText(stage?.name, `阶段 ${index + 1}`);
             const status = displayText(stage?.status, "not_started");
-            const currentAttribute =
-              status === "current" ? ' aria-current="step"' : "";
+            const currentAttribute = status === "current" ? ' aria-current="step"' : "";
 
             return `
               <li data-state="${escapeHtml(status)}"${currentAttribute}>
                 <span class="journey-node" aria-hidden="true">${index + 1}</span>
-                <span class="journey-label">${escapeHtml(
-                  displayText(stage?.name, `阶段 ${index + 1}`)
-                )}</span>
+                <span class="journey-label">${escapeHtml(name)}</span>
+                <small>${escapeHtml(STAGE_OBJECTIVES[name] ?? "等待项目上下文")}</small>
               </li>
             `;
           })
@@ -94,25 +116,27 @@ function renderJourney(journey) {
 }
 
 function renderActionNavigator(actionNavigator) {
-  const actions = Array.isArray(actionNavigator.actions)
-    ? actionNavigator.actions
-    : [];
+  const actions = Array.isArray(actionNavigator.actions) ? actionNavigator.actions : [];
   const primaryAction = isPlainObject(actions[0]) ? actions[0] : {};
+  const actionStatus = displayText(primaryAction.status, "proposal");
 
   return `
     <section class="action-navigator" aria-labelledby="action-navigator-title">
-      <p class="section-kicker">Action Navigator</p>
-      <h3 id="action-navigator-title">当前行动方向</h3>
+      <div class="space-view-heading">
+        <div>
+          <p class="section-kicker">Action Navigator</p>
+          <h3 id="action-navigator-title">当前行动中心</h3>
+        </div>
+        <span class="action-state">${escapeHtml(actionStatus)}</span>
+      </div>
+      <div class="action-focus">
+        <p class="action-focus-label">Next meaningful action</p>
+        <h4>${escapeHtml(displayText(primaryAction.title, "等待进一步确认"))}</h4>
+      </div>
       <dl class="action-details">
         <div>
           <dt>当前目标</dt>
           <dd>${escapeHtml(displayText(actionNavigator.goal))}</dd>
-        </div>
-        <div>
-          <dt>下一步行动</dt>
-          <dd>${escapeHtml(
-            displayText(primaryAction.title, "等待进一步确认")
-          )}</dd>
         </div>
         <div>
           <dt>为什么现在做</dt>
@@ -121,13 +145,53 @@ function renderActionNavigator(actionNavigator) {
         <div>
           <dt>完成标准</dt>
           <dd>${escapeHtml(
-            displayText(
-              primaryAction.criteria,
-              displayText(actionNavigator.criteria)
-            )
+            displayText(primaryAction.criteria, displayText(actionNavigator.criteria))
           )}</dd>
         </div>
       </dl>
+    </section>
+  `;
+}
+
+function renderNavigation() {
+  return SPACE_NAVIGATION.map(
+    (item) => `
+      <label class="project-space-nav-item" for="project-space-tab-${item.id}" data-space-target="${item.id}">
+        <span class="project-space-nav-index" aria-hidden="true">${item.index}</span>
+        <span class="project-space-nav-copy">
+          <strong>${item.label}</strong>
+          <small>${item.hint}</small>
+        </span>
+      </label>
+    `
+  ).join("");
+}
+
+function renderTabControls() {
+  return SPACE_NAVIGATION.map(
+    (item, index) => `
+      <input
+        class="project-space-tab-control"
+        type="radio"
+        name="project-space-view"
+        id="project-space-tab-${item.id}"
+        aria-controls="project-space-panel-${item.id}"
+        aria-label="${item.label} · ${item.hint}"
+        ${index === 0 ? "checked" : ""}
+      />
+    `
+  ).join("");
+}
+
+function renderPanel(id, label, content) {
+  return `
+    <section
+      class="project-space-panel"
+      id="project-space-panel-${id}"
+      data-space-panel="${id}"
+      aria-label="${label}"
+    >
+      ${content}
     </section>
   `;
 }
@@ -146,18 +210,47 @@ export function renderProjectSpace(experience = {}) {
   const actionNavigator = isPlainObject(normalized.actionNavigator)
     ? normalized.actionNavigator
     : {};
+  const title = displayText(overview.title, "未命名项目");
+  const stage = displayText(overview.stage, "Idea");
 
   return `
     <section class="project-space" aria-labelledby="project-space-title">
-      <header class="project-space-intro">
-        <p class="eyebrow">Nexus Project Space</p>
-        <h2 id="project-space-title">项目认知空间</h2>
+      <header class="project-space-app-header">
+        <div class="project-space-identity">
+          <p class="eyebrow">Nexus Project Space</p>
+          <div>
+            <h2 id="project-space-title">${escapeHtml(title)}</h2>
+            <span class="project-space-stage">${escapeHtml(stage)}</span>
+          </div>
+        </div>
+        <p class="project-space-context-status">
+          <span aria-hidden="true"></span>
+          Read-only Context Workspace
+        </p>
       </header>
-      <div class="project-space-layout">
-        ${renderOverview(overview)}
-        ${renderStarMap(contextMap)}
-        ${renderJourney(journey)}
-        ${renderActionNavigator(actionNavigator)}
+
+      <div class="project-workspace-shell">
+        ${renderTabControls()}
+        <nav class="project-space-sidebar" aria-label="Project Space 导航">
+          <div class="project-space-sidebar-heading">
+            <span>Project views</span>
+            <strong>${escapeHtml(stage)}</strong>
+          </div>
+          <div class="project-space-navigation">
+            ${renderNavigation()}
+          </div>
+          <p class="project-space-sidebar-note">
+            Space over Page<br />Context over Content
+          </p>
+        </nav>
+
+        <main class="project-space-main" tabindex="-1">
+          ${renderPanel("overview", "Project Overview", renderOverview(overview))}
+          ${renderPanel("journey", "Project Journey", renderJourney(journey))}
+          ${renderPanel("context", "Context Space", renderContextMap(contextMap))}
+          ${renderPanel("universe", "Project Universe", renderStarMap(contextMap))}
+          ${renderPanel("action", "Action Navigator", renderActionNavigator(actionNavigator))}
+        </main>
       </div>
     </section>
   `;

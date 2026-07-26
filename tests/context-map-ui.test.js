@@ -134,7 +134,7 @@ test("Context Map rendering and interaction binding are read-only", () => {
   assert.deepEqual(contextMap, before);
 });
 
-test("Project Space places Star Map between Overview and Journey", () => {
+test("Project Space migrates Context and Star Map into separate workspace views", () => {
   const html = renderProjectSpace({
     projectOverview: { title: "校园环保项目" },
     contextMap: sampleMap(),
@@ -142,12 +142,18 @@ test("Project Space places Star Map between Overview and Journey", () => {
     actionNavigator: {}
   });
 
-  const overviewIndex = html.indexOf("project-overview");
-  const mapIndex = html.indexOf("star-map");
-  const journeyIndex = html.indexOf("project-journey");
+  const overviewIndex = html.indexOf('data-space-panel="overview"');
+  const journeyIndex = html.indexOf('data-space-panel="journey"');
+  const contextIndex = html.indexOf('data-space-panel="context"');
+  const universeIndex = html.indexOf('data-space-panel="universe"');
+  const actionIndex = html.indexOf('data-space-panel="action"');
 
-  assert.ok(overviewIndex < mapIndex);
-  assert.ok(mapIndex < journeyIndex);
+  assert.ok(overviewIndex < journeyIndex);
+  assert.ok(journeyIndex < contextIndex);
+  assert.ok(contextIndex < universeIndex);
+  assert.ok(universeIndex < actionIndex);
+  assert.match(html, /项目关系地图/);
+  assert.match(html, /项目宇宙/);
 });
 
 test("Frontend entry binds Star Map interaction and responsive styles", () => {
