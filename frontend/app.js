@@ -105,6 +105,7 @@ function restoreSession() {
 
     sessionState = {
       initialMessage: String(stored.initialMessage ?? ""),
+      projectId: stored.projectId ? String(stored.projectId) : null,
       currentAnalysis: stored.currentAnalysis ?? null,
       clarificationAnswers: Array.isArray(stored.clarificationAnswers)
         ? stored.clarificationAnswers

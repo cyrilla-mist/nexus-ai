@@ -1,6 +1,7 @@
 import { runProjectAtlas } from "../atlas/project-atlas/index.js";
 import { createProjectMemoryCandidates } from "../memory/memory-candidate.js";
 import { normalizeMemory, updateProjectMemory } from "../memory/memory.js";
+import { MEMORY_TYPES } from "../memory/schema.js";
 import { reflectOnResult } from "./reflection.js";
 import { detectIntent, listAvailableAtlases, selectAtlas } from "./router.js";
 
@@ -41,6 +42,53 @@ async function retrieveMemoryContext(memoryManager, query) {
   }
 
   return memoryManager.retrieveContext(query);
+}
+
+function ensureProjectMemory({
+  memoryManager,
+  projectId,
+  message,
+  reflection
+}) {
+  const normalizedProjectId = String(projectId ?? "").trim();
+
+  if (normalizedProjectId) {
+    return {
+      projectId: normalizedProjectId,
+      created: false
+    };
+  }
+
+  if (
+    !memoryManager ||
+    typeof memoryManager.create !== "function" ||
+    reflection?.passed !== true
+  ) {
+    return {
+      projectId: null,
+      created: false
+    };
+  }
+
+  try {
+    const memory = memoryManager.create({
+      type: MEMORY_TYPES.PROJECT,
+      data: {
+        title: String(message ?? "").trim()
+      }
+    });
+
+    return {
+      projectId: memory.id,
+      created: true
+    };
+  } catch (error) {
+    return {
+      projectId: null,
+      created: false,
+      error: error instanceof Error ? error.message : String(error)
+    };
+  }
 }
 
 function updateProjectMemoryContext({
@@ -164,16 +212,27 @@ export async function runNexusCore(payload = {}, runtime = {}) {
   }
 
   const reflection = reflectOnResult(atlasResult);
-  const memoryUpdate = updateProjectMemoryContext({
+  const memoryTarget = ensureProjectMemory({
     memoryManager: runtime.memoryManager,
     projectId: payload.context?.projectId,
-    atlasResult,
-    reflection,
-    context: {
-      ...(payload.context ?? {}),
-      memoryContext
-    }
+    message,
+    reflection
   });
+  const memoryUpdate = {
+    ...updateProjectMemoryContext({
+      memoryManager: runtime.memoryManager,
+      projectId: memoryTarget.projectId,
+      atlasResult,
+      reflection,
+      context: {
+        ...(payload.context ?? {}),
+        memoryContext
+      }
+    }),
+    projectId: memoryTarget.projectId,
+    created: memoryTarget.created,
+    ...(memoryTarget.error ? { error: memoryTarget.error } : {})
+  };
   const updatedMemory = updateProjectMemory(memory, {
     summary: atlasResult.ideaProfile?.summary ?? memory.project.summary,
     stage: atlasResult.currentStage ?? memory.project.stage,

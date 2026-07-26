@@ -1,6 +1,7 @@
 export function createEmptySessionState() {
   return {
     initialMessage: "",
+    projectId: null,
     currentAnalysis: null,
     clarificationAnswers: [],
     pendingAnswers: [],
@@ -55,6 +56,9 @@ export function stagePendingAnswers(sessionState, pendingAnswers) {
 
 export function buildClarificationContext(sessionState, turn) {
   return {
+    ...(sessionState.projectId
+      ? { projectId: String(sessionState.projectId) }
+      : {}),
     clarificationAnswers: mergeClarificationAnswers(
       sessionState.clarificationAnswers,
       sessionState.pendingAnswers
@@ -72,6 +76,8 @@ export function commitAnalysisResult(sessionState, data, fallbackTurn = 1) {
       sessionState.pendingAnswers
     ),
     pendingAnswers: [],
+    projectId:
+      data.memoryUpdate?.projectId ?? sessionState.projectId ?? null,
     currentAnalysis: data.response,
     turn: data.response?.turn ?? fallbackTurn,
     lastResult: data

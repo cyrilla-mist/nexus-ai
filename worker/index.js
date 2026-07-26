@@ -1,4 +1,10 @@
 import { runNexusCore } from "../core/nexus-core.js";
+import { MemoryManager } from "../memory/memory-manager.js";
+import { MemoryStore } from "../memory/memory-store.js";
+
+const memoryManager = new MemoryManager({
+  store: new MemoryStore()
+});
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -139,6 +145,7 @@ export default {
 
       try {
         const result = await runNexusCore(payload, {
+          memoryManager,
           model: {
             apiKey: env.DEEPSEEK_API_KEY
           }

@@ -28,6 +28,7 @@ test("failed second turn keeps pending answers and retry commits them once", () 
   const initialState = {
     ...createEmptySessionState(),
     initialMessage: "做一个大学生学习任务管理工具。",
+    projectId: "project-memory-1",
     currentAnalysis: previousResult.response,
     clarificationAnswers: [confirmedAnswer],
     turn: 1,
@@ -40,6 +41,7 @@ test("failed second turn keeps pending answers and retry commits them once", () 
   assert.equal(failedState.clarificationAnswers.length, 1);
   assert.deepEqual(failedState.pendingAnswers, retryBatch);
   assert.equal(failedState.lastResult, previousResult);
+  assert.equal(firstAttempt.projectId, "project-memory-1");
   assert.equal(firstAttempt.clarificationAnswers.length, 3);
 
   const retryState = stagePendingAnswers(failedState, retryBatch);
@@ -49,6 +51,9 @@ test("failed second turn keeps pending answers and retry commits them once", () 
 
   const successfulResult = {
     ok: true,
+    memoryUpdate: {
+      projectId: "project-memory-1"
+    },
     response: {
       turn: 2,
       ideaProfile: { summary: "已结合澄清回答更新" },
@@ -70,5 +75,6 @@ test("failed second turn keeps pending answers and retry commits them once", () 
     1
   );
   assert.equal(committedState.turn, 2);
+  assert.equal(committedState.projectId, "project-memory-1");
   assert.equal(committedState.lastResult, successfulResult);
 });
