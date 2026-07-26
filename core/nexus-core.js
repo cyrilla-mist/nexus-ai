@@ -1,4 +1,5 @@
 import { runProjectAtlas } from "../atlas/project-atlas/index.js";
+import { createProjectMemoryCandidates } from "../memory/memory-candidate.js";
 import { normalizeMemory, updateProjectMemory } from "../memory/memory.js";
 import { reflectOnResult } from "./reflection.js";
 import { detectIntent, listAvailableAtlases, selectAtlas } from "./router.js";
@@ -40,6 +41,62 @@ async function retrieveMemoryContext(memoryManager, query) {
   }
 
   return memoryManager.retrieveContext(query);
+}
+
+function updateProjectMemoryContext({
+  memoryManager,
+  projectId,
+  atlasResult,
+  reflection,
+  context
+}) {
+  if (
+    !memoryManager ||
+    typeof memoryManager.updateMemoryFromCandidate !== "function"
+  ) {
+    return {
+      attempted: 0,
+      applied: 0,
+      rejected: 0,
+      results: []
+    };
+  }
+
+  const candidates = createProjectMemoryCandidates({
+    projectId,
+    atlasResult,
+    reflection,
+    context
+  });
+  const results = candidates.map((candidate) => {
+    try {
+      const result = memoryManager.updateMemoryFromCandidate(candidate);
+
+      return {
+        candidateId: candidate.candidateId,
+        category: candidate.category,
+        updated: result.updated,
+        allowed: result.policy.allowed,
+        reason: result.policy.reason
+      };
+    } catch (error) {
+      return {
+        candidateId: candidate.candidateId,
+        category: candidate.category,
+        updated: false,
+        allowed: false,
+        reason: "memory_update_failed",
+        error: error instanceof Error ? error.message : String(error)
+      };
+    }
+  });
+
+  return {
+    attempted: results.length,
+    applied: results.filter((result) => result.updated).length,
+    rejected: results.filter((result) => !result.allowed).length,
+    results
+  };
 }
 
 export async function runNexusCore(payload = {}, runtime = {}) {
@@ -107,6 +164,16 @@ export async function runNexusCore(payload = {}, runtime = {}) {
   }
 
   const reflection = reflectOnResult(atlasResult);
+  const memoryUpdate = updateProjectMemoryContext({
+    memoryManager: runtime.memoryManager,
+    projectId: payload.context?.projectId,
+    atlasResult,
+    reflection,
+    context: {
+      ...(payload.context ?? {}),
+      memoryContext
+    }
+  });
   const updatedMemory = updateProjectMemory(memory, {
     summary: atlasResult.ideaProfile?.summary ?? memory.project.summary,
     stage: atlasResult.currentStage ?? memory.project.stage,
@@ -123,6 +190,7 @@ export async function runNexusCore(payload = {}, runtime = {}) {
     },
     response: atlasResult,
     reflection,
+    memoryUpdate,
     memory: updatedMemory
   };
 }

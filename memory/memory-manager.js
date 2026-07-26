@@ -7,6 +7,7 @@ import {
   MemoryNotFoundError,
   MemoryStore
 } from "./memory-store.js";
+import { evaluateMemoryCandidate } from "./memory-policy.js";
 
 function defaultIdGenerator() {
   return globalThis.crypto.randomUUID();
@@ -94,6 +95,94 @@ export class MemoryManager {
 
     const updated = updateMemoryRecord(current, data, this.clock());
     return this.store.updateMemory(id, updated);
+  }
+
+  updateMemoryFromCandidate(candidate) {
+    const policy = evaluateMemoryCandidate(candidate);
+
+    if (!policy.allowed) {
+      return {
+        updated: false,
+        policy,
+        memory: null
+      };
+    }
+
+    const current = this.store.getMemory(candidate.recordId);
+
+    if (!current) {
+      throw new MemoryNotFoundError(candidate.recordId);
+    }
+
+    if (current.type !== MEMORY_TYPES.PROJECT) {
+      throw new TypeError(
+        "Memory Update Foundation only supports Project Memory."
+      );
+    }
+
+    const history = Array.isArray(current.data.history)
+      ? current.data.history
+      : [];
+    const alreadyApplied = history.some(
+      (entry) => entry?.candidateId === candidate.candidateId
+    );
+
+    if (alreadyApplied) {
+      return {
+        updated: false,
+        policy: {
+          allowed: true,
+          reason: "candidate_already_applied"
+        },
+        memory: current
+      };
+    }
+
+    const historyEntry = {
+      candidateId: candidate.candidateId,
+      category: candidate.category,
+      content: structuredClone(candidate.content),
+      source: candidate.source,
+      createdAt: candidate.createdAt ?? this.clock()
+    };
+    const dataPatch = {
+      history: [...history, historyEntry]
+    };
+
+    if (candidate.category === "decision") {
+      const content = candidate.content;
+      const question =
+        typeof content === "object" && content
+          ? String(content.question ?? "").trim()
+          : "";
+      const answer =
+        typeof content === "string"
+          ? content.trim()
+          : String(content.answer ?? content.statement ?? "").trim();
+
+      dataPatch.decisions = [
+        ...current.data.decisions,
+        {
+          candidateId: candidate.candidateId,
+          question,
+          answer,
+          source: candidate.source,
+          createdAt: historyEntry.createdAt
+        }
+      ];
+    }
+
+    if (candidate.category === "stage_change") {
+      dataPatch.stage = String(candidate.content.to ?? "").trim();
+    }
+
+    const memory = this.update(candidate.recordId, dataPatch);
+
+    return {
+      updated: true,
+      policy,
+      memory
+    };
   }
 
   list(type) {

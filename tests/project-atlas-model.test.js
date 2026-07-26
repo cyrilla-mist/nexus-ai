@@ -165,10 +165,15 @@ test("Nexus Core passes retrieved Project Memory to Project Atlas", async () => 
   assert.equal(memoryContext.projectMemory[0].data.stage, "Explore");
   assert.deepEqual(memoryContext.userMemory, []);
   assert.deepEqual(memoryContext.atlasMemory, []);
-  assert.deepEqual(
-    memoryManager.retrieve(projectMemory.id),
-    projectMemory
+  assert.equal(
+    memoryManager.retrieve(projectMemory.id).data.title,
+    projectMemory.data.title
   );
+  assert.equal(
+    memoryManager.retrieve(projectMemory.id).data.stage,
+    "Validate"
+  );
+  assert.equal(result.memoryUpdate.applied, 1);
   assert.equal(memoryManager.list().length, 1);
 });
 
