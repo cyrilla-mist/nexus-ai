@@ -11,6 +11,7 @@ import {
   getNodeTypeTextLayout,
   getNodeLabelPlacement,
   getNodeLabelPosition,
+  getNodeLabelBounds,
   getUniverseContentBounds,
   renderStarMap
 } from "../frontend/star-map.js";
@@ -131,7 +132,7 @@ test("Universe layout keeps wide spacing and avoids center-crossing edges", () =
   }
 
   assert.ok(view.edges.every((edge) => edge.crossesCore === false));
-  assert.ok(view.edges.find((edge) => edge.relation === "addresses").x1 >= view.nodes.find((node) => node.type === "project").x - 100);
+  assert.ok(view.edges.find((edge) => edge.relation === "addresses").x1 >= view.nodes.find((node) => node.type === "project").x - 120);
 });
 
 test("Project Core and semantic orbits preserve visual hierarchy", () => {
@@ -471,7 +472,7 @@ test("Desktop Project Universe uses large semantic spatial regions", () => {
 
   assert.equal(view.width, 1500);
   assert.equal(view.height, 940);
-  assert.equal(byType("project").size, 86);
+  assert.equal(byType("project").size, 106);
   assert.equal(byType("problem").x, 300);
   assert.equal(byType("decision").x, 1200);
   assert.equal(byType("milestone").y, 250);
@@ -524,7 +525,7 @@ test("Project Universe simplification keeps the default map quiet and focused", 
   assert.match(html, /universe-label-layer/);
   assert.match(html, /star-map-screen-label/);
   assert.match(html, /data-star-label-id="project:campus"/);
-  assert.match(html, /data-label-placement="below"/);
+  assert.match(html, /data-label-placement="core"/);
   assert.match(html, /star-map-node-glyph/);
   assert.doesNotMatch(html, /class="star-map-node-label"/);
   assert.match(html, /data-detail-state="closed"/);
@@ -533,8 +534,8 @@ test("Project Universe simplification keeps the default map quiet and focused", 
   assert.equal(Number.isFinite(projectLabel.top), true);
   assert.ok(projectLabel.left > 0 && projectLabel.left < 100);
   assert.ok(projectLabel.top > 0 && projectLabel.top < 100);
-  assert.equal(getNodeLabelPlacement(project), "below");
-  assert.equal(getNodeLabelPlacement(problem), "left");
+  assert.equal(getNodeLabelPlacement(project), "core");
+  assert.equal(getNodeLabelPlacement(problem), "above");
   assert.equal(getNodeLabelPlacement(decision), "right");
   assert.equal(getNodeLabelPlacement(milestone), "above");
   assert.equal(getNodeLabelPlacement(task), "below");
@@ -589,13 +590,15 @@ test("Project Universe uses full readable node type names inside nodes", () => {
 
   assert.deepEqual(getNodeTypeTextLayout("project"), [{ text: "\u9879\u76ee", y: 0 }]);
   assert.deepEqual(getNodeTypeTextLayout("milestone"), [
-    { text: "\u91cc\u7a0b", y: -8 },
-    { text: "\u7891", y: 8 }
+    { text: "\u91cc\u7a0b", y: -9 },
+    { text: "\u7891", y: 9 }
   ]);
   assert.match(html, /class="star-map-node-glyph" x="0" y="0" text-anchor="middle" dominant-baseline="middle"/);
-  assert.match(html, /<tspan x="0" y="-8" dominant-baseline="middle">\u91cc\u7a0b<\/tspan><tspan x="0" y="8" dominant-baseline="middle">\u7891<\/tspan>/);
+  assert.match(html, /<tspan x="0" y="-9" dominant-baseline="middle">\u91cc\u7a0b<\/tspan><tspan x="0" y="9" dominant-baseline="middle">\u7891<\/tspan>/);
   assert.match(css, /Nexus AI v0\.8\.14 Star Map Label Alignment Fix/);
   assert.match(css, /\.project-space-panel\[data-space-panel="universe"\] \.star-map-node-glyph[\s\S]*?dominant-baseline: middle/);
+  assert.match(css, /Nexus AI v0\.8\.15 Star Map Scale & Collision Fix/);
+  assert.match(css, /\.star-map-node\[data-node-type="project"\] \.star-map-node-glyph[\s\S]*?font-size: 18px/);
 });
 
 test("Project Universe labels use inward placement and safe area clamping", () => {
@@ -610,13 +613,12 @@ test("Project Universe labels use inward placement and safe area clamping", () =
   const decisionLabel = getNodeLabelPosition(decision, view.viewBox);
   const taskLabel = getNodeLabelPosition(task, view.viewBox);
 
-  assert.equal(getNodeLabelPlacement(problem), "left");
+  assert.equal(getNodeLabelPlacement(problem), "above");
   assert.equal(getNodeLabelPlacement(decision), "right");
   assert.equal(getNodeLabelPlacement(task), "below");
-  assert.equal(getNodeLabelPlacement(project), "below");
+  assert.equal(getNodeLabelPlacement(project), "core");
   assert.equal(getNodeLabelPlacement(progress), "above");
   assert.ok(problemLabel.left >= 6);
-  assert.ok(problemLabel.left >= 22);
   assert.ok(decisionLabel.left <= 58);
   assert.ok(taskLabel.top <= 91);
   assert.ok(taskLabel.top > 80);
@@ -641,6 +643,57 @@ test("Project Universe staggers task labels below the nodes", () => {
   assert.ok(labels.every((label) => label.placement === "below"));
   assert.ok(Math.abs(labels[0].left - labels[1].left) >= 18);
   assert.ok(labels.every((label) => label.top <= 91));
+});
+
+test("Project Universe scales nodes and avoids Project, Task, and hover label collisions", () => {
+  const graph = sampleGraph();
+  graph.nodes[0] = {
+    ...graph.nodes[0],
+    title: "校园低碳循环计划"
+  };
+  graph.nodes.push({
+    id: "task:scene",
+    type: "task",
+    title: "记录 3 个高频消费场景",
+    criteria: "形成场景清单",
+    status: "todo"
+  });
+  graph.edges.push({ from: "milestone:research", to: "task:scene", relation: "contains" });
+
+  const view = createStarMapView(graph);
+  const byType = (type) => view.nodes.find((node) => node.type === type);
+  const project = byType("project");
+  const problem = byType("problem");
+  const tasks = view.nodes.filter((node) => node.type === "task");
+  const projectBounds = getNodeLabelBounds(project, view.viewBox);
+  const taskBounds = tasks.map((node) => getNodeLabelBounds(node, view.viewBox));
+  const problemBounds = getNodeLabelBounds(problem, view.viewBox);
+  const nodeBounds = (node) => {
+    const radiusX = (node.size / view.viewBox.width) * 100;
+    const radiusY = (node.size / view.viewBox.height) * 100;
+    const centerX = ((node.x - view.viewBox.x) / view.viewBox.width) * 100;
+    const centerY = ((node.y - view.viewBox.y) / view.viewBox.height) * 100;
+
+    return {
+      left: centerX - radiusX,
+      right: centerX + radiusX,
+      top: centerY - radiusY,
+      bottom: centerY + radiusY
+    };
+  };
+  const overlaps = (left, right) =>
+    left.left < right.right && left.right > right.left && left.top < right.bottom && left.bottom > right.top;
+
+  assert.ok(project.size >= 106);
+  assert.ok(byType("problem").size >= 64);
+  assert.ok(byType("decision").size >= 64);
+  assert.ok(byType("milestone").size >= 72);
+  assert.ok(tasks.every((node) => node.size >= 54));
+  assert.ok(byType("progress").size >= 46);
+  assert.equal(getNodeLabelPlacement(project), "core");
+  assert.equal(getNodeLabelPlacement(problem), "above");
+  assert.ok(taskBounds.every((bounds) => !overlaps(projectBounds, bounds)));
+  assert.ok(!overlaps(problemBounds, nodeBounds(problem)));
 });
 test("Project Universe Inspector close control is geometric and font-independent", () => {
   const source = readFileSync(new URL("../frontend/star-map.js", import.meta.url), "utf8");
@@ -685,7 +738,7 @@ test("Project Universe camera uses content bounds instead of the full virtual ca
   assert.ok(milestone.y < project.y);
   assert.ok(task.y > project.y);
   assert.ok(progress.y < milestone.y);
-  assert.match(html, /viewBox="120\.28 37 1260 840"/);
+  assert.match(html, /viewBox="107\.5 21 1285 870"/);
   assert.match(html, /preserveAspectRatio="xMidYMid meet"/);
   assert.match(html, /data-camera="default"/);
   assert.match(html, /默认 Camera 会聚焦有效节点区域/);

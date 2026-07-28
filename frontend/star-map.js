@@ -2,8 +2,8 @@ const VIEWBOX = Object.freeze({ width: 1500, height: 940 });
 const CAMERA = Object.freeze({
   minWidth: 1180,
   minHeight: 760,
-  maxWidth: 1260,
-  maxHeight: 840,
+  maxWidth: 1285,
+  maxHeight: 870,
   horizontalPadding: 116,
   verticalPadding: 92,
   labelPaddingX: 96,
@@ -19,13 +19,13 @@ const ORBITS = Object.freeze({
   growth: 600
 });
 const NODE_SIZES = Object.freeze({
-  project: 86,
-  problem: 48,
-  decision: 50,
-  milestone: 57,
-  task: 38,
-  progress: 30,
-  context: 22
+  project: 106,
+  problem: 64,
+  decision: 64,
+  milestone: 72,
+  task: 54,
+  progress: 46,
+  context: 28
 });
 const TYPE_LABELS = Object.freeze({
   project: "\u9879\u76ee",
@@ -48,7 +48,7 @@ function getNodeTypeLines(type) {
 
 export function getNodeTypeTextLayout(type) {
   const lines = getNodeTypeLines(type);
-  const gap = type === "milestone" ? 16 : 0;
+  const gap = type === "milestone" ? 18 : 0;
   const middle = (lines.length - 1) / 2;
 
   return Object.freeze(
@@ -636,18 +636,18 @@ function renderNodeLabel(node) {
 
 export function getNodeLabelPlacement(node) {
   if (node.type === "project") {
-    return "below";
+    return "core";
   }
 
   if (node.type === "task") {
     return "below";
   }
 
-  if (node.type === "milestone" || node.type === "progress" || node.y < CENTER.y - 180) {
+  if (node.type === "problem" || node.type === "milestone" || node.type === "progress" || node.y < CENTER.y - 180) {
     return "above";
   }
 
-  if (node.type === "problem" || node.x < CENTER.x - 250) {
+  if (node.x < CENTER.x - 250) {
     return "left";
   }
 
@@ -660,8 +660,8 @@ export function getNodeLabelPlacement(node) {
 
 function getLabelMetrics(node) {
   return Object.freeze({
-    widthPercent: node.type === "project" ? 22 : 16,
-    heightPercent: node.type === "project" ? 8 : 7
+    widthPercent: node.type === "project" ? 20 : node.type === "task" ? 14 : 16,
+    heightPercent: node.type === "project" ? 6 : node.type === "task" ? 6 : 7
   });
 }
 
@@ -680,7 +680,7 @@ function clampLabelPercent(left, top, placement, metrics) {
 
   if (placement === "above") {
     nextTop = clampNumber(nextTop, safe.top + metrics.heightPercent, safe.bottom);
-  } else if (placement === "below") {
+  } else if (placement === "below" || placement === "core") {
     nextTop = clampNumber(nextTop, safe.top, safe.bottom - metrics.heightPercent);
   } else {
     nextTop = clampNumber(nextTop, safe.top + metrics.heightPercent / 2, safe.bottom - metrics.heightPercent / 2);
@@ -696,13 +696,14 @@ export function getNodeLabelPosition(node, viewBox) {
   const placement = getNodeLabelPlacement(node);
   const taskStagger = node.type === "task" ? Math.sign(node.x - SPATIAL_ZONES.task.x) : 0;
   const offsets = {
+    core: { x: 0, y: -(node.size + 74) },
     below: {
       x: node.type === "task" ? taskStagger * 92 : 0,
-      y: node.type === "project" ? 132 : node.type === "task" ? node.size + 96 + (taskStagger > 0 ? 26 : 0) : node.size + 56
+      y: node.type === "task" ? node.size + 112 + (taskStagger > 0 ? 26 : 0) : node.size + 56
     },
     above: { x: 0, y: node.type === "progress" ? -(node.size + 82) : -(node.size + 86) },
-    left: { x: -(node.size + 112), y: 0 },
-    right: { x: node.size + 112, y: 0 }
+    left: { x: -(node.size + 148), y: 0 },
+    right: { x: node.size + 148, y: 0 }
   };
   const offset = offsets[placement] ?? offsets.below;
   const rawLeft = ((node.x + offset.x - safeViewBox.x) / safeViewBox.width) * 100;
@@ -716,6 +717,46 @@ export function getNodeLabelPosition(node, viewBox) {
   });
 }
 
+export function getNodeLabelBounds(node, viewBox) {
+  const position = getNodeLabelPosition(node, viewBox);
+  const metrics = getLabelMetrics(node);
+  const halfWidth = metrics.widthPercent / 2;
+  const halfHeight = metrics.heightPercent / 2;
+
+  if (position.placement === "left") {
+    return Object.freeze({
+      left: Number((position.left - metrics.widthPercent).toFixed(3)),
+      right: position.left,
+      top: Number((position.top - halfHeight).toFixed(3)),
+      bottom: Number((position.top + halfHeight).toFixed(3))
+    });
+  }
+
+  if (position.placement === "right") {
+    return Object.freeze({
+      left: position.left,
+      right: Number((position.left + metrics.widthPercent).toFixed(3)),
+      top: Number((position.top - halfHeight).toFixed(3)),
+      bottom: Number((position.top + halfHeight).toFixed(3))
+    });
+  }
+
+  if (position.placement === "above") {
+    return Object.freeze({
+      left: Number((position.left - halfWidth).toFixed(3)),
+      right: Number((position.left + halfWidth).toFixed(3)),
+      top: Number((position.top - metrics.heightPercent).toFixed(3)),
+      bottom: position.top
+    });
+  }
+
+  return Object.freeze({
+    left: Number((position.left - halfWidth).toFixed(3)),
+    right: Number((position.left + halfWidth).toFixed(3)),
+    top: position.top,
+    bottom: Number((position.top + metrics.heightPercent).toFixed(3))
+  });
+}
 function renderScreenLabel(node, viewBox, focusState = "default") {
   const typeLabel = getNodeTypeDisplayName(node.type);
   const maximum = node.type === "project" ? 18 : 14;

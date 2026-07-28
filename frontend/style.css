@@ -5365,3 +5365,77 @@ body.demo-body .demo-case-note {
 .project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-label-placement="right"][data-focus-state="related"] {
   transform: translate(var(--label-clearance), -50%) scale(1.04);
 }
+
+/* Nexus AI v0.8.15 Star Map Scale & Collision Fix */
+.project-space-panel[data-space-panel="universe"] .star-map-node-glyph {
+  font-size: 15px;
+  font-weight: 840;
+  letter-spacing: 0.01em;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-node[data-node-type="project"] .star-map-node-glyph {
+  font-size: 18px;
+  font-weight: 860;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-node[data-node-type="problem"] .star-map-node-glyph,
+.project-space-panel[data-space-panel="universe"] .star-map-node[data-node-type="decision"] .star-map-node-glyph {
+  font-size: 16px;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-node[data-node-type="milestone"] .star-map-node-glyph {
+  font-size: 14px;
+  font-weight: 850;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-node[data-node-type="task"] .star-map-node-glyph,
+.project-space-panel[data-space-panel="universe"] .star-map-node[data-node-type="progress"] .star-map-node-glyph {
+  font-size: 14px;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label {
+  --label-clearance: 28px;
+  max-inline-size: 168px;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-node-type="project"] {
+  max-inline-size: 260px;
+  z-index: 8;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-node-type="project"] strong {
+  font-size: 18px;
+  line-height: 1.22;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-node-type="task"] {
+  max-inline-size: 148px;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-focus-state="hovered"] {
+  max-inline-size: 136px;
+  padding: 6px 9px;
+  border: 1px solid color-mix(in srgb, var(--border-soft) 72%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface-primary) 78%, transparent);
+  box-shadow: 0 12px 26px color-mix(in srgb, var(--shadow-soft) 52%, transparent);
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-focus-state="hovered"] strong {
+  font-size: 13px;
+  line-height: 1.18;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-focus-state="hovered"] strong span:nth-child(n+2) {
+  display: none;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-label-placement="core"] {
+  transform: translate(-50%, var(--label-clearance)) scale(0.98);
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-label-placement="core"][data-focus-state="selected"],
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-label-placement="core"][data-focus-state="hovered"],
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-label-placement="core"][data-focus-state="related"] {
+  transform: translate(-50%, var(--label-clearance)) scale(1.03);
+}
