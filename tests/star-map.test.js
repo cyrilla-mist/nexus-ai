@@ -61,11 +61,20 @@ test("deterministic orbit layout is stable", () => {
   assert.deepEqual(first, second);
   assert.deepEqual(
     { x: byType(first, "project").x, y: byType(first, "project").y, layer: byType(first, "project").layer },
-    { x: 480, y: 320, layer: "core" }
+    { x: 560, y: 400, layer: "core" }
   );
-  assert.equal(byType(first, "problem").orbit, 132);
-  assert.equal(byType(first, "milestone").orbit, 224);
-  assert.equal(byType(first, "progress").orbit, 286);
+  assert.equal(byType(first, "problem").orbit, 190);
+  assert.equal(byType(first, "milestone").orbit, 300);
+  assert.equal(byType(first, "problem").layer, "understanding");
+  assert.equal(byType(first, "decision").layer, "understanding");
+  assert.equal(byType(first, "milestone").layer, "execution");
+  assert.equal(byType(first, "task").layer, "execution");
+  assert.equal(byType(first, "progress").layer, "growth");
+  assert.ok(byType(first, "problem").x < byType(first, "project").x);
+  assert.ok(byType(first, "decision").x > byType(first, "project").x);
+  assert.ok(byType(first, "milestone").y < byType(first, "project").y);
+  assert.ok(byType(first, "task").y < byType(first, "project").y);
+  assert.ok(byType(first, "progress").y < byType(first, "milestone").y);
 });
 
 test("node click and keyboard selection reveal read-only details", () => {
@@ -102,6 +111,23 @@ test("empty Context Graph renders a safe empty state", () => {
   assert.match(html, /暂无可显示的项目星图/);
   assert.doesNotMatch(html, /star-map-canvas/);
 });
+test("Universe layout keeps wide spacing and avoids center-crossing edges", () => {
+  const view = createStarMapView(sampleGraph());
+
+  for (let leftIndex = 0; leftIndex < view.nodes.length; leftIndex += 1) {
+    for (let rightIndex = leftIndex + 1; rightIndex < view.nodes.length; rightIndex += 1) {
+      const left = view.nodes[leftIndex];
+      const right = view.nodes[rightIndex];
+      const distance = Math.hypot(left.x - right.x, left.y - right.y);
+
+      assert.ok(distance >= left.size + right.size + 66);
+    }
+  }
+
+  assert.ok(view.edges.every((edge) => edge.crossesCore === false));
+  assert.ok(view.edges.find((edge) => edge.relation === "addresses").x1 > view.nodes.find((node) => node.type === "project").x - 90);
+});
+
 test("Project Core and semantic orbits preserve visual hierarchy", () => {
   const view = createStarMapView(sampleGraph());
   const html = renderStarMap(sampleGraph());

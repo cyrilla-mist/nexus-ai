@@ -1,19 +1,19 @@
 import { renderContextNodeDetail } from "./context-map.js";
 
-const VIEWBOX = Object.freeze({ width: 960, height: 640 });
-const CENTER = Object.freeze({ x: 480, y: 320 });
+const VIEWBOX = Object.freeze({ width: 1120, height: 760 });
+const CENTER = Object.freeze({ x: 560, y: 400 });
 const ORBITS = Object.freeze({
-  understanding: 132,
-  execution: 224,
-  growth: 286
+  understanding: 190,
+  execution: 300,
+  growth: 360
 });
 const NODE_SIZES = Object.freeze({
-  project: 52,
-  problem: 25,
-  decision: 28,
-  milestone: 30,
-  task: 21,
-  progress: 17,
+  project: 68,
+  problem: 28,
+  decision: 31,
+  milestone: 34,
+  task: 23,
+  progress: 19,
   context: 18
 });
 const TYPE_LABELS = Object.freeze({
@@ -119,24 +119,122 @@ function orderExecutionNodes(nodes, edges) {
   return ordered;
 }
 
-function positionRing(nodes, radius, startAngle, layer) {
+const ORBIT_LAYOUTS = Object.freeze({
+  understanding: Object.freeze({
+    problem: Object.freeze([{ angle: 180, spread: 34 }]),
+    decision: Object.freeze([{ angle: 0, spread: 34 }]),
+    context: Object.freeze([{ angle: 210 }, { angle: 150 }, { angle: 330 }, { angle: 30 }])
+  }),
+  execution: Object.freeze({
+    milestone: Object.freeze([{ angle: 235, spread: 24 }]),
+    task: Object.freeze([{ angle: 305, spread: 24 }]),
+    context: Object.freeze([{ angle: 250 }, { angle: 290 }, { angle: 220 }, { angle: 320 }])
+  }),
+  growth: Object.freeze({
+    progress: Object.freeze([{ angle: 270, spread: 42 }]),
+    context: Object.freeze([{ angle: 270 }, { angle: 242 }, { angle: 298 }, { angle: 218 }, { angle: 322 }])
+  })
+});
+
+function expandAngles(count, fallback) {
+  if (count <= 0) {
+    return [];
+  }
+
+  const first = fallback[0] ?? { angle: -90, spread: 40 };
+
+  if (count === 1) {
+    return [first.angle];
+  }
+
+  if (typeof first.spread === "number") {
+    const start = first.angle - first.spread / 2;
+    const step = first.spread / (count - 1);
+    return Array.from({ length: count }, (_item, index) => start + step * index);
+  }
+
+  return Array.from({ length: count }, (_item, index) => fallback[index % fallback.length].angle);
+}
+
+function pointFromAngle(radius, angle) {
+  const radians = (angle * Math.PI) / 180;
+
+  return {
+    x: Number((CENTER.x + Math.cos(radians) * radius).toFixed(2)),
+    y: Number((CENTER.y + Math.sin(radians) * radius).toFixed(2))
+  };
+}
+
+function positionOrbit(nodes, radius, layer) {
   if (nodes.length === 0) {
     return [];
   }
 
-  return nodes.map((node, index) => {
-    const angle = startAngle + (360 * index) / nodes.length;
-    const radians = (angle * Math.PI) / 180;
+  const groups = new Map();
 
-    return {
+  nodes.forEach((node) => {
+    const group = ORBIT_LAYOUTS[layer]?.[node.type] ? node.type : "context";
+    groups.set(group, [...(groups.get(group) ?? []), node]);
+  });
+
+  return [...groups.entries()].flatMap(([group, groupNodes]) => {
+    const fallback = ORBIT_LAYOUTS[layer]?.[group] ?? [{ angle: -90, spread: 48 }];
+    const angles = expandAngles(groupNodes.length, fallback);
+
+    return groupNodes.map((node, index) => ({
       ...node,
       layer,
       orbit: radius,
+      angle: Number(angles[index].toFixed(2)),
       size: NODE_SIZES[node.type] ?? NODE_SIZES.context,
-      x: Number((CENTER.x + Math.cos(radians) * radius).toFixed(2)),
-      y: Number((CENTER.y + Math.sin(radians) * radius).toFixed(2))
-    };
+      ...pointFromAngle(radius, angles[index])
+    }));
   });
+}
+
+function trimEdgeEndpoint(from, to, padding = 5) {
+  const vectorX = to.x - from.x;
+  const vectorY = to.y - from.y;
+  const length = Math.hypot(vectorX, vectorY);
+
+  if (length === 0) {
+    return { x: from.x, y: from.y };
+  }
+
+  const offset = (from.size ?? NODE_SIZES.context) + padding;
+
+  return {
+    x: Number((from.x + (vectorX / length) * offset).toFixed(2)),
+    y: Number((from.y + (vectorY / length) * offset).toFixed(2))
+  };
+}
+
+function edgeCrossesCore(edge, from, to) {
+  if (from.type === "project" || to.type === "project") {
+    return false;
+  }
+
+  const vectorX = to.x - from.x;
+  const vectorY = to.y - from.y;
+  const lengthSquared = vectorX * vectorX + vectorY * vectorY;
+
+  if (lengthSquared === 0) {
+    return false;
+  }
+
+  const projection =
+    ((CENTER.x - from.x) * vectorX + (CENTER.y - from.y) * vectorY) /
+    lengthSquared;
+
+  if (projection <= 0 || projection >= 1) {
+    return false;
+  }
+
+  const closestX = from.x + projection * vectorX;
+  const closestY = from.y + projection * vectorY;
+  const distance = Math.hypot(closestX - CENTER.x, closestY - CENTER.y);
+
+  return distance < NODE_SIZES.project + 34;
 }
 
 function freezeView(view) {
@@ -206,15 +304,10 @@ export function createStarMapView(contextMap = {}) {
           }
         ]
       : []),
-    ...positionRing(
-      understanding,
-      ORBITS.understanding,
-      -135,
-      "understanding"
-    ),
-    ...positionRing(execution, ORBITS.execution, -45, "execution"),
-    ...positionRing(progress, ORBITS.growth, -90, "growth"),
-    ...positionRing(remaining, ORBITS.growth, 90, "context")
+    ...positionOrbit(understanding, ORBITS.understanding, "understanding"),
+    ...positionOrbit(execution, ORBITS.execution, "execution"),
+    ...positionOrbit(progress, ORBITS.growth, "growth"),
+    ...positionOrbit(remaining, ORBITS.growth, "context")
   ];
   const positions = new Map(laidOut.map((node) => [node.id, node]));
   const edges = sourceEdges
@@ -226,14 +319,18 @@ export function createStarMapView(contextMap = {}) {
         return null;
       }
 
+      const start = trimEdgeEndpoint(from, to);
+      const end = trimEdgeEndpoint(to, from);
+
       return {
         from: from.id,
         to: to.id,
         relation: normalizeText(edge.relation) || "related_to",
-        x1: from.x,
-        y1: from.y,
-        x2: to.x,
-        y2: to.y
+        x1: start.x,
+        y1: start.y,
+        x2: end.x,
+        y2: end.y,
+        crossesCore: edgeCrossesCore(edge, from, to)
       };
     })
     .filter(Boolean);
@@ -333,6 +430,7 @@ function renderEdge(edge, index, focusState = "default") {
       class="star-map-edge"
       data-edge-index="${index}"
       data-relation="${escapeMarkup(edge.relation)}"
+      data-crosses-core="${edge.crossesCore ? "true" : "false"}"
       data-strength="${escapeMarkup(strength)}"
       data-focus-state="${escapeMarkup(focusState)}"
     >
@@ -351,7 +449,7 @@ function renderEdge(edge, index, focusState = "default") {
 }
 
 function renderNode(node, focusState = "default") {
-  const label = shortLabel(node.title);
+  const label = shortLabel(node.title, node.type === "project" ? 16 : 10);
   const typeLabel = TYPE_LABELS[node.type] ?? "上下文";
   const selected = focusState === "selected";
 
@@ -373,7 +471,7 @@ function renderNode(node, focusState = "default") {
       <title>${escapeMarkup(`${typeLabel}：${node.title}`)}</title>
       ${
         node.type === "project"
-          ? '<circle class="star-map-project-halo" r="68" aria-hidden="true" />'
+          ? '<circle class="star-map-project-halo" r="96" aria-hidden="true" />'
           : ""
       }
       <circle class="star-map-node-body" r="${node.size}" />
