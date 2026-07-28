@@ -4306,3 +4306,195 @@ body.demo-body .demo-case-note {
     padding: 10px 0;
   }
 }
+
+/* Nexus AI v0.8.8 Project Universe Visual Polish */
+:root {
+  --universe-core-fill: #405f96;
+  --universe-core-rim: rgba(57, 82, 132, 0.72);
+  --universe-core-glow-inner: rgba(82, 113, 171, 0.2);
+  --universe-core-glow-outer: rgba(82, 113, 171, 0.09);
+  --universe-problem-rim: rgba(151, 111, 67, 0.48);
+  --universe-decision-rim: rgba(76, 102, 154, 0.48);
+  --universe-milestone-rim: rgba(66, 90, 135, 0.44);
+  --universe-task-rim: rgba(92, 108, 139, 0.3);
+  --universe-progress-rim: rgba(79, 132, 119, 0.34);
+  --universe-trail-default: rgba(87, 104, 137, 0.13);
+  --universe-trail-focus: rgba(68, 96, 150, 0.48);
+  --universe-label-muted: rgba(74, 88, 118, 0.58);
+  --universe-paper-mist: rgba(255, 255, 255, 0.64);
+}
+
+:root[data-theme="dark"] {
+  --universe-core-fill: #172641;
+  --universe-core-rim: rgba(156, 181, 226, 0.64);
+  --universe-core-glow-inner: rgba(126, 159, 217, 0.2);
+  --universe-core-glow-outer: rgba(126, 159, 217, 0.08);
+  --universe-problem-rim: rgba(197, 157, 100, 0.42);
+  --universe-decision-rim: rgba(151, 162, 214, 0.46);
+  --universe-milestone-rim: rgba(132, 158, 202, 0.44);
+  --universe-task-rim: rgba(118, 137, 172, 0.28);
+  --universe-progress-rim: rgba(109, 174, 157, 0.34);
+  --universe-trail-default: rgba(130, 153, 194, 0.1);
+  --universe-trail-focus: rgba(174, 196, 235, 0.42);
+  --universe-label-muted: rgba(189, 202, 225, 0.54);
+  --universe-paper-mist: rgba(9, 15, 27, 0.68);
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-stage {
+  background:
+    radial-gradient(circle at 50% 55%, var(--universe-core-glow-inner), transparent 14rem),
+    radial-gradient(circle at 50% 55%, var(--universe-core-glow-outer), transparent 34rem),
+    radial-gradient(circle at 19% 55%, color-mix(in srgb, var(--universe-problem-core) 22%, transparent), transparent 16rem),
+    radial-gradient(circle at 81% 55%, color-mix(in srgb, var(--universe-decision-core) 22%, transparent), transparent 17rem),
+    linear-gradient(90deg, color-mix(in srgb, var(--universe-map-line) 34%, transparent) 1px, transparent 1px) 0 0 / 128px 128px,
+    linear-gradient(0deg, color-mix(in srgb, var(--universe-map-line) 28%, transparent) 1px, transparent 1px) 0 0 / 128px 128px,
+    linear-gradient(145deg, var(--universe-depth-1), var(--universe-depth-2) 64%, var(--universe-depth-3));
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-stage::before {
+  background-image:
+    radial-gradient(circle, color-mix(in srgb, var(--universe-dust) 66%, transparent) 0 0.48px, transparent 0.96px),
+    radial-gradient(circle, color-mix(in srgb, var(--universe-dust) 36%, transparent) 0 0.42px, transparent 0.9px);
+  background-size: 132px 132px, 211px 211px;
+  opacity: 0.2;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-project-halo {
+  fill: url(#unused);
+  fill: var(--universe-core-glow-inner);
+  opacity: 0.68;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-node[data-node-type="project"] .star-map-node-body {
+  fill: var(--universe-core-fill);
+  stroke: var(--universe-core-rim);
+  stroke-width: 2.15;
+  filter:
+    drop-shadow(0 0 10px var(--universe-core-glow-inner))
+    drop-shadow(0 22px 44px rgba(15, 23, 42, 0.13));
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-node[data-node-type="problem"] .star-map-node-body {
+  stroke: var(--universe-problem-rim);
+  stroke-width: 1.65;
+  filter: drop-shadow(0 8px 18px rgba(120, 86, 44, 0.08));
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-node[data-node-type="decision"] .star-map-node-body {
+  stroke: var(--universe-decision-rim);
+  stroke-width: 1.7;
+  filter: drop-shadow(0 8px 18px rgba(59, 82, 132, 0.08));
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-node[data-node-type="milestone"] .star-map-node-body {
+  stroke: var(--universe-milestone-rim);
+  stroke-width: 1.9;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-node[data-node-type="task"] {
+  opacity: 0.88;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-node[data-node-type="task"] .star-map-node-body {
+  stroke: var(--universe-task-rim);
+  stroke-width: 1.05;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-node[data-node-type="progress"] {
+  opacity: 0.72;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-node[data-node-type="progress"] .star-map-node-body {
+  stroke: var(--universe-progress-rim);
+  stroke-width: 1;
+  stroke-dasharray: 1 4;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-node[data-focus-state="selected"],
+.project-space-panel[data-space-panel="universe"] .star-map-node[data-focus-state="related"],
+.project-space-panel[data-space-panel="universe"] .star-map-node[data-focus-state="hovered"] {
+  opacity: 1;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-orbit-group[data-orbit="understanding"] .star-map-orbit {
+  stroke: color-mix(in srgb, var(--universe-orbit-understanding) 78%, transparent);
+  stroke-width: 0.62;
+  stroke-dasharray: 1 18;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-orbit-group[data-orbit="execution"] .star-map-orbit {
+  stroke: color-mix(in srgb, var(--universe-orbit-execution) 92%, transparent);
+  stroke-width: 0.95;
+  stroke-dasharray: 3 18;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-orbit-group[data-orbit="growth"] .star-map-orbit {
+  stroke: color-mix(in srgb, var(--universe-orbit-growth) 64%, transparent);
+  stroke-width: 0.52;
+  stroke-dasharray: 1 25;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-orbit-label {
+  fill: var(--universe-label-muted);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  opacity: 0.16;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-edge line,
+.project-space-panel[data-space-panel="universe"] .star-map-edge[data-strength="primary"] line {
+  stroke: var(--universe-trail-default);
+  stroke-linecap: round;
+  stroke-width: 0.62;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-edge[data-focus-state="related"] line,
+.project-space-panel[data-space-panel="universe"] .star-map-edge[data-focus-state="related"][data-strength="primary"] line {
+  stroke: var(--universe-trail-focus);
+  stroke-width: 1.18;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-edge[data-strength="history"] line {
+  stroke: color-mix(in srgb, var(--universe-progress-rim) 72%, var(--universe-trail-default));
+  stroke-dasharray: 1 8;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-edge text {
+  font-size: 8px;
+  stroke: var(--universe-paper-mist);
+  stroke-width: 5px;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-node-type {
+  font-size: 7.5px;
+  letter-spacing: 0.08em;
+  opacity: 0.72;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-node-label {
+  fill: var(--text-primary);
+  font-size: 10px;
+  font-weight: 680;
+  stroke: var(--universe-paper-mist);
+  stroke-width: 6px;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-node[data-node-type="project"] .star-map-node-type,
+.project-space-panel[data-space-panel="universe"] .star-map-node[data-node-type="project"] .star-map-node-label {
+  fill: var(--star-project-text);
+  stroke: transparent;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-detail {
+  border-color: color-mix(in srgb, var(--border-soft) 48%, transparent);
+  box-shadow: 0 20px 54px rgba(15, 23, 42, 0.1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project-space-panel[data-space-panel="universe"] .star-map-stage,
+  .project-space-panel[data-space-panel="universe"] .star-map-node,
+  .project-space-panel[data-space-panel="universe"] .star-map-edge,
+  .project-space-panel[data-space-panel="universe"] .star-map-detail {
+    transition: none;
+  }
+}

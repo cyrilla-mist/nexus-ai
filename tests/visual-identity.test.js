@@ -74,3 +74,11 @@ test("v0.8.6 keeps the mobile hero focused on Nexus identity and entry", () => {
   assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.hero-brand\s*\{[\s\S]*?clamp\(2\.75rem/);
   assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.hero-enter-action\s*\{[\s\S]*?width: 100%/);
 });
+test("v0.8.8 calibrates Quiet Deep Space and Morning Mist universe tokens", () => {
+  assert.match(css, /:root\s*\{[\s\S]*?--universe-core-fill: #405f96/);
+  assert.match(css, /:root\s*\{[\s\S]*?--universe-paper-mist: rgba\(255, 255, 255, 0\.64\)/);
+  assert.match(css, /:root\[data-theme="dark"\]\s*\{[\s\S]*?--universe-core-fill: #172641/);
+  assert.match(css, /:root\[data-theme="dark"\]\s*\{[\s\S]*?--universe-paper-mist: rgba\(9, 15, 27, 0\.68\)/);
+  assert.match(css, /project-space-panel\[data-space-panel="universe"\] \.star-map-stage[\s\S]*?linear-gradient\(145deg, var\(--universe-depth-1\)/);
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\)[\s\S]*?project-space-panel\[data-space-panel="universe"\] \.star-map-stage/);
+});

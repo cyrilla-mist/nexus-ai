@@ -436,3 +436,30 @@ test("Desktop Project Universe uses large semantic spatial regions", () => {
   assert.equal(byType("progress").y, 115);
   assert.ok(Math.hypot(byType("progress").x - byType("project").x, byType("progress").y - byType("project").y) > 390);
 });
+test("Project Universe polish defines quiet core, node identity, orbit atmosphere, and trails", () => {
+  const css = readFileSync(new URL("../frontend/style.css", import.meta.url), "utf8");
+
+  for (const token of [
+    "--universe-core-fill",
+    "--universe-core-rim",
+    "--universe-core-glow-inner",
+    "--universe-core-glow-outer",
+    "--universe-trail-default",
+    "--universe-trail-focus",
+    "--universe-label-muted"
+  ]) {
+    assert.match(css, new RegExp(token));
+  }
+
+  assert.match(css, /Nexus AI v0\.8\.8 Project Universe Visual Polish/);
+  assert.match(css, /data-space-panel="universe"\] \.star-map-node\[data-node-type="project"\][\s\S]*?--universe-core-fill/);
+  assert.match(css, /data-node-type="problem"\][\s\S]*?--universe-problem-rim/);
+  assert.match(css, /data-node-type="decision"\][\s\S]*?--universe-decision-rim/);
+  assert.match(css, /data-node-type="milestone"\][\s\S]*?--universe-milestone-rim/);
+  assert.match(css, /data-node-type="task"\][\s\S]*?--universe-task-rim/);
+  assert.match(css, /data-node-type="progress"\][\s\S]*?--universe-progress-rim/);
+  assert.match(css, /data-orbit="understanding"\][\s\S]*?stroke-dasharray: 1 18/);
+  assert.match(css, /data-orbit="execution"\][\s\S]*?stroke-dasharray: 3 18/);
+  assert.match(css, /data-orbit="growth"\][\s\S]*?stroke-dasharray: 1 25/);
+  assert.match(css, /data-focus-state="related"\] line[\s\S]*?--universe-trail-focus/);
+});
