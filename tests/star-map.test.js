@@ -255,3 +255,50 @@ test("theme tokens, reduced motion, and mobile semantic fallback are present", (
   assert.match(html, /Execution · 如何推进/);
   assert.match(html, /Growth · 如何成长/);
 });
+
+test("Project Universe visual system defines core, orbit, node, and edge hierarchy", () => {
+  const css = readFileSync(
+    new URL("../frontend/style.css", import.meta.url),
+    "utf8"
+  );
+
+  for (const token of [
+    "--universe-core-atmosphere",
+    "--universe-core-aura",
+    "--universe-core-shadow",
+    "--universe-edge-default",
+    "--universe-edge-focus",
+    "--universe-orbit-understanding",
+    "--universe-orbit-execution",
+    "--universe-orbit-growth"
+  ]) {
+    assert.match(css, new RegExp(token));
+  }
+
+  assert.match(css, /:root\[data-theme="dark"\][\s\S]*?--universe-depth-1/);
+  assert.match(css, /\.project-space-panel \.star-map-stage\s*\{[\s\S]*?--universe-core-atmosphere/);
+  assert.match(css, /data-orbit="understanding"[\s\S]*?--universe-orbit-understanding/);
+  assert.match(css, /data-orbit="execution"[\s\S]*?--universe-orbit-execution/);
+  assert.match(css, /data-orbit="growth"[\s\S]*?--universe-orbit-growth/);
+  assert.match(css, /\.project-space-panel \.star-map-edge\s*\{[\s\S]*?opacity: 0\.18/);
+  assert.match(css, /data-focus-state="related"\][\s\S]*?opacity: 0\.78/);
+});
+
+test("Project Universe maps all six node types to distinct visual roles", () => {
+  const css = readFileSync(
+    new URL("../frontend/style.css", import.meta.url),
+    "utf8"
+  );
+
+  for (const type of ["project", "problem", "decision", "milestone", "task", "progress"]) {
+    assert.match(css, new RegExp(`data-node-type="${type}"`));
+  }
+
+  assert.match(css, /data-node-type="project"[\s\S]*?--star-project-fill/);
+  assert.match(css, /data-node-type="problem"[\s\S]*?--universe-problem-core/);
+  assert.match(css, /data-node-type="decision"[\s\S]*?--universe-decision-core/);
+  assert.match(css, /data-node-type="milestone"[\s\S]*?--universe-milestone-core/);
+  assert.match(css, /data-node-type="task"[\s\S]*?--universe-task-core/);
+  assert.match(css, /data-node-type="progress"[\s\S]*?--universe-progress-core/);
+  assert.match(css, /prefers-reduced-motion: reduce[\s\S]*?\.star-map-node/);
+});

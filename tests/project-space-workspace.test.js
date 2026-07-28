@@ -102,7 +102,7 @@ test("Universe keeps Project Core, semantic orbits, and subdued connections", ()
   assert.match(html, /data-relation="supports"/);
   assert.match(html, /data-relation="contains"/);
   assert.match(html, /data-relation="updates"/);
-  assert.match(css, /\.project-space-panel \.star-map-edge\s*\{[\s\S]*?opacity: 0\.34/);
+  assert.match(css, /\.project-space-panel \.star-map-edge\s*\{[\s\S]*?opacity: 0\.18/);
 });
 
 test("Context and Universe expose read-only detail panels", () => {
