@@ -1,57 +1,135 @@
 # Nexus AI
 
-**Connect ideas. Create possibilities.**
+**AI Project Intelligence Space**
 
-Nexus AI v0.1.1 turns Project Atlas from a single technical JSON demo into a
-small, readable project collaboration workspace.
+Connect ideas. Create possibilities.
 
-## Current Flow
+Nexus AI is a project intelligence workspace that helps turn an early idea into
+a structured project direction. It combines an agent layer, memory layer,
+execution layer, and visual experience layer so a project can be understood,
+refined, remembered, and explored.
 
-```text
-Frontend session
-  → Cloudflare Worker
-  → Nexus Core
-  → Router
-  → Project Atlas
-  → Model Router
-  → DeepSeek Client (when configured)
-  → Structured result validation
-  → Explainable project-stage evaluation
-  → Reflection
-  → Temporary browser session
+Nexus is not designed as a generic chatbot. It is a space for understanding how
+an idea becomes a project.
+
+## Live Demo
+
+Live demo:
+
+[https://cyrilla-mist.github.io/nexus-ai/](https://cyrilla-mist.github.io/nexus-ai/)
+
+The GitHub Pages demo is a static showcase. It uses preset demo data for a
+campus sustainability project and does not call the Cloudflare Worker, DeepSeek,
+or the runtime Memory Layer.
+
+Use the demo to review the product direction:
+
+- Project Space
+- Project Overview
+- Journey
+- Context Map
+- Project Universe / Star Map
+- Action Navigator
+
+To test the real AI prototype, run the Worker and frontend locally.
+
+## Core Experience
+
+Nexus guides a project through four visible experience steps:
+
+1. Capture the initial idea.
+2. Generate a structured project analysis with Project Atlas.
+3. Preserve high-value project context through Memory.
+4. Display the project as a navigable Project Space.
+
+The current product experience includes:
+
+- readable project profile and blueprint
+- project stage tracking
+- clarification questions
+- next-action guidance
+- Context Map data
+- Star Map / Project Universe display
+- retry-safe browser session handling
+- Mock, DeepSeek, and Fallback model modes
+
+## Architecture
+
+```mermaid
+flowchart TD
+  User[User]
+  Worker[Cloudflare Worker]
+  Core[Nexus Core]
+  Retrieval[Memory Retrieval]
+  Atlas[Project Atlas]
+  Model[Model Router]
+  DeepSeek[DeepSeek / Mock / Fallback]
+  Reflection[Reflection]
+  Policy[Memory Policy]
+  Execution[Execution Layer]
+  Experience[Context Experience]
+  Space[Project Space / Project Universe]
+
+  User --> Worker
+  Worker --> Core
+  Core --> Retrieval
+  Retrieval --> Atlas
+  Atlas --> Model
+  Model --> DeepSeek
+  DeepSeek --> Reflection
+  Reflection --> Policy
+  Policy --> Execution
+  Execution --> Experience
+  Experience --> Space
 ```
 
-The frontend keeps at most three analysis turns in the current browser tab.
-There is no account, database, durable chat history, or remote project storage.
+The GitHub Pages demo does not execute this full backend chain. It presents a
+static version of the experience for public viewing.
 
-## Product Experience
-
-Project Atlas displays:
-
-- a readable project profile
-- a Project Blueprint
-- risk, basis, and mitigation cards
-- the current stage and next target stage
-- a highlighted next action
-- answerable clarification questions
-- raw JSON inside a collapsed developer section
-
-The supported stages are:
+## Repository Structure
 
 ```text
-Idea → Explore → Design → Validate → Execute
+atlas/       Project Atlas agent logic
+core/        Nexus Core orchestration
+memory/      Memory schema, retrieval, policy, and update foundation
+execution/   Project state, milestone, task, and progress foundation
+experience/  Read-only experience adapters and Context Map data
+model/       Model router and DeepSeek client
+worker/      Cloudflare Worker entrypoint
+frontend/    Static HTML, CSS, and JavaScript interface
+tests/       Node native tests and validation scripts
+docs/        Architecture, design, and product planning documents
 ```
 
-The stage is calculated locally from explicit result signals. It does not
-trigger another model call.
+## Current Capabilities
 
-## Model Modes
+- Nexus Core can orchestrate Project Atlas.
+- Project Atlas can build structured project analysis.
+- The model layer supports DeepSeek when configured.
+- Mock Mode works without an API key.
+- Fallback Mode protects the user experience when model output fails.
+- Memory Retrieval can provide project context.
+- Memory Policy filters what can be saved.
+- Execution Layer can represent project stage, milestones, tasks, and progress.
+- Context Experience converts internal state into display-ready structures.
+- Frontend Project Space presents Overview, Journey, Context, Universe, and
+  Action sections.
 
-- **Mock Mode**: `DEEPSEEK_API_KEY` is not configured.
-- **DeepSeek Mode**: DeepSeek returns valid structured JSON.
-- **Fallback Mode**: the model request times out, returns an HTTP error, or
-  produces invalid output. Project Atlas falls back safely while preserving
-  the previous analysis and clarification answers.
+## Current Limitations
+
+This repository is still an early prototype. Current limitations are explicit:
+
+- GitHub Pages demo uses static preset data.
+- Runtime Memory is process-local and not durable.
+- Restarting the Worker clears in-memory state.
+- Browser session progress is stored per tab with `sessionStorage`.
+- There are no user accounts.
+- There is no multi-user project system.
+- There is no cloud-persistent project storage.
+- DataHub is not connected.
+- MCP is not connected.
+- Multi-Atlas collaboration is not implemented.
+- Project Universe is still being refined for readability and exploration.
 
 ## Local Development
 
@@ -66,171 +144,82 @@ Install dependencies:
 npm install
 ```
 
-### 1. Configure DeepSeek locally
+Start the Cloudflare Worker:
 
-Mock Mode works without `.dev.vars`.
-
-For DeepSeek Mode:
-
-```powershell
-Copy-Item .dev.vars.example .dev.vars
-```
-
-Then edit `.dev.vars`:
-
-```dotenv
-DEEPSEEK_API_KEY=...
-```
-
-### 2. Start the Worker
-
-```powershell
+```bash
 npm run dev
 ```
 
-The local endpoint is:
+The local Worker endpoint is:
 
 ```text
 http://localhost:8787/api/nexus
 ```
 
-### 3. Start the static frontend
-
-Open a second terminal:
-
-```powershell
-npx.cmd --yes serve frontend -l 4173
-```
-
-Open `http://localhost:4173`.
-
-## Multi-turn Acceptance
-
-1. Enter an initial project idea and select **开始分析**.
-2. Confirm the page shows the project profile, Blueprint, risks, stage, and
-   next action.
-3. Answer every displayed clarification question.
-4. Select **继续完善项目**.
-5. Confirm the turn number increases, the previous Blueprint is refined, the
-   provided answers appear as known facts, and the answered question is not
-   repeated.
-6. Refresh the tab and confirm the current session is restored.
-7. Select **清空** and confirm the idea, analysis, answers, and temporary
-   session are removed.
-
-The automated two-turn Mock Mode acceptance script is:
+Serve the static frontend in a second terminal:
 
 ```bash
-npm run verify:multiturn
+npx --yes serve frontend -l 4173
 ```
 
-## Frontend API Configuration
+Open:
 
-The frontend reads this element in `frontend/index.html`:
-
-```html
-<meta name="nexus-api-endpoint" content="" />
+```text
+http://localhost:4173
 ```
 
-Resolution rules:
-
-- blank on `localhost`: `http://localhost:8787/api/nexus`
-- blank in production: same-origin `/api/nexus`
-- explicit `content`: use that complete Worker endpoint
-
-For a separate Cloudflare Pages frontend and Worker backend, set `content` to
-the deployed Worker endpoint before publishing the static frontend:
-
-```html
-<meta
-  name="nexus-api-endpoint"
-  content="https://your-worker.your-subdomain.workers.dev/api/nexus"
-/>
-```
-
-## Cloudflare Deployment Preparation
-
-This repository does not create or modify Cloudflare projects automatically.
-
-Set the Worker production secret interactively:
-
-```bash
-npx wrangler secret put DEEPSEEK_API_KEY
-```
-
-Validate the Worker bundle without deployment:
-
-```bash
-npx wrangler deploy --dry-run
-```
-
-Deployment options:
-
-- deploy `worker/` through the existing Wrangler configuration
-- publish `frontend/` as static assets on Cloudflare Pages
-- use a same-origin route for `/api/nexus`, or configure the complete Worker
-  URL in the frontend meta element
-
-## API Context
-
-First turn:
-
-```json
-{
-  "message": "initial idea",
-  "context": {
-    "clarificationAnswers": [],
-    "previousAnalysis": null,
-    "turn": 1
-  }
-}
-```
-
-Following turn:
-
-```json
-{
-  "message": "the same initial idea",
-  "context": {
-    "clarificationAnswers": [
-      {
-        "question": "question from Project Atlas",
-        "answer": "user answer"
-      }
-    ],
-    "previousAnalysis": {
-      "ideaProfile": {},
-      "projectBlueprint": {},
-      "risks": [],
-      "clarificationQuestions": [],
-      "nextAction": ""
-    },
-    "turn": 2
-  }
-}
-```
-
-The maximum turn is currently `3`.
-
-## Validation
+Run checks:
 
 ```bash
 npm test
 npm run check
 npm run verify:multiturn
+```
+
+Validate the Worker bundle without deploying:
+
+```bash
 npx wrangler deploy --dry-run
 ```
 
-## Current Scope
+## DeepSeek Configuration
 
-This version intentionally does not include:
+Mock Mode works without a DeepSeek key.
 
-- D1, KV, or other persistent storage
-- registration or login
-- RAG or MCP
-- DataHub
-- Evidence Atlas implementation
-- multi-model expansion
-- file uploads
-- a complete chat system
-- React, Vue, or another frontend framework
+For local DeepSeek Mode, create `.dev.vars` from the example file and set:
+
+```dotenv
+DEEPSEEK_API_KEY=...
+```
+
+For Cloudflare production, store the key as a Worker secret:
+
+```bash
+npx wrangler secret put DEEPSEEK_API_KEY
+```
+
+Security rules:
+
+- Do not commit `.dev.vars`.
+- Do not put API keys in frontend code.
+- Do not put API keys in GitHub.
+- If no key is configured, Nexus should continue in Mock Mode.
+
+## Roadmap
+
+Planned directions:
+
+- improve Project Universe readability and onboarding
+- refine the Star Map as a true project exploration space
+- add persistent project memory in a future storage layer
+- explore DataHub Context Graph integration
+- support multiple Atlas capabilities
+- prepare stronger showcase and portfolio materials
+
+These are future directions, not current shipped capabilities.
+
+## License
+
+MIT License.
+
+Copyright (c) 2026 cyrilla-mist
