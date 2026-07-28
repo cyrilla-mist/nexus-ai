@@ -466,6 +466,37 @@ function shortLabel(value, maximum = 12) {
     : characters.join("");
 }
 
+function labelLines(value, maximum = 12) {
+  const label = shortLabel(value, maximum);
+  const characters = Array.from(label);
+
+  if (characters.length <= Math.ceil(maximum * 0.72)) {
+    return [label];
+  }
+
+  const firstLineLength = Math.ceil(characters.length / 2);
+  return [
+    characters.slice(0, firstLineLength).join(""),
+    characters.slice(firstLineLength).join("")
+  ].filter(Boolean);
+}
+
+function renderNodeLabel(node) {
+  const maximum = node.type === "project" ? 18 : 14;
+  const lines = labelLines(node.title, maximum);
+  const startY = node.size + (lines.length > 1 ? 22 : 24);
+
+  return `
+      <text class="star-map-node-label" y="${startY}" text-anchor="middle">
+        ${lines
+          .map(
+            (line, index) =>
+              `<tspan x="0" dy="${index === 0 ? 0 : 18}">${escapeMarkup(line)}</tspan>`
+          )
+          .join("")}
+      </text>`;
+}
+
 function renderOrbit(radius, { key, title }) {
   return `
     <g class="star-map-orbit-group" data-orbit="${escapeMarkup(key)}">
@@ -515,7 +546,6 @@ function renderEdge(edge, index, focusState = "default") {
 }
 
 function renderNode(node, focusState = "default") {
-  const label = shortLabel(node.title, node.type === "project" ? 16 : 10);
   const typeLabel = TYPE_LABELS[node.type] ?? "上下文";
   const selected = focusState === "selected";
   const inContextPath = ["selected", "related", "hovered"].includes(focusState);
@@ -543,8 +573,8 @@ function renderNode(node, focusState = "default") {
           : ""
       }
       <circle class="star-map-node-body" r="${node.size}" />
-      <text class="star-map-node-type" y="-4" text-anchor="middle">${escapeMarkup(typeLabel)}</text>
-      <text class="star-map-node-label" y="${node.size + 17}" text-anchor="middle">${escapeMarkup(label)}</text>
+      <text class="star-map-node-type" y="-6" text-anchor="middle">${escapeMarkup(typeLabel)}</text>
+      ${renderNodeLabel(node)}
     </g>
   `;
 }
@@ -631,8 +661,13 @@ function renderStarMapEmptyDetail() {
   return `
     <div class="star-map-explanation-space star-map-detail-empty">
       <p class="section-kicker">Context Inspector</p>
-      <h4>选择一个节点</h4>
-      <p>默认先保留主宇宙视野。选择节点后，Context Inspector 会展开它的身份、上下文、影响和关联路径。</p>
+      <h4>这张图怎么读？</h4>
+      <p>先看中心的 Project Core，再沿着方向观察：左侧是问题，右侧是决策，上方是阶段成果，下方是下一步任务，外围是项目进展。</p>
+      <ol class="star-map-reading-steps">
+        <li>点击任意节点查看它为什么存在。</li>
+        <li>被高亮的线表示当前节点的上下文路径。</li>
+        <li>完整说明会出现在这里，不堆在星图里。</li>
+      </ol>
     </div>
   `;
 }
@@ -725,7 +760,7 @@ export function renderStarMap(contextMap = {}) {
         <div>
           <p class="section-kicker">Star Map</p>
           <h3 id="star-map-title">项目宇宙</h3>
-          <p class="star-map-entry-copy">Project Core 位于中心；Problem、Decision、Milestone、Task 与 Progress 占据不同语义区域。</p>
+          <p class="star-map-entry-copy">这不是流程图。先看中心项目，再看左侧问题、右侧决策、上方里程碑、下方任务和外围进展。</p>
         </div>
         <p>${view.nodes.length} 个节点 · ${view.edges.length} 条关系</p>
       </div>
@@ -774,6 +809,15 @@ export function renderStarMap(contextMap = {}) {
               .map((node) => renderNode(node, initialFocus.nodes[node.id]))
               .join("")}
           </svg>
+          <div class="star-map-reading-guide" aria-label="项目宇宙阅读指南">
+            <strong>阅读路径</strong>
+            <span>左：问题</span>
+            <span>中：项目核心</span>
+            <span>右：决策</span>
+            <span>上：里程碑</span>
+            <span>下：任务</span>
+            <span>外：进展</span>
+          </div>
           ${renderSemanticOutline(view.nodes)}
         </div>
         <aside

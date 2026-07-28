@@ -111,7 +111,7 @@ test("Context and Universe expose read-only detail panels", () => {
   assert.match(html, /data-context-map-detail/);
   assert.match(html, /data-star-map-detail/);
   assert.match(html, /Context Inspector/);
-  assert.match(html, /选择一个节点/);
+  assert.match(html, /这张图怎么读/);
   assert.match(html, /来源/);
   assert.match(html, /状态/);
 });
@@ -142,4 +142,17 @@ test("Desktop Universe gives the canvas priority over the Context Inspector", ()
   assert.match(css, /@media \(min-width: 761px\)[\s\S]*?\.project-space-panel\[data-space-panel="universe"\] \.star-map-stage\s*\{[\s\S]*?min-height: clamp\(700px/);
   assert.match(css, /@media \(min-width: 761px\)[\s\S]*?\.project-space-panel\[data-space-panel="universe"\] \.star-map-detail\s*\{[\s\S]*?position: absolute/);
   assert.match(css, /@media \(min-width: 761px\)[\s\S]*?\.star-map-detail\[data-detail-state="empty"\][\s\S]*?display: none/);
+});
+
+test("Universe includes a readable first-use guide instead of tiny unexplained labels", () => {
+  const html = renderProjectSpace(workspaceExperience());
+
+  assert.match(html, /star-map-reading-guide/);
+  assert.match(html, /阅读路径/);
+  assert.match(html, /左：问题/);
+  assert.match(html, /中：项目核心/);
+  assert.match(html, /右：决策/);
+  assert.match(html, /上：里程碑/);
+  assert.match(html, /下：任务/);
+  assert.match(html, /外：进展/);
 });

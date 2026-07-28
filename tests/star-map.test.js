@@ -242,8 +242,10 @@ test("Project Universe starts in observation mode before node selection", () => 
   assert.ok(focus.edges.every((state) => state === "default"));
   assert.match(html, /data-universe-state="default"/);
   assert.match(html, /data-detail-state="empty"/);
-  assert.match(html, /选择一个节点/);
-  assert.match(html, /Project Core 位于中心/);
+  assert.match(html, /这张图怎么读/);
+  assert.match(html, /左侧问题、右侧决策、上方里程碑、下方任务和外围进展/);
+  assert.match(html, /star-map-reading-guide/);
+  assert.match(html, /阅读路径/);
 });
 
 test("keyboard Escape clears selection and restores observation mode", () => {
@@ -335,7 +337,7 @@ test("keyboard Escape clears selection and restores observation mode", () => {
   assert.equal(attributes.get("decision:users:aria-pressed"), "false");
   assert.equal(attributes.get("visual:decision:users:data-focus-state"), "default");
   assert.equal(attributes.get("edge:1:data-focus-state"), "default");
-  assert.match(detail.innerHTML, /选择一个节点/);
+  assert.match(detail.innerHTML, /这张图怎么读/);
 });
 test("theme tokens, reduced motion, and mobile semantic fallback are present", () => {
   const css = readFileSync(
@@ -462,4 +464,19 @@ test("Project Universe polish defines quiet core, node identity, orbit atmospher
   assert.match(css, /data-orbit="execution"\][\s\S]*?stroke-dasharray: 3 18/);
   assert.match(css, /data-orbit="growth"\][\s\S]*?stroke-dasharray: 1 25/);
   assert.match(css, /data-focus-state="related"\] line[\s\S]*?--universe-trail-focus/);
+});
+
+test("Project Universe readability fix keeps labels and guidance legible", () => {
+  const html = renderStarMap(sampleGraph());
+  const css = readFileSync(new URL("../frontend/style.css", import.meta.url), "utf8");
+
+  assert.match(html, /star-map-reading-guide/);
+  assert.match(html, /这不是流程图/);
+  assert.match(html, /这张图怎么读/);
+  assert.match(html, /<tspan x="0"/);
+  assert.match(css, /Nexus AI v0\.8\.9 Project Universe Readability Fix/);
+  assert.match(css, /star-map-node-label[\s\S]*?font-size: 15px/);
+  assert.match(css, /star-map-node\[data-node-type="project"\] \.star-map-node-label[\s\S]*?font-size: 19px/);
+  assert.match(css, /star-map-orbit-label[\s\S]*?font-size: 13px/);
+  assert.match(css, /star-map-edge text[\s\S]*?font-size: 11px/);
 });
