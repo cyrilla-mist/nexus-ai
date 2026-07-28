@@ -45,6 +45,21 @@ function getNodeTypeLines(type) {
 
   return type === "milestone" ? ["\u91cc\u7a0b", "\u7891"] : [label];
 }
+
+export function getNodeTypeTextLayout(type) {
+  const lines = getNodeTypeLines(type);
+  const gap = type === "milestone" ? 16 : 0;
+  const middle = (lines.length - 1) / 2;
+
+  return Object.freeze(
+    lines.map((line, index) =>
+      Object.freeze({
+        text: line,
+        y: Number(((index - middle) * gap).toFixed(2))
+      })
+    )
+  );
+}
 const LAYER_LABELS = Object.freeze({
   core: "Project Core",
   understanding: "Understanding · 为什么开始",
@@ -625,19 +640,19 @@ export function getNodeLabelPlacement(node) {
   }
 
   if (node.type === "task") {
-    return "above";
-  }
-
-  if (node.type === "progress" || node.y < CENTER.y - 180) {
     return "below";
   }
 
-  if (node.x < CENTER.x - 250) {
-    return "right";
+  if (node.type === "milestone" || node.type === "progress" || node.y < CENTER.y - 180) {
+    return "above";
   }
 
-  if (node.x > CENTER.x + 250) {
+  if (node.type === "problem" || node.x < CENTER.x - 250) {
     return "left";
+  }
+
+  if (node.type === "decision" || node.x > CENTER.x + 250) {
+    return "right";
   }
 
   return node.y > CENTER.y ? "above" : "below";
@@ -679,11 +694,15 @@ export function getNodeLabelPosition(node, viewBox) {
     ? viewBox
     : { x: 0, y: 0, width: VIEWBOX.width, height: VIEWBOX.height };
   const placement = getNodeLabelPlacement(node);
+  const taskStagger = node.type === "task" ? Math.sign(node.x - SPATIAL_ZONES.task.x) : 0;
   const offsets = {
-    below: { x: 0, y: node.type === "project" ? 112 : node.size + 34 },
-    above: { x: 0, y: -(node.size + 58) },
-    left: { x: -(node.size + 56), y: 0 },
-    right: { x: node.size + 56, y: 0 }
+    below: {
+      x: node.type === "task" ? taskStagger * 92 : 0,
+      y: node.type === "project" ? 132 : node.type === "task" ? node.size + 96 + (taskStagger > 0 ? 26 : 0) : node.size + 56
+    },
+    above: { x: 0, y: node.type === "progress" ? -(node.size + 82) : -(node.size + 86) },
+    left: { x: -(node.size + 112), y: 0 },
+    right: { x: node.size + 112, y: 0 }
   };
   const offset = offsets[placement] ?? offsets.below;
   const rawLeft = ((node.x + offset.x - safeViewBox.x) / safeViewBox.width) * 100;
@@ -837,11 +856,11 @@ function renderNode(node, focusState = "default") {
           : ""
       }
       <circle class="star-map-node-body" r="${node.size}" />
-      <text class="star-map-node-glyph" text-anchor="middle" aria-hidden="true">
-        ${getNodeTypeLines(node.type)
+      <text class="star-map-node-glyph" x="0" y="0" text-anchor="middle" dominant-baseline="middle" aria-hidden="true">
+        ${getNodeTypeTextLayout(node.type)
           .map(
-            (line, index, lines) =>
-              `<tspan x="0" dy="${lines.length === 1 ? 5 : index === 0 ? -2 : 15}">${escapeMarkup(line)}</tspan>`
+            (line) =>
+              `<tspan x="0" y="${line.y}" dominant-baseline="middle">${escapeMarkup(line.text)}</tspan>`
           )
           .join("")}
       </text>

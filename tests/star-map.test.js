@@ -8,6 +8,7 @@ import {
   createStarMapView,
   getDefaultUniverseViewBox,
   getNodeTypeDisplayName,
+  getNodeTypeTextLayout,
   getNodeLabelPlacement,
   getNodeLabelPosition,
   getUniverseContentBounds,
@@ -533,11 +534,11 @@ test("Project Universe simplification keeps the default map quiet and focused", 
   assert.ok(projectLabel.left > 0 && projectLabel.left < 100);
   assert.ok(projectLabel.top > 0 && projectLabel.top < 100);
   assert.equal(getNodeLabelPlacement(project), "below");
-  assert.equal(getNodeLabelPlacement(problem), "right");
-  assert.equal(getNodeLabelPlacement(decision), "left");
-  assert.equal(getNodeLabelPlacement(milestone), "below");
-  assert.equal(getNodeLabelPlacement(task), "above");
-  assert.equal(getNodeLabelPlacement(progress), "below");
+  assert.equal(getNodeLabelPlacement(problem), "left");
+  assert.equal(getNodeLabelPlacement(decision), "right");
+  assert.equal(getNodeLabelPlacement(milestone), "above");
+  assert.equal(getNodeLabelPlacement(task), "below");
+  assert.equal(getNodeLabelPlacement(progress), "above");
 
   assert.match(css, /Nexus AI v0\.8\.12 Universe Simplification & Focus Mode/);
   assert.match(css, /\.star-map-spatial-legend\s*\{[\s\S]*?display: none/);
@@ -585,6 +586,16 @@ test("Project Universe uses full readable node type names inside nodes", () => {
   assert.match(css, /\.universe-node-type-label\s*\{[\s\S]*?font-size: 13px/);
   assert.match(css, /\.universe-node-type-label\[data-node-type="project"\][\s\S]*?font-size: 15px/);
   assert.match(css, /\.universe-node-type-label\[data-node-type="milestone"\][\s\S]*?font-size: 12px/);
+
+  assert.deepEqual(getNodeTypeTextLayout("project"), [{ text: "\u9879\u76ee", y: 0 }]);
+  assert.deepEqual(getNodeTypeTextLayout("milestone"), [
+    { text: "\u91cc\u7a0b", y: -8 },
+    { text: "\u7891", y: 8 }
+  ]);
+  assert.match(html, /class="star-map-node-glyph" x="0" y="0" text-anchor="middle" dominant-baseline="middle"/);
+  assert.match(html, /<tspan x="0" y="-8" dominant-baseline="middle">\u91cc\u7a0b<\/tspan><tspan x="0" y="8" dominant-baseline="middle">\u7891<\/tspan>/);
+  assert.match(css, /Nexus AI v0\.8\.14 Star Map Label Alignment Fix/);
+  assert.match(css, /\.project-space-panel\[data-space-panel="universe"\] \.star-map-node-glyph[\s\S]*?dominant-baseline: middle/);
 });
 
 test("Project Universe labels use inward placement and safe area clamping", () => {
@@ -599,17 +610,38 @@ test("Project Universe labels use inward placement and safe area clamping", () =
   const decisionLabel = getNodeLabelPosition(decision, view.viewBox);
   const taskLabel = getNodeLabelPosition(task, view.viewBox);
 
-  assert.equal(getNodeLabelPlacement(problem), "right");
-  assert.equal(getNodeLabelPlacement(decision), "left");
-  assert.equal(getNodeLabelPlacement(task), "above");
+  assert.equal(getNodeLabelPlacement(problem), "left");
+  assert.equal(getNodeLabelPlacement(decision), "right");
+  assert.equal(getNodeLabelPlacement(task), "below");
   assert.equal(getNodeLabelPlacement(project), "below");
-  assert.equal(getNodeLabelPlacement(progress), "below");
+  assert.equal(getNodeLabelPlacement(progress), "above");
   assert.ok(problemLabel.left >= 6);
-  assert.ok(problemLabel.left <= 58);
-  assert.ok(decisionLabel.left <= 74);
+  assert.ok(problemLabel.left >= 22);
+  assert.ok(decisionLabel.left <= 58);
   assert.ok(taskLabel.top <= 91);
+  assert.ok(taskLabel.top > 80);
 });
 
+test("Project Universe staggers task labels below the nodes", () => {
+  const graph = sampleGraph();
+  graph.nodes.push({
+    id: "task:scene",
+    type: "task",
+    title: "\u8bb0\u5f55\u4f7f\u7528\u573a\u666f",
+    criteria: "\u5f62\u6210\u573a\u666f\u6e05\u5355",
+    status: "todo"
+  });
+  graph.edges.push({ from: "milestone:research", to: "task:scene", relation: "contains" });
+
+  const view = createStarMapView(graph);
+  const tasks = view.nodes.filter((node) => node.type === "task");
+  const labels = tasks.map((node) => getNodeLabelPosition(node, view.viewBox));
+
+  assert.equal(tasks.length, 2);
+  assert.ok(labels.every((label) => label.placement === "below"));
+  assert.ok(Math.abs(labels[0].left - labels[1].left) >= 18);
+  assert.ok(labels.every((label) => label.top <= 91));
+});
 test("Project Universe Inspector close control is geometric and font-independent", () => {
   const source = readFileSync(new URL("../frontend/star-map.js", import.meta.url), "utf8");
   const css = readFileSync(new URL("../frontend/style.css", import.meta.url), "utf8");

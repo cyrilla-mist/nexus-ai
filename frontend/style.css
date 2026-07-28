@@ -5286,3 +5286,82 @@ body.demo-body .demo-case-note {
     transition: none;
   }
 }
+
+/* Nexus AI v0.8.14 Star Map Label Alignment Fix */
+.project-space-panel[data-space-panel="universe"] .star-map-node-glyph {
+  opacity: 1;
+  dominant-baseline: middle;
+  alignment-baseline: middle;
+  font-size: 13px;
+  line-height: 1;
+  transform: none;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-node[data-node-type="project"] .star-map-node-glyph {
+  font-size: 15px;
+  font-weight: 820;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-node[data-node-type="milestone"] .star-map-node-glyph,
+.project-space-panel[data-space-panel="universe"] .star-map-node[data-node-type="task"] .star-map-node-glyph,
+.project-space-panel[data-space-panel="universe"] .star-map-node[data-node-type="progress"] .star-map-node-glyph {
+  font-size: 12px;
+}
+
+.project-space-panel[data-space-panel="universe"] .universe-node-type-layer {
+  display: none;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label {
+  --label-clearance: 18px;
+  z-index: 7;
+  max-inline-size: 176px;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-node-type="project"] {
+  max-inline-size: 240px;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-node-type="task"] {
+  max-inline-size: 168px;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-label-placement="above"] {
+  transform: translate(-50%, calc(-100% - var(--label-clearance))) scale(0.98);
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-label-placement="below"] {
+  transform: translate(-50%, var(--label-clearance)) scale(0.98);
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-label-placement="left"] {
+  transform: translate(calc(-100% - var(--label-clearance)), -50%) scale(0.98);
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-label-placement="right"] {
+  transform: translate(var(--label-clearance), -50%) scale(0.98);
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-label-placement="above"][data-focus-state="selected"],
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-label-placement="above"][data-focus-state="hovered"],
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-label-placement="above"][data-focus-state="related"] {
+  transform: translate(-50%, calc(-100% - var(--label-clearance))) scale(1.04);
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-label-placement="below"][data-focus-state="selected"],
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-label-placement="below"][data-focus-state="hovered"],
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-label-placement="below"][data-focus-state="related"] {
+  transform: translate(-50%, var(--label-clearance)) scale(1.04);
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-label-placement="left"][data-focus-state="selected"],
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-label-placement="left"][data-focus-state="hovered"],
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-label-placement="left"][data-focus-state="related"] {
+  transform: translate(calc(-100% - var(--label-clearance)), -50%) scale(1.04);
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-label-placement="right"][data-focus-state="selected"],
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-label-placement="right"][data-focus-state="hovered"],
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-label-placement="right"][data-focus-state="related"] {
+  transform: translate(var(--label-clearance), -50%) scale(1.04);
+}
