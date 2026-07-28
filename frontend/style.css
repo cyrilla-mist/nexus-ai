@@ -5093,3 +5093,196 @@ body.demo-body .demo-case-note {
     display: none;
   }
 }
+
+/* Nexus AI v0.8.13 Node Label & Inspector Boundary Fix */
+.project-space-panel[data-space-panel="universe"] .star-map-stage {
+  --universe-selected-map-shift: clamp(-84px, -5vw, -56px);
+  --universe-label-safe-max: 190px;
+  --universe-project-label-safe-max: 260px;
+}
+
+.universe-node-type-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  transform: translateX(0);
+  transition: transform 180ms ease;
+}
+
+.universe-node-type-label {
+  position: absolute;
+  left: var(--node-type-x);
+  top: var(--node-type-y);
+  display: grid;
+  place-items: center;
+  gap: 0;
+  min-inline-size: 2.4em;
+  color: color-mix(in srgb, var(--text-primary) 88%, transparent);
+  font-size: 13px;
+  font-weight: 760;
+  line-height: 1.04;
+  letter-spacing: 0.02em;
+  text-align: center;
+  text-shadow: 0 1px 8px color-mix(in srgb, var(--surface-primary) 62%, transparent);
+  transform: translate(-50%, -50%);
+  transition: opacity 180ms ease, color 180ms ease, transform 180ms ease;
+  user-select: none;
+}
+
+.universe-node-type-label[data-node-type="project"] {
+  color: color-mix(in srgb, var(--star-project-text) 94%, var(--text-primary));
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.universe-node-type-label[data-node-type="milestone"] {
+  font-size: 12px;
+  line-height: 1.02;
+}
+
+.universe-node-type-label[data-node-type="task"],
+.universe-node-type-label[data-node-type="progress"] {
+  font-size: 12px;
+  font-weight: 740;
+}
+
+.universe-node-type-label[data-focus-state="dimmed"] {
+  opacity: 0.62;
+}
+
+.universe-node-type-label[data-focus-state="selected"],
+.universe-node-type-label[data-focus-state="hovered"],
+.universe-node-type-label[data-focus-state="related"] {
+  color: var(--text-primary);
+  opacity: 1;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-node-glyph {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-canvas,
+.project-space-panel[data-space-panel="universe"] .universe-node-type-layer,
+.project-space-panel[data-space-panel="universe"] .universe-label-layer {
+  transition: transform 180ms ease;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-stage[data-universe-state="selected"] .star-map-canvas,
+.project-space-panel[data-space-panel="universe"] .star-map-stage[data-universe-state="selected"] .universe-node-type-layer,
+.project-space-panel[data-space-panel="universe"] .star-map-stage[data-universe-state="selected"] .universe-label-layer {
+  transform: translateX(var(--universe-selected-map-shift));
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label {
+  max-inline-size: var(--universe-label-safe-max);
+  overflow: visible;
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: anywhere;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-node-type="project"] {
+  max-inline-size: var(--universe-project-label-safe-max);
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label strong {
+  max-inline-size: inherit;
+  line-height: 1.28;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label strong span {
+  display: block;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label-type {
+  display: none;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-label-placement="right"] {
+  text-align: left;
+  transform: translate(0, -50%) scale(0.98);
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-label-placement="left"] {
+  text-align: right;
+  transform: translate(-100%, -50%) scale(0.98);
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-label-placement="right"][data-focus-state="selected"],
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-label-placement="right"][data-focus-state="hovered"],
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-label-placement="right"][data-focus-state="related"] {
+  transform: translate(0, -50%) scale(1.04);
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-label-placement="left"][data-focus-state="selected"],
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-label-placement="left"][data-focus-state="hovered"],
+.project-space-panel[data-space-panel="universe"] .star-map-screen-label[data-label-placement="left"][data-focus-state="related"] {
+  transform: translate(-100%, -50%) scale(1.04);
+}
+
+.star-map-detail-close {
+  inline-size: 38px;
+  block-size: 38px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border-radius: 50%;
+  line-height: 1;
+  flex-shrink: 0;
+  isolation: isolate;
+}
+
+.star-map-detail-close span {
+  display: none;
+}
+
+.star-map-detail-close::before,
+.star-map-detail-close::after {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  inline-size: 14px;
+  block-size: 2px;
+  border-radius: 999px;
+  background: currentColor;
+  content: "";
+  transform-origin: center;
+}
+
+.star-map-detail-close::before {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.star-map-detail-close::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.star-map-detail-close:hover {
+  background: color-mix(in srgb, var(--surface-soft) 86%, var(--accent) 10%);
+}
+
+.star-map-detail-close:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+@media (max-width: 760px) {
+  .universe-node-type-layer {
+    display: none;
+  }
+
+  .project-space-panel[data-space-panel="universe"] .star-map-stage[data-universe-state="selected"] .star-map-canvas,
+  .project-space-panel[data-space-panel="universe"] .star-map-stage[data-universe-state="selected"] .universe-label-layer {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .universe-node-type-label,
+  .universe-node-type-layer,
+  .project-space-panel[data-space-panel="universe"] .star-map-canvas,
+  .project-space-panel[data-space-panel="universe"] .universe-label-layer {
+    transition: none;
+  }
+}

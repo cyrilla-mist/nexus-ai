@@ -20,21 +20,31 @@ const ORBITS = Object.freeze({
 });
 const NODE_SIZES = Object.freeze({
   project: 86,
-  problem: 42,
-  decision: 44,
-  milestone: 50,
-  task: 34,
-  progress: 26,
+  problem: 48,
+  decision: 50,
+  milestone: 57,
+  task: 38,
+  progress: 30,
   context: 22
 });
 const TYPE_LABELS = Object.freeze({
-  project: "项目",
-  problem: "问题",
-  decision: "决策",
-  milestone: "里程碑",
-  task: "任务",
-  progress: "进展"
+  project: "\u9879\u76ee",
+  problem: "\u95ee\u9898",
+  decision: "\u51b3\u7b56",
+  milestone: "\u91cc\u7a0b\u7891",
+  task: "\u4efb\u52a1",
+  progress: "\u8fdb\u5c55"
 });
+
+export function getNodeTypeDisplayName(type) {
+  return TYPE_LABELS[String(type ?? "")] ?? "\u4e0a\u4e0b\u6587";
+}
+
+function getNodeTypeLines(type) {
+  const label = getNodeTypeDisplayName(type);
+
+  return type === "milestone" ? ["\u91cc\u7a0b", "\u7891"] : [label];
+}
 const LAYER_LABELS = Object.freeze({
   core: "Project Core",
   understanding: "Understanding · 为什么开始",
@@ -623,14 +633,45 @@ export function getNodeLabelPlacement(node) {
   }
 
   if (node.x < CENTER.x - 250) {
-    return "left";
-  }
-
-  if (node.x > CENTER.x + 250) {
     return "right";
   }
 
+  if (node.x > CENTER.x + 250) {
+    return "left";
+  }
+
   return node.y > CENTER.y ? "above" : "below";
+}
+
+function getLabelMetrics(node) {
+  return Object.freeze({
+    widthPercent: node.type === "project" ? 22 : 16,
+    heightPercent: node.type === "project" ? 8 : 7
+  });
+}
+
+function clampLabelPercent(left, top, placement, metrics) {
+  const safe = { left: 6, right: 74, top: 7, bottom: 91 };
+  let nextLeft = left;
+  let nextTop = top;
+
+  if (placement === "left") {
+    nextLeft = clampNumber(nextLeft, safe.left + metrics.widthPercent, safe.right);
+  } else if (placement === "right") {
+    nextLeft = clampNumber(nextLeft, safe.left, safe.right - metrics.widthPercent);
+  } else {
+    nextLeft = clampNumber(nextLeft, safe.left + metrics.widthPercent / 2, safe.right - metrics.widthPercent / 2);
+  }
+
+  if (placement === "above") {
+    nextTop = clampNumber(nextTop, safe.top + metrics.heightPercent, safe.bottom);
+  } else if (placement === "below") {
+    nextTop = clampNumber(nextTop, safe.top, safe.bottom - metrics.heightPercent);
+  } else {
+    nextTop = clampNumber(nextTop, safe.top + metrics.heightPercent / 2, safe.bottom - metrics.heightPercent / 2);
+  }
+
+  return { left: nextLeft, top: nextTop };
 }
 
 export function getNodeLabelPosition(node, viewBox) {
@@ -641,22 +682,23 @@ export function getNodeLabelPosition(node, viewBox) {
   const offsets = {
     below: { x: 0, y: node.type === "project" ? 112 : node.size + 34 },
     above: { x: 0, y: -(node.size + 58) },
-    left: { x: -(node.size + 62), y: node.size + 18 },
-    right: { x: node.size + 62, y: node.size + 18 }
+    left: { x: -(node.size + 56), y: 0 },
+    right: { x: node.size + 56, y: 0 }
   };
   const offset = offsets[placement] ?? offsets.below;
-  const left = ((node.x + offset.x - safeViewBox.x) / safeViewBox.width) * 100;
-  const top = ((node.y + offset.y - safeViewBox.y) / safeViewBox.height) * 100;
+  const rawLeft = ((node.x + offset.x - safeViewBox.x) / safeViewBox.width) * 100;
+  const rawTop = ((node.y + offset.y - safeViewBox.y) / safeViewBox.height) * 100;
+  const safePosition = clampLabelPercent(rawLeft, rawTop, placement, getLabelMetrics(node));
 
   return Object.freeze({
-    left: Number(clampNumber(left, 4, 96).toFixed(3)),
-    top: Number(clampNumber(top, 6, 92).toFixed(3)),
+    left: Number(safePosition.left.toFixed(3)),
+    top: Number(safePosition.top.toFixed(3)),
     placement
   });
 }
 
 function renderScreenLabel(node, viewBox, focusState = "default") {
-  const typeLabel = TYPE_LABELS[node.type] ?? "上下文";
+  const typeLabel = getNodeTypeDisplayName(node.type);
   const maximum = node.type === "project" ? 18 : 14;
   const lines = labelLines(node.title, maximum);
   const position = getNodeLabelPosition(node, viewBox);
@@ -672,7 +714,6 @@ function renderScreenLabel(node, viewBox, focusState = "default") {
       style="--label-x: ${position.left}%; --label-y: ${position.top}%;"
       aria-hidden="true"
     >
-      <span class="star-map-screen-label-type">${escapeMarkup(typeLabel)}</span>
       <strong>${lines.map((line) => `<span>${escapeMarkup(line)}</span>`).join("")}</strong>
     </div>
   `;
@@ -716,6 +757,34 @@ function renderOrbit(radius, { key, title }) {
   `;
 }
 
+function getNodeCenterPosition(node, viewBox) {
+  const safeViewBox = isPlainObject(viewBox)
+    ? viewBox
+    : { x: 0, y: 0, width: VIEWBOX.width, height: VIEWBOX.height };
+
+  return Object.freeze({
+    left: Number((((node.x - safeViewBox.x) / safeViewBox.width) * 100).toFixed(3)),
+    top: Number((((node.y - safeViewBox.y) / safeViewBox.height) * 100).toFixed(3))
+  });
+}
+
+function renderNodeTypeLabel(node, viewBox, focusState = "default") {
+  const position = getNodeCenterPosition(node, viewBox);
+  const lines = getNodeTypeLines(node.type);
+
+  return `
+    <div
+      class="universe-node-type-label"
+      data-star-type-label-id="${escapeMarkup(node.id)}"
+      data-node-type="${escapeMarkup(node.type)}"
+      data-focus-state="${escapeMarkup(focusState)}"
+      style="--node-type-x: ${position.left}%; --node-type-y: ${position.top}%;"
+      aria-hidden="true"
+    >
+      ${lines.map((line) => `<span>${escapeMarkup(line)}</span>`).join("")}
+    </div>
+  `;
+}
 function renderEdge(edge, index, focusState = "default") {
   const strength = RELATION_STRENGTH[edge.relation] ?? "secondary";
 
@@ -741,7 +810,7 @@ function renderEdge(edge, index, focusState = "default") {
 }
 
 function renderNode(node, focusState = "default") {
-  const typeLabel = TYPE_LABELS[node.type] ?? "上下文";
+  const typeLabel = getNodeTypeDisplayName(node.type);
   const selected = focusState === "selected";
   const inContextPath = ["selected", "related", "hovered"].includes(focusState);
 
@@ -768,7 +837,14 @@ function renderNode(node, focusState = "default") {
           : ""
       }
       <circle class="star-map-node-body" r="${node.size}" />
-      <text class="star-map-node-glyph" y="4" text-anchor="middle" aria-hidden="true">${escapeMarkup(typeLabel.slice(0, 1))}</text>
+      <text class="star-map-node-glyph" text-anchor="middle" aria-hidden="true">
+        ${getNodeTypeLines(node.type)
+          .map(
+            (line, index, lines) =>
+              `<tspan x="0" dy="${lines.length === 1 ? 5 : index === 0 ? -2 : 15}">${escapeMarkup(line)}</tspan>`
+          )
+          .join("")}
+      </text>
     </g>
   `;
 }
@@ -807,7 +883,7 @@ function renderSemanticOutline(nodes) {
                           aria-controls="star-map-detail"
                           aria-pressed="false"
                         >
-                          <span>${escapeMarkup(TYPE_LABELS[node.type] ?? "上下文")}</span>
+                          <span>${escapeMarkup(getNodeTypeDisplayName(node.type))}</span>
                           <strong>${escapeMarkup(node.title)}</strong>
                           ${
                             node.status
@@ -862,11 +938,11 @@ function renderStarMapDetail(node, nodes, edges) {
 
   const nodesById = new Map(nodes.map((item) => [item.id, item]));
   const relationships = relatedEdges(node?.id, edges);
-  const typeLabel = TYPE_LABELS[node.type] ?? "上下文";
+  const typeLabel = getNodeTypeDisplayName(node.type);
 
   return `
     <div class="star-map-explanation-space">
-      <button class="star-map-detail-close" type="button" data-star-map-close aria-label="关闭 Context Inspector">×</button>
+      <button class="star-map-detail-close" type="button" data-star-map-close aria-label="关闭详情"><span aria-hidden="true"></span></button>
       <p class="section-kicker">Context Inspector</p>
       <h4>${escapeMarkup(node.title)}</h4>
       <dl class="star-map-detail-grid" aria-label="节点上下文说明">
@@ -999,6 +1075,11 @@ export function renderStarMap(contextMap = {}) {
               .map((node) => renderNode(node, initialFocus.nodes[node.id]))
               .join("")}
           </svg>
+          <div class="universe-node-type-layer" aria-hidden="true">
+            ${view.nodes
+              .map((node) => renderNodeTypeLabel(node, view.viewBox, initialFocus.nodes[node.id]))
+              .join("")}
+          </div>
           <div class="universe-label-layer" aria-hidden="true">
             ${view.nodes
               .map((node) => renderScreenLabel(node, view.viewBox, initialFocus.nodes[node.id]))
@@ -1040,6 +1121,11 @@ export function bindStarMapInteractions(container, contextMap = {}) {
       ".star-map-edge[data-edge-index]"
     ) ?? [])
   ];
+  const visualTypeLabels = [
+    ...(container?.querySelectorAll?.(
+      ".universe-node-type-label[data-star-type-label-id]"
+    ) ?? [])
+  ];
   const visualLabels = [
     ...(container?.querySelectorAll?.(
       ".star-map-screen-label[data-star-label-id]"
@@ -1069,6 +1155,9 @@ export function bindStarMapInteractions(container, contextMap = {}) {
         visualEdges.forEach((item) => {
           const index = Number(item.dataset.edgeIndex);
           item.setAttribute("data-focus-state", focus.edges[index] ?? "default");
+        });
+        visualTypeLabels.forEach((item) => {
+          item.setAttribute("data-focus-state", "default");
         });
         visualLabels.forEach((item) => {
           item.setAttribute("data-focus-state", "default");
@@ -1112,6 +1201,19 @@ export function bindStarMapInteractions(container, contextMap = {}) {
       const index = Number(item.dataset.edgeIndex);
       item.setAttribute("data-focus-state", focus.edges[index] ?? "quiet");
     });
+    visualTypeLabels.forEach((item) => {
+      const itemId = String(item.dataset.starTypeLabelId ?? "");
+      const state = focus.nodes[itemId] ?? "dimmed";
+      item.setAttribute(
+        "data-focus-state",
+        preview
+          ? itemId === node.id
+            ? "hovered"
+            : "default"
+          : state
+      );
+    });
+
     visualLabels.forEach((item) => {
       const itemId = String(item.dataset.starLabelId ?? "");
       const state = focus.nodes[itemId] ?? "dimmed";

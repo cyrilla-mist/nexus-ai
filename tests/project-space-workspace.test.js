@@ -152,7 +152,9 @@ test("Universe keeps guide compact and uses focus labels instead of default clut
   assert.doesNotMatch(html, /star-map-spatial-legend/);
   assert.match(html, /universe-label-layer/);
   assert.match(html, /data-label-placement="/);
-  assert.match(html, /star-map-screen-label-type/);
+  assert.match(html, /universe-node-type-layer/);
+  assert.match(html, /universe-node-type-label/);
+  assert.doesNotMatch(html, /star-map-screen-label-type/);
   assert.doesNotMatch(html, /class="star-map-reading-guide"/);
 });
 
