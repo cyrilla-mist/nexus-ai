@@ -52,14 +52,16 @@ function workspaceExperience() {
 
 const css = readFileSync(new URL("../frontend/style.css", import.meta.url), "utf8");
 
-test("Workspace Shell renders compact header, sidebar, and main space", () => {
+test("Workspace Shell integrates project identity into spatial navigation", () => {
   const html = renderProjectSpace(workspaceExperience());
 
-  assert.match(html, /project-space-app-header/);
+  assert.doesNotMatch(html, /project-space-app-header/);
+  assert.match(html, /project-space-project-anchor/);
+  assert.match(html, /project-space-mobile-anchor/);
   assert.match(html, /project-workspace-shell/);
   assert.match(html, /project-space-sidebar/);
   assert.match(html, /project-space-main/);
-  assert.match(html, /Read-only Context Workspace/);
+  assert.match(html, /Context linked · Growth visible/);
 });
 
 test("Sidebar provides five native, keyboard-accessible workspace controls", () => {

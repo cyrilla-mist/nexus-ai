@@ -17,30 +17,38 @@
   </head>
   <body>
     <main class="shell">
-      <header class="hero" id="nexus-entry">
-        <div class="hero-toolbar">
-          <p class="eyebrow">Nexus AI · Space Entry</p>
-          <button
-            id="theme-toggle"
-            class="theme-toggle"
-            type="button"
-            aria-pressed="false"
-          >
-            切换至静谧深空
-          </button>
-        </div>
+      <header class="hero nexus-hero" id="nexus-entry">
+        <button
+          id="theme-toggle"
+          class="theme-toggle hero-theme-toggle"
+          type="button"
+          aria-pressed="false"
+          aria-label="切换 Nexus 主题"
+        >
+          切换至静谧深空
+        </button>
+
         <div class="hero-entry-layout">
-          <div>
-            <p class="hero-orientation">理解项目 · 连接上下文 · 看见成长</p>
-            <h1>进入一个让想法<span>逐步成为项目</span>的空间。</h1>
+          <div class="hero-identity-block">
+            <p class="hero-brand">Nexus AI</p>
+            <p class="hero-product-position">AI Project Intelligence Space</p>
+            <h1 class="hero-slogan">
+              <span>Connect ideas,</span>
+              <span>create possibilities.</span>
+            </h1>
             <p class="hero-copy">
-              Nexus 将项目理解、历史上下文、成长阶段和当前行动组织在同一个 Project Space 中。
+              把想法、决策、行动与成长连接成一个可探索、可继续推进的项目空间。
             </p>
+            <div class="hero-entry-actions">
+              <a class="hero-enter-action" href="#entry-space">进入项目空间</a>
+              <span>Context · Growth · Exploration</span>
+            </div>
           </div>
+
           <ol class="entry-route" aria-label="Nexus 项目旅程">
             <li><span>01</span><strong>创建项目</strong><small>从不完整的想法开始</small></li>
-            <li><span>02</span><strong>理解上下文</strong><small>形成项目画像与路径</small></li>
-            <li><span>03</span><strong>探索空间</strong><small>查看关系、阶段与行动</small></li>
+            <li><span>02</span><strong>连接上下文</strong><small>理解问题、决策与方向</small></li>
+            <li><span>03</span><strong>探索成长</strong><small>查看阶段、关系与行动</small></li>
           </ol>
         </div>
       </header>

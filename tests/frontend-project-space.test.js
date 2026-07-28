@@ -47,7 +47,7 @@ test("Project Space renders Experience output without changing it", () => {
   const before = structuredClone(experience);
   const html = renderProjectSpace(experience);
 
-  assert.match(html, /Read-only Context Workspace/);
+  assert.match(html, /Context linked · Growth visible/);
   assert.match(html, /校园环保项目/);
   assert.match(html, /Explore/);
   assert.match(html, /完成 20 份用户访谈/);

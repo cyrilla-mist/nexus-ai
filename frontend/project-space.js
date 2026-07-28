@@ -215,25 +215,22 @@ export function renderProjectSpace(experience = {}) {
 
   return `
     <section class="project-space" aria-labelledby="project-space-title">
-      <header class="project-space-app-header">
-        <div class="project-space-identity">
-          <p class="eyebrow">Nexus Project Space</p>
-          <div>
-            <h2 id="project-space-title">${escapeHtml(title)}</h2>
-            <span class="project-space-stage">${escapeHtml(stage)}</span>
-          </div>
-        </div>
-        <p class="project-space-context-status">
-          <span aria-hidden="true"></span>
-          Read-only Context Workspace
-        </p>
-      </header>
-
       <div class="project-workspace-shell">
         ${renderTabControls()}
         <nav class="project-space-sidebar" aria-label="Project Space 导航">
+          <div class="project-space-project-anchor">
+            <p class="eyebrow">Nexus AI · Project Space</p>
+            <h2 id="project-space-title">${escapeHtml(title)}</h2>
+            <div class="project-space-anchor-meta">
+              <span class="project-space-stage">${escapeHtml(stage)}</span>
+              <span class="project-space-context-status">
+                <i aria-hidden="true"></i>
+                Context linked · Growth visible
+              </span>
+            </div>
+          </div>
           <div class="project-space-sidebar-heading">
-            <span>Project views</span>
+            <span>Explore space</span>
             <strong>${escapeHtml(stage)}</strong>
           </div>
           <div class="project-space-navigation">
@@ -245,6 +242,11 @@ export function renderProjectSpace(experience = {}) {
         </nav>
 
         <main class="project-space-main" tabindex="-1">
+          <div class="project-space-mobile-anchor" aria-hidden="true">
+            <span>Nexus AI</span>
+            <strong>${escapeHtml(title)}</strong>
+            <small>${escapeHtml(stage)}</small>
+          </div>
           ${renderPanel("overview", "Project Overview", renderOverview(overview))}
           ${renderPanel("journey", "Project Journey", renderJourney(journey))}
           ${renderPanel("context", "Context Space", renderContextMap(contextMap))}
