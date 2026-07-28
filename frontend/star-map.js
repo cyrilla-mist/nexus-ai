@@ -1,4 +1,17 @@
 const VIEWBOX = Object.freeze({ width: 1500, height: 940 });
+const CAMERA = Object.freeze({
+  minWidth: 1180,
+  minHeight: 760,
+  maxWidth: 1260,
+  maxHeight: 840,
+  horizontalPadding: 116,
+  verticalPadding: 92,
+  labelPaddingX: 96,
+  labelPaddingTop: 48,
+  labelPaddingBottom: 86,
+  inspectorSafeRight: 84,
+  inspectorSafeBottom: 52
+});
 const CENTER = Object.freeze({ x: 750, y: 520 });
 const ORBITS = Object.freeze({
   understanding: 330,
@@ -274,6 +287,98 @@ function edgeCrossesCore(edge, from, to) {
 
   return distance < NODE_SIZES.project + 34;
 }
+function clampNumber(value, min, max) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function normalizeBounds(bounds) {
+  return Object.freeze({
+    minX: Number(bounds.minX.toFixed(2)),
+    minY: Number(bounds.minY.toFixed(2)),
+    maxX: Number(bounds.maxX.toFixed(2)),
+    maxY: Number(bounds.maxY.toFixed(2)),
+    width: Number((bounds.maxX - bounds.minX).toFixed(2)),
+    height: Number((bounds.maxY - bounds.minY).toFixed(2))
+  });
+}
+
+export function getUniverseContentBounds(nodes = []) {
+  const positionedNodes = Array.isArray(nodes) ? nodes.filter(isPlainObject) : [];
+
+  if (positionedNodes.length === 0) {
+    return normalizeBounds({ minX: 0, minY: 0, maxX: 0, maxY: 0 });
+  }
+
+  const bounds = positionedNodes.reduce(
+    (current, node) => {
+      const size = Number.isFinite(node.size) ? node.size : NODE_SIZES.context;
+      const labelWidth = Math.min(
+        CAMERA.labelPaddingX + Array.from(normalizeText(node.title)).length * 2.8,
+        node.type === "project" ? 156 : 132
+      );
+      const topPadding = size + CAMERA.labelPaddingTop;
+      const bottomPadding = size + CAMERA.labelPaddingBottom;
+
+      return {
+        minX: Math.min(current.minX, node.x - size - labelWidth),
+        minY: Math.min(current.minY, node.y - topPadding),
+        maxX: Math.max(current.maxX, node.x + size + labelWidth),
+        maxY: Math.max(current.maxY, node.y + bottomPadding)
+      };
+    },
+    { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity }
+  );
+
+  return normalizeBounds(bounds);
+}
+
+export function getDefaultUniverseViewBox(nodes = []) {
+  const bounds = getUniverseContentBounds(nodes);
+
+  if (bounds.width === 0 && bounds.height === 0) {
+    return Object.freeze({ x: 0, y: 0, width: VIEWBOX.width, height: VIEWBOX.height });
+  }
+
+  const desiredWidth = clampNumber(
+    bounds.width + CAMERA.horizontalPadding * 2 + CAMERA.inspectorSafeRight,
+    CAMERA.minWidth,
+    CAMERA.maxWidth
+  );
+  const desiredHeight = clampNumber(
+    bounds.height + CAMERA.verticalPadding * 2 + CAMERA.inspectorSafeBottom,
+    CAMERA.minHeight,
+    CAMERA.maxHeight
+  );
+  const projectNode = nodes.find?.((node) => node?.type === "project");
+  const focusX = Number.isFinite(projectNode?.x)
+    ? projectNode.x
+    : (bounds.minX + bounds.maxX) / 2;
+  const focusY = Number.isFinite(projectNode?.y)
+    ? projectNode.y
+    : (bounds.minY + bounds.maxY) / 2;
+  const boundsCenterX = (bounds.minX + bounds.maxX) / 2;
+  const boundsCenterY = (bounds.minY + bounds.maxY) / 2;
+  const centerX = focusX * 0.72 + boundsCenterX * 0.28;
+  const centerY = focusY * 0.78 + boundsCenterY * 0.22;
+  const minX = Math.max(0, bounds.maxX - desiredWidth);
+  const maxX = Math.min(bounds.minX, VIEWBOX.width - desiredWidth);
+  const minY = Math.max(0, bounds.maxY - desiredHeight);
+  const maxY = Math.min(bounds.minY, VIEWBOX.height - desiredHeight);
+  const rawX = centerX - desiredWidth / 2;
+  const rawY = centerY - desiredHeight / 2;
+
+  return Object.freeze({
+    x: Number(clampNumber(rawX, minX, maxX).toFixed(2)),
+    y: Number(clampNumber(rawY, minY, maxY).toFixed(2)),
+    width: Number(desiredWidth.toFixed(2)),
+    height: Number(desiredHeight.toFixed(2))
+  });
+}
+
+function formatViewBox(viewBox) {
+  return `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`;
+}
+
 
 function freezeView(view) {
   return Object.freeze({
@@ -305,6 +410,8 @@ export function createStarMapView(contextMap = {}) {
     return freezeView({
       width: VIEWBOX.width,
       height: VIEWBOX.height,
+      viewBox: Object.freeze({ x: 0, y: 0, width: VIEWBOX.width, height: VIEWBOX.height }),
+      contentBounds: getUniverseContentBounds([]),
       center: Object.freeze({ ...CENTER }),
       nodes: [],
       edges: []
@@ -384,9 +491,14 @@ export function createStarMapView(contextMap = {}) {
     })
     .filter(Boolean);
 
+  const contentBounds = getUniverseContentBounds(laidOut);
+  const viewBox = getDefaultUniverseViewBox(laidOut);
+
   return freezeView({
     width: VIEWBOX.width,
     height: VIEWBOX.height,
+    viewBox: Object.freeze(viewBox),
+    contentBounds,
     center: Object.freeze({ ...CENTER }),
     nodes: laidOut,
     edges
@@ -769,12 +881,15 @@ export function renderStarMap(contextMap = {}) {
           <svg
             class="star-map-canvas"
             data-selected-node=""
-            viewBox="0 0 ${view.width} ${view.height}"
+            viewBox="${formatViewBox(view.viewBox)}"
+            preserveAspectRatio="xMidYMid meet"
+            data-camera="default"
+            data-camera-viewbox="${formatViewBox(view.viewBox)}"
             role="img"
             aria-labelledby="star-map-svg-title star-map-svg-description"
           >
             <title id="star-map-svg-title">项目上下文星图</title>
-            <desc id="star-map-svg-description">项目位于中心，理解、执行与成长节点沿不同轨道排列。</desc>
+            <desc id="star-map-svg-description">默认 Camera 会聚焦有效节点区域，而不是展示完整虚拟画布；项目位于中心，理解、执行与成长节点沿不同轨道排列。</desc>
             <defs>
               <marker
                 id="star-map-arrow"

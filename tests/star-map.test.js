@@ -6,6 +6,8 @@ import {
   bindStarMapInteractions,
   createStarMapFocusState,
   createStarMapView,
+  getDefaultUniverseViewBox,
+  getUniverseContentBounds,
   renderStarMap
 } from "../frontend/star-map.js";
 
@@ -479,4 +481,40 @@ test("Project Universe readability fix keeps labels and guidance legible", () =>
   assert.match(css, /star-map-node\[data-node-type="project"\] \.star-map-node-label[\s\S]*?font-size: 19px/);
   assert.match(css, /star-map-orbit-label[\s\S]*?font-size: 13px/);
   assert.match(css, /star-map-edge text[\s\S]*?font-size: 11px/);
+});
+
+test("Project Universe camera uses content bounds instead of the full virtual canvas", () => {
+  const view = createStarMapView(sampleGraph());
+  const bounds = getUniverseContentBounds(view.nodes);
+  const camera = getDefaultUniverseViewBox(view.nodes);
+  const html = renderStarMap(sampleGraph());
+  const project = view.nodes.find((node) => node.type === "project");
+  const problem = view.nodes.find((node) => node.type === "problem");
+  const decision = view.nodes.find((node) => node.type === "decision");
+  const milestone = view.nodes.find((node) => node.type === "milestone");
+  const task = view.nodes.find((node) => node.type === "task");
+  const progress = view.nodes.find((node) => node.type === "progress");
+  const primaryNodeSpan = decision.x - problem.x;
+
+  assert.deepEqual(view.contentBounds, bounds);
+  assert.deepEqual(view.viewBox, camera);
+  assert.notDeepEqual(view.viewBox, { x: 0, y: 0, width: 1500, height: 940 });
+  assert.ok(view.viewBox.width < view.width);
+  assert.ok(view.viewBox.height < view.height);
+  assert.ok(bounds.minX >= view.viewBox.x);
+  assert.ok(bounds.maxX <= view.viewBox.x + view.viewBox.width);
+  assert.ok(bounds.minY >= view.viewBox.y);
+  assert.ok(bounds.maxY <= view.viewBox.y + view.viewBox.height);
+  assert.ok(primaryNodeSpan / view.viewBox.width >= 0.7);
+  assert.ok(project.x > view.viewBox.x + view.viewBox.width * 0.42);
+  assert.ok(project.x < view.viewBox.x + view.viewBox.width * 0.58);
+  assert.ok(problem.x < project.x);
+  assert.ok(decision.x > project.x);
+  assert.ok(milestone.y < project.y);
+  assert.ok(task.y > project.y);
+  assert.ok(progress.y < milestone.y);
+  assert.match(html, /viewBox="120\.28 41 1260 840"/);
+  assert.match(html, /preserveAspectRatio="xMidYMid meet"/);
+  assert.match(html, /data-camera="default"/);
+  assert.match(html, /默认 Camera 会聚焦有效节点区域/);
 });

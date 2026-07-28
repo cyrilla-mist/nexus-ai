@@ -156,3 +156,11 @@ test("Universe includes a readable first-use guide instead of tiny unexplained l
   assert.match(html, /下：任务/);
   assert.match(html, /外：进展/);
 });
+
+test("Universe Inspector uses a compact overlay safe area instead of compressing the canvas", () => {
+  assert.match(css, /Nexus AI v0\.8\.10 Project Universe Camera Calibration/);
+  assert.match(css, /star-map-canvas\[data-camera="default"\]/);
+  assert.match(css, /@media \(min-width: 761px\)[\s\S]*?\.project-space-panel\[data-space-panel="universe"\] \.star-map-detail\s*\{[\s\S]*?top: clamp/);
+  assert.match(css, /@media \(min-width: 761px\)[\s\S]*?\.project-space-panel\[data-space-panel="universe"\] \.star-map-detail\s*\{[\s\S]*?bottom: auto/);
+  assert.match(css, /@media \(min-width: 761px\)[\s\S]*?\.project-space-panel\[data-space-panel="universe"\] \.star-map-detail\s*\{[\s\S]*?width: min\(320px, 24%\)/);
+});
