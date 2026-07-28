@@ -110,7 +110,8 @@ test("Context and Universe expose read-only detail panels", () => {
 
   assert.match(html, /data-context-map-detail/);
   assert.match(html, /data-star-map-detail/);
-  assert.match(html, /关联关系/);
+  assert.match(html, /Context Explanation/);
+  assert.match(html, /选择一个节点/);
   assert.match(html, /来源/);
   assert.match(html, /状态/);
 });

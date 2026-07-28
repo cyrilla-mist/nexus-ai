@@ -213,7 +213,7 @@ test("selection updates related nodes, edges, and relationship details", () => {
     "related"
   );
   assert.equal(attributes.get("edge:1:data-focus-state"), "related");
-  assert.match(detail.innerHTML, /关联关系/);
+  assert.match(detail.innerHTML, /Relationship/);
   assert.match(detail.innerHTML, /支持/);
   assert.match(detail.innerHTML, /校园环保项目/);
 
@@ -229,6 +229,112 @@ test("selection updates related nodes, edges, and relationship details", () => {
   );
 });
 
+
+test("Project Universe starts in observation mode before node selection", () => {
+  const graph = sampleGraph();
+  const focus = createStarMapFocusState(graph);
+  const html = renderStarMap(graph);
+
+  assert.equal(focus.selectedId, "");
+  assert.ok(Object.values(focus.nodes).every((state) => state === "default"));
+  assert.ok(focus.edges.every((state) => state === "default"));
+  assert.match(html, /data-universe-state="default"/);
+  assert.match(html, /data-detail-state="empty"/);
+  assert.match(html, /选择一个节点/);
+  assert.match(html, /先观察 Project Core/);
+});
+
+test("keyboard Escape clears selection and restores observation mode", () => {
+  const graph = sampleGraph();
+  const listeners = new Map();
+  const attributes = new Map();
+  const detail = {
+    innerHTML: "",
+    setAttribute(name, value) {
+      attributes.set(`detail:${name}`, value);
+    }
+  };
+  const stage = {
+    setAttribute(name, value) {
+      attributes.set(`stage:${name}`, value);
+    }
+  };
+  const canvas = {
+    setAttribute(name, value) {
+      attributes.set(`canvas:${name}`, value);
+    }
+  };
+  const controls = graph.nodes.map((node) => ({
+    dataset: { starNodeId: node.id },
+    setAttribute(name, value) {
+      attributes.set(`${node.id}:${name}`, value);
+    },
+    addEventListener(event, handler) {
+      listeners.set(`${node.id}:${event}`, handler);
+    }
+  }));
+  const visualNodes = controls.map((control) => ({
+    dataset: { ...control.dataset },
+    setAttribute(name, value) {
+      attributes.set(`visual:${control.dataset.starNodeId}:${name}`, value);
+    }
+  }));
+  const visualEdges = graph.edges.map((_edge, index) => ({
+    dataset: { edgeIndex: String(index) },
+    setAttribute(name, value) {
+      attributes.set(`edge:${index}:${name}`, value);
+    }
+  }));
+  const container = {
+    querySelector(selector) {
+      if (selector === "[data-star-map-detail]") {
+        return detail;
+      }
+
+      if (selector === ".star-map-stage") {
+        return stage;
+      }
+
+      if (selector === ".star-map-canvas") {
+        return canvas;
+      }
+
+      return null;
+    },
+    querySelectorAll(selector) {
+      if (selector.startsWith(".star-map-node")) {
+        return visualNodes;
+      }
+
+      if (selector.startsWith(".star-map-edge")) {
+        return visualEdges;
+      }
+
+      return controls;
+    }
+  };
+
+  bindStarMapInteractions(container, graph);
+  listeners.get("decision:users:keydown")({
+    key: "Enter",
+    preventDefault() {}
+  });
+  assert.equal(attributes.get("detail:data-detail-state"), "selected");
+  assert.equal(attributes.get("stage:data-universe-state"), "selected");
+
+  listeners.get("decision:users:keydown")({
+    key: "Escape",
+    preventDefault() {}
+  });
+
+  assert.equal(attributes.get("detail:data-detail-state"), "empty");
+  assert.equal(attributes.get("stage:data-universe-state"), "default");
+  assert.equal(attributes.get("canvas:data-selected-node"), "");
+  assert.equal(attributes.get("decision:users:aria-pressed"), "false");
+  assert.equal(attributes.get("visual:decision:users:data-focus-state"), "default");
+  assert.equal(attributes.get("edge:1:data-focus-state"), "default");
+  assert.match(detail.innerHTML, /选择一个节点/);
+});
 test("theme tokens, reduced motion, and mobile semantic fallback are present", () => {
   const css = readFileSync(
     new URL("../frontend/style.css", import.meta.url),

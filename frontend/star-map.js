@@ -1,5 +1,3 @@
-import { renderContextNodeDetail } from "./context-map.js";
-
 const VIEWBOX = Object.freeze({ width: 1120, height: 760 });
 const CENTER = Object.freeze({ x: 560, y: 400 });
 const ORBITS = Object.freeze({
@@ -245,6 +243,17 @@ function freezeView(view) {
   });
 }
 
+function createDefaultFocusState(view) {
+  return Object.freeze({
+    selectedId: "",
+    nodes: Object.freeze(
+      Object.fromEntries(view.nodes.map((node) => [node.id, "default"]))
+    ),
+    edges: Object.freeze(view.edges.map(() => "default")),
+    pathIds: Object.freeze([])
+  });
+}
+
 export function createStarMapView(contextMap = {}) {
   const graph = isPlainObject(contextMap) ? contextMap : {};
   const sourceEdges = Array.isArray(graph.edges)
@@ -351,14 +360,18 @@ export function createStarMapFocusState(contextMap = {}, selectedId = "") {
     return Object.freeze({
       selectedId: "",
       nodes: Object.freeze({}),
-      edges: Object.freeze([])
+      edges: Object.freeze([]),
+      pathIds: Object.freeze([])
     });
   }
 
   const supportedIds = new Set(view.nodes.map((node) => node.id));
-  const fallbackId =
-    view.nodes.find((node) => node.type === "project")?.id ?? view.nodes[0].id;
-  const activeId = supportedIds.has(selectedId) ? selectedId : fallbackId;
+  const activeId = supportedIds.has(selectedId) ? selectedId : "";
+
+  if (!activeId) {
+    return createDefaultFocusState(view);
+  }
+
   const relatedIds = new Set([activeId]);
 
   view.edges.forEach((edge) => {
@@ -389,7 +402,8 @@ export function createStarMapFocusState(contextMap = {}, selectedId = "") {
       view.edges.map((edge) =>
         edge.from === activeId || edge.to === activeId ? "related" : "quiet"
       )
-    )
+    ),
+    pathIds: Object.freeze([...relatedIds])
   });
 }
 
@@ -452,6 +466,7 @@ function renderNode(node, focusState = "default") {
   const label = shortLabel(node.title, node.type === "project" ? 16 : 10);
   const typeLabel = TYPE_LABELS[node.type] ?? "上下文";
   const selected = focusState === "selected";
+  const inContextPath = ["selected", "related", "hovered"].includes(focusState);
 
   return `
     <g
@@ -461,6 +476,7 @@ function renderNode(node, focusState = "default") {
       data-layer="${escapeMarkup(node.layer)}"
       data-status="${escapeMarkup(normalizeText(node.status) || "unknown")}"
       data-focus-state="${escapeMarkup(focusState)}"
+      data-context-path="${inContextPath ? "true" : "false"}"
       transform="translate(${node.x} ${node.y})"
       role="button"
       tabindex="0"
@@ -505,7 +521,6 @@ function renderSemanticOutline(nodes) {
               <ol>
                 ${group.nodes
                   .map((node) => {
-                    const selected = itemIndex === 0;
                     itemIndex += 1;
 
                     return `
@@ -514,7 +529,7 @@ function renderSemanticOutline(nodes) {
                           type="button"
                           data-star-node-id="${escapeMarkup(node.id)}"
                           aria-controls="star-map-detail"
-                          aria-pressed="${selected}"
+                          aria-pressed="false"
                         >
                           <span>${escapeMarkup(TYPE_LABELS[node.type] ?? "上下文")}</span>
                           <strong>${escapeMarkup(node.title)}</strong>
@@ -541,14 +556,69 @@ function relatedEdges(nodeId, edges) {
   return edges.filter((edge) => edge.from === nodeId || edge.to === nodeId);
 }
 
+function detailValue(value) {
+  return normalizeText(value) || "无法判断";
+}
+
+function describeNodeContext(node) {
+  if (!node) {
+    return "无法判断";
+  }
+
+  return detailValue(
+    node.summary ??
+      node.description ??
+      node.reason ??
+      node.criteria ??
+      node.time ??
+      node.title
+  );
+}
+
+function renderStarMapEmptyDetail() {
+  return `
+    <div class="star-map-explanation-space star-map-detail-empty">
+      <p class="section-kicker">Context Explanation</p>
+      <h4>选择一个节点</h4>
+      <p>进入项目宇宙后，先观察 Project Core 与三层 Orbit。点击任一节点，可以查看它的身份、状态、来源和关联路径。</p>
+    </div>
+  `;
+}
+
 function renderStarMapDetail(node, nodes, edges) {
+  if (!node) {
+    return renderStarMapEmptyDetail();
+  }
+
   const nodesById = new Map(nodes.map((item) => [item.id, item]));
   const relationships = relatedEdges(node?.id, edges);
+  const typeLabel = TYPE_LABELS[node.type] ?? "上下文";
 
   return `
-    ${renderContextNodeDetail(node)}
+    <div class="star-map-explanation-space">
+      <p class="section-kicker">Context Explanation</p>
+      <h4>${escapeMarkup(node.title)}</h4>
+      <dl class="star-map-detail-grid" aria-label="节点上下文说明">
+        <div>
+          <dt>Identity</dt>
+          <dd>${escapeMarkup(typeLabel)}</dd>
+        </div>
+        <div>
+          <dt>Status</dt>
+          <dd>${escapeMarkup(detailValue(node.status))}</dd>
+        </div>
+        <div>
+          <dt>Context</dt>
+          <dd>${escapeMarkup(describeNodeContext(node))}</dd>
+        </div>
+        <div>
+          <dt>Source</dt>
+          <dd>${escapeMarkup(detailValue(node.source))}</dd>
+        </div>
+      </dl>
+    </div>
     <section class="star-map-detail-relations" aria-label="节点关系">
-      <h5>关联关系</h5>
+      <h5>Relationship</h5>
       ${
         relationships.length === 0
           ? '<p class="project-space-empty">暂无关联关系。</p>'
@@ -591,9 +661,7 @@ export function renderStarMap(contextMap = {}) {
     `;
   }
 
-  const projectId =
-    view.nodes.find((node) => node.type === "project")?.id ?? view.nodes[0].id;
-  const initialFocus = createStarMapFocusState(contextMap, projectId);
+  const initialFocus = createStarMapFocusState(contextMap);
 
   return `
     <section class="star-map" aria-labelledby="star-map-title">
@@ -601,13 +669,15 @@ export function renderStarMap(contextMap = {}) {
         <div>
           <p class="section-kicker">Star Map</p>
           <h3 id="star-map-title">项目宇宙</h3>
+          <p class="star-map-entry-copy">先观察 Project Core，再选择节点查看上下文路径。</p>
         </div>
         <p>${view.nodes.length} 个节点 · ${view.edges.length} 条关系</p>
       </div>
       <div class="star-map-layout">
-        <div class="star-map-stage">
+        <div class="star-map-stage" data-universe-state="default">
           <svg
             class="star-map-canvas"
+            data-selected-node=""
             viewBox="0 0 ${view.width} ${view.height}"
             role="img"
             aria-labelledby="star-map-svg-title star-map-svg-description"
@@ -654,13 +724,10 @@ export function renderStarMap(contextMap = {}) {
           class="star-map-detail context-node-detail"
           id="star-map-detail"
           data-star-map-detail
+          data-detail-state="empty"
           aria-live="polite"
         >
-          ${renderStarMapDetail(
-            view.nodes.find((node) => node.id === initialFocus.selectedId),
-            view.nodes,
-            view.edges
-          )}
+          ${renderStarMapEmptyDetail()}
         </aside>
       </div>
     </section>
@@ -671,6 +738,8 @@ export function bindStarMapInteractions(container, contextMap = {}) {
   const view = createStarMapView(contextMap);
   const nodesById = new Map(view.nodes.map((node) => [node.id, node]));
   const detail = container?.querySelector?.("[data-star-map-detail]");
+  const stage = container?.querySelector?.(".star-map-stage");
+  const canvas = container?.querySelector?.(".star-map-canvas");
   const controls = [
     ...(container?.querySelectorAll?.("[data-star-node-id]") ?? [])
   ];
@@ -689,13 +758,32 @@ export function bindStarMapInteractions(container, contextMap = {}) {
     return;
   }
 
-  let selectedId =
-    view.nodes.find((node) => node.type === "project")?.id ?? view.nodes[0].id;
+  let selectedId = "";
 
   const applyFocus = (nodeId, { commit = false, preview = false } = {}) => {
     const node = nodesById.get(String(nodeId ?? ""));
 
     if (!node) {
+      if (commit || !preview) {
+        selectedId = "";
+        const focus = createStarMapFocusState(contextMap);
+
+        controls.forEach((item) => item.setAttribute("aria-pressed", "false"));
+        visualNodes.forEach((item) => {
+          const itemId = String(item.dataset.starNodeId ?? "");
+          item.setAttribute("data-focus-state", focus.nodes[itemId] ?? "default");
+          item.setAttribute("data-context-path", "false");
+        });
+        visualEdges.forEach((item) => {
+          const index = Number(item.dataset.edgeIndex);
+          item.setAttribute("data-focus-state", focus.edges[index] ?? "default");
+        });
+        detail.innerHTML = renderStarMapEmptyDetail();
+        detail.setAttribute?.("data-detail-state", "empty");
+        stage?.setAttribute?.("data-universe-state", "default");
+        canvas?.setAttribute?.("data-selected-node", "");
+      }
+
       return;
     }
 
@@ -717,6 +805,12 @@ export function bindStarMapInteractions(container, contextMap = {}) {
         "data-focus-state",
         preview && itemId === node.id ? "hovered" : state
       );
+      item.setAttribute(
+        "data-context-path",
+        ["selected", "related"].includes(state) || (preview && itemId === node.id)
+          ? "true"
+          : "false"
+      );
     });
     visualEdges.forEach((item) => {
       const index = Number(item.dataset.edgeIndex);
@@ -725,6 +819,9 @@ export function bindStarMapInteractions(container, contextMap = {}) {
 
     if (commit) {
       detail.innerHTML = renderStarMapDetail(node, view.nodes, view.edges);
+      detail.setAttribute?.("data-detail-state", "selected");
+      stage?.setAttribute?.("data-universe-state", "selected");
+      canvas?.setAttribute?.("data-selected-node", node.id);
     }
   };
 
@@ -737,6 +834,12 @@ export function bindStarMapInteractions(container, contextMap = {}) {
       applyFocus(control.dataset.starNodeId, { commit: true })
     );
     control.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        applyFocus("", { commit: true });
+        return;
+      }
+
       if (!["Enter", " "].includes(event.key)) {
         return;
       }
@@ -748,5 +851,9 @@ export function bindStarMapInteractions(container, contextMap = {}) {
       applyFocus(control.dataset.starNodeId, { preview: true })
     );
     control.addEventListener("pointerleave", restoreSelection);
+    control.addEventListener("focus", () =>
+      applyFocus(control.dataset.starNodeId, { preview: true })
+    );
+    control.addEventListener("blur", restoreSelection);
   });
 }
