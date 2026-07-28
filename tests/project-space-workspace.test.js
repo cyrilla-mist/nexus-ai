@@ -139,21 +139,23 @@ test("Mobile Project Space uses app-like identity, current space, and bottom nav
 test("Desktop Universe gives the canvas priority over the Context Inspector", () => {
   assert.match(css, /Nexus AI v0\.8\.7 Project Universe Spatial Redesign/);
   assert.match(css, /@media \(min-width: 761px\)[\s\S]*?\.project-space-panel\[data-space-panel="universe"\] \.star-map-layout\s*\{[\s\S]*?display: block/);
-  assert.match(css, /@media \(min-width: 761px\)[\s\S]*?\.project-space-panel\[data-space-panel="universe"\] \.star-map-stage\s*\{[\s\S]*?min-height: clamp\(700px/);
+  assert.match(css, /@media \(min-width: 761px\)[\s\S]*?\.project-space-panel\[data-space-panel="universe"\] \.star-map-stage\s*\{[\s\S]*?min-height: clamp\(560px, calc\(100dvh - 300px\), 720px\)/);
   assert.match(css, /@media \(min-width: 761px\)[\s\S]*?\.project-space-panel\[data-space-panel="universe"\] \.star-map-detail\s*\{[\s\S]*?position: absolute/);
   assert.match(css, /@media \(min-width: 761px\)[\s\S]*?\.star-map-detail\[data-detail-state="closed"\][\s\S]*?display: none/);
 });
 
-test("Universe separates reading guide, spatial legend, labels, and inspector layers", () => {
+test("Universe keeps guide compact and uses focus labels instead of default clutter", () => {
   const html = renderProjectSpace(workspaceExperience());
 
   assert.match(html, /star-map-guide-popover/);
-  assert.match(html, /<summary>/);
-  assert.match(html, /star-map-spatial-legend/);
+  assert.match(html, /<summary aria-label="[^"]*Project Universe"/);
+  assert.doesNotMatch(html, /star-map-spatial-legend/);
   assert.match(html, /universe-label-layer/);
+  assert.match(html, /data-label-placement="/);
   assert.match(html, /star-map-screen-label-type/);
   assert.doesNotMatch(html, /class="star-map-reading-guide"/);
 });
+
 test("Universe Inspector uses a compact overlay safe area instead of compressing the canvas", () => {
   assert.match(css, /Nexus AI v0\.8\.10 Project Universe Camera Calibration/);
   assert.match(css, /star-map-canvas\[data-camera="default"\]/);

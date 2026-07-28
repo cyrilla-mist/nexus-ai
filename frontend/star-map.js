@@ -609,15 +609,49 @@ function renderNodeLabel(node) {
       </text>`;
 }
 
+export function getNodeLabelPlacement(node) {
+  if (node.type === "project") {
+    return "below";
+  }
+
+  if (node.type === "task") {
+    return "above";
+  }
+
+  if (node.type === "progress" || node.y < CENTER.y - 180) {
+    return "below";
+  }
+
+  if (node.x < CENTER.x - 250) {
+    return "left";
+  }
+
+  if (node.x > CENTER.x + 250) {
+    return "right";
+  }
+
+  return node.y > CENTER.y ? "above" : "below";
+}
+
 export function getNodeLabelPosition(node, viewBox) {
   const safeViewBox = isPlainObject(viewBox)
     ? viewBox
     : { x: 0, y: 0, width: VIEWBOX.width, height: VIEWBOX.height };
-  const labelOffset = node.type === "project" ? 112 : node.size + 42;
+  const placement = getNodeLabelPlacement(node);
+  const offsets = {
+    below: { x: 0, y: node.type === "project" ? 112 : node.size + 34 },
+    above: { x: 0, y: -(node.size + 58) },
+    left: { x: -(node.size + 62), y: node.size + 18 },
+    right: { x: node.size + 62, y: node.size + 18 }
+  };
+  const offset = offsets[placement] ?? offsets.below;
+  const left = ((node.x + offset.x - safeViewBox.x) / safeViewBox.width) * 100;
+  const top = ((node.y + offset.y - safeViewBox.y) / safeViewBox.height) * 100;
 
   return Object.freeze({
-    left: Number((((node.x - safeViewBox.x) / safeViewBox.width) * 100).toFixed(3)),
-    top: Number((((node.y + labelOffset - safeViewBox.y) / safeViewBox.height) * 100).toFixed(3))
+    left: Number(clampNumber(left, 4, 96).toFixed(3)),
+    top: Number(clampNumber(top, 6, 92).toFixed(3)),
+    placement
   });
 }
 
@@ -634,6 +668,7 @@ function renderScreenLabel(node, viewBox, focusState = "default") {
       data-node-type="${escapeMarkup(node.type)}"
       data-layer="${escapeMarkup(node.layer)}"
       data-focus-state="${escapeMarkup(focusState)}"
+      data-label-placement="${escapeMarkup(position.placement)}"
       style="--label-x: ${position.left}%; --label-y: ${position.top}%;"
       aria-hidden="true"
     >
@@ -643,38 +678,24 @@ function renderScreenLabel(node, viewBox, focusState = "default") {
   `;
 }
 
-function renderSpatialLegend() {
-  return `
-    <div class="star-map-spatial-legend" aria-label="项目宇宙阅读路径">
-      <strong>阅读路径</strong>
-      <span>问题 → 项目核心 → 决策</span>
-      <span>里程碑 ↑</span>
-      <span>任务 ↓</span>
-      <span>进展 · 外围</span>
-    </div>
-  `;
-}
-
 function renderGuidePopover() {
   return `
     <details class="star-map-guide-popover">
-      <summary>如何阅读</summary>
+      <summary aria-label="如何阅读 Project Universe">?</summary>
       <div>
-        <p>先看中心 Project Core，再沿方向探索上下文。</p>
         <ol>
-          <li>左侧是问题。</li>
-          <li>右侧是决策。</li>
-          <li>上方是阶段成果。</li>
-          <li>下方是下一步任务。</li>
-          <li>外围是项目进展。</li>
-          <li>点击节点查看解释。</li>
+          <li>左：问题</li>
+          <li>中：项目核心</li>
+          <li>右：决策</li>
+          <li>上：里程碑</li>
+          <li>下：任务</li>
+          <li>外围：进展</li>
         </ol>
-        <p>路径：问题 → 项目核心 → 决策 → 行动。</p>
+        <p>阅读路径：问题 → 项目核心 → 决策。</p>
       </div>
     </details>
   `;
 }
-
 function renderOrbit(radius, { key, title }) {
   return `
     <g class="star-map-orbit-group" data-orbit="${escapeMarkup(key)}">
@@ -923,14 +944,13 @@ export function renderStarMap(contextMap = {}) {
         <div>
           <p class="section-kicker">Star Map</p>
           <h3 id="star-map-title">项目宇宙</h3>
-          <p class="star-map-entry-copy">这不是流程图。先看中心项目，再看左侧问题、右侧决策、上方里程碑、下方任务和外围进展。</p>
+          <p class="star-map-entry-copy">从项目核心探索关键关系</p>
         </div>
         <div class="star-map-heading-actions">
           <p>${view.nodes.length} 个节点 · ${view.edges.length} 条关系</p>
           ${renderGuidePopover()}
         </div>
       </div>
-      ${renderSpatialLegend()}
       <div class="star-map-layout">
         <div class="star-map-stage" data-universe-state="default">
           <svg
@@ -1051,8 +1071,7 @@ export function bindStarMapInteractions(container, contextMap = {}) {
           item.setAttribute("data-focus-state", focus.edges[index] ?? "default");
         });
         visualLabels.forEach((item) => {
-          const itemId = String(item.dataset.starLabelId ?? "");
-          item.setAttribute("data-focus-state", focus.nodes[itemId] ?? "default");
+          item.setAttribute("data-focus-state", "default");
         });
         detail.innerHTML = renderStarMapEmptyDetail();
         detail.setAttribute?.("data-detail-state", "closed");
@@ -1098,7 +1117,11 @@ export function bindStarMapInteractions(container, contextMap = {}) {
       const state = focus.nodes[itemId] ?? "dimmed";
       item.setAttribute(
         "data-focus-state",
-        preview && itemId === node.id ? "hovered" : state
+        preview
+          ? itemId === node.id
+            ? "hovered"
+            : "default"
+          : state
       );
     });
 

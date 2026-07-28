@@ -4920,3 +4920,176 @@ body.demo-body .demo-case-note {
     transition: none;
   }
 }
+
+/* Nexus AI v0.8.12 Universe Simplification & Focus Mode */
+.project-space-panel[data-space-panel="universe"] .star-map {
+  padding-block: clamp(18px, 2.2vw, 28px);
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-heading {
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-heading h3 {
+  margin-bottom: 5px;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-entry-copy {
+  max-width: 34rem;
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: clamp(0.95rem, 1vw, 1.05rem);
+  line-height: 1.45;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-heading-actions {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-heading-actions > p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: clamp(0.9rem, 0.92vw, 1rem);
+  white-space: nowrap;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-guide-popover summary {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--border-soft) 62%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface-primary) 58%, transparent);
+  color: var(--text-primary);
+  font-size: 1rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-guide-popover summary::after {
+  content: "";
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-guide-popover[open] > div {
+  width: min(360px, calc(100vw - 48px));
+  padding: 14px 16px;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-guide-popover p {
+  margin: 8px 0 0;
+  font-size: 0.9rem;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-guide-popover ol {
+  margin: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-spatial-legend {
+  display: none;
+}
+
+@media (min-width: 761px) {
+  .project-space-panel[data-space-panel="universe"] > .star-map {
+    min-height: auto;
+  }
+
+  .project-space-panel[data-space-panel="universe"] .star-map-layout,
+  .project-space-panel[data-space-panel="universe"] .star-map-stage,
+  .project-space-panel[data-space-panel="universe"] .star-map-canvas {
+    min-height: clamp(560px, calc(100dvh - 300px), 720px);
+  }
+
+  .project-space-panel[data-space-panel="universe"] .star-map-stage {
+    max-height: 720px;
+  }
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-stage::before {
+  opacity: 0.11;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-orbit {
+  opacity: 0.24;
+  stroke-width: 0.8;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-edge {
+  opacity: 0.06;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-edge[data-focus-state="related"] {
+  opacity: 0.58;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-edge[data-focus-state="quiet"] {
+  opacity: 0.025;
+}
+
+.star-map-screen-label {
+  opacity: 0;
+  max-width: 184px;
+  transform: translate(-50%, 0) scale(0.98);
+}
+
+.star-map-screen-label[data-node-type="project"],
+.star-map-screen-label[data-focus-state="hovered"],
+.star-map-screen-label[data-focus-state="selected"],
+.star-map-screen-label[data-focus-state="related"] {
+  opacity: 1;
+}
+
+.star-map-screen-label[data-node-type="project"][data-focus-state="dimmed"] {
+  opacity: 0.62;
+}
+
+.star-map-screen-label[data-focus-state="default"]:not([data-node-type="project"]),
+.star-map-screen-label[data-focus-state="dimmed"]:not([data-node-type="project"]) {
+  opacity: 0;
+}
+
+.star-map-screen-label[data-label-placement="above"] {
+  transform: translate(-50%, -100%) scale(0.98);
+}
+
+.star-map-screen-label[data-label-placement="left"] {
+  text-align: right;
+  transform: translate(-100%, -50%) scale(0.98);
+}
+
+.star-map-screen-label[data-label-placement="right"] {
+  text-align: left;
+  transform: translate(0, -50%) scale(0.98);
+}
+
+.star-map-screen-label[data-focus-state="selected"] {
+  transform: translate(-50%, 0) scale(1.04);
+}
+
+.star-map-screen-label[data-label-placement="above"][data-focus-state="selected"] {
+  transform: translate(-50%, -100%) scale(1.04);
+}
+
+.star-map-screen-label[data-label-placement="left"][data-focus-state="selected"] {
+  transform: translate(-100%, -50%) scale(1.04);
+}
+
+.star-map-screen-label[data-label-placement="right"][data-focus-state="selected"] {
+  transform: translate(0, -50%) scale(1.04);
+}
+
+.star-map-screen-label[data-focus-state="hovered"] {
+  filter: saturate(1.08) drop-shadow(0 12px 24px color-mix(in srgb, var(--surface-primary) 72%, transparent));
+}
+
+@media (max-width: 760px) {
+  .project-space-panel[data-space-panel="universe"] .star-map-entry-copy {
+    display: none;
+  }
+}

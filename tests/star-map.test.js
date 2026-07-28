@@ -7,6 +7,7 @@ import {
   createStarMapFocusState,
   createStarMapView,
   getDefaultUniverseViewBox,
+  getNodeLabelPlacement,
   getNodeLabelPosition,
   getUniverseContentBounds,
   renderStarMap
@@ -191,6 +192,12 @@ test("selection updates related nodes, edges, and relationship details", () => {
       attributes.set(`edge:${index}:${name}`, value);
     }
   }));
+  const visualLabels = controls.map((control) => ({
+    dataset: { starLabelId: control.dataset.starNodeId },
+    setAttribute(name, value) {
+      attributes.set(`label:${control.dataset.starNodeId}:${name}`, value);
+    }
+  }));
   const container = {
     querySelector: () => detail,
     querySelectorAll(selector) {
@@ -200,6 +207,10 @@ test("selection updates related nodes, edges, and relationship details", () => {
 
       if (selector.startsWith(".star-map-edge")) {
         return visualEdges;
+      }
+
+      if (selector.startsWith(".star-map-screen-label")) {
+        return visualLabels;
       }
 
       return controls;
@@ -218,6 +229,8 @@ test("selection updates related nodes, edges, and relationship details", () => {
     "related"
   );
   assert.equal(attributes.get("edge:1:data-focus-state"), "related");
+  assert.equal(attributes.get("label:decision:users:data-focus-state"), "selected");
+  assert.equal(attributes.get("label:project:campus:data-focus-state"), "related");
   assert.match(detail.innerHTML, /Relationship/);
   assert.match(detail.innerHTML, /支持/);
   assert.match(detail.innerHTML, /校园环保项目/);
@@ -227,6 +240,8 @@ test("selection updates related nodes, edges, and relationship details", () => {
     attributes.get("visual:problem:waste:data-focus-state"),
     "hovered"
   );
+  assert.equal(attributes.get("label:problem:waste:data-focus-state"), "hovered");
+  assert.equal(attributes.get("label:decision:users:data-focus-state"), "default");
   listeners.get("problem:waste:pointerleave")();
   assert.equal(
     attributes.get("visual:decision:users:data-focus-state"),
@@ -248,10 +263,14 @@ test("Project Universe starts in observation mode before node selection", () => 
   assert.match(html, /data-detail-state="closed"[\s\S]*?hidden/);
   assert.doesNotMatch(html, /Context Inspector/);
   assert.match(html, /star-map-guide-popover/);
-  assert.match(html, /<summary>/);
-  assert.match(html, /star-map-spatial-legend/);
+  assert.match(html, /aria-label="[^"]*Project Universe"/);
+  assert.doesNotMatch(html, /star-map-spatial-legend/);
+  assert.doesNotMatch(html, /star-map-reading-guide/);
+  assert.match(html, /star-map-entry-copy/);
   assert.match(html, /universe-label-layer/);
+  assert.match(html, /data-label-placement="/);
 });
+
 test("keyboard Escape clears selection and restores observation mode", () => {
   const graph = sampleGraph();
   const listeners = new Map();
@@ -486,35 +505,47 @@ test("Project Universe polish defines quiet core, node identity, orbit atmospher
   assert.match(css, /data-focus-state="related"\] line[\s\S]*?--universe-trail-focus/);
 });
 
-test("Project Universe readability fix separates map, label, inspector, and guide layers", () => {
+test("Project Universe simplification keeps the default map quiet and focused", () => {
   const html = renderStarMap(sampleGraph());
   const css = readFileSync(new URL("../frontend/style.css", import.meta.url), "utf8");
   const view = createStarMapView(sampleGraph());
   const project = view.nodes.find((node) => node.type === "project");
-  const labelPosition = getNodeLabelPosition(project, view.viewBox);
+  const problem = view.nodes.find((node) => node.type === "problem");
+  const decision = view.nodes.find((node) => node.type === "decision");
+  const milestone = view.nodes.find((node) => node.type === "milestone");
+  const task = view.nodes.find((node) => node.type === "task");
+  const progress = view.nodes.find((node) => node.type === "progress");
+  const projectLabel = getNodeLabelPosition(project, view.viewBox);
 
   assert.match(html, /star-map-guide-popover/);
-  assert.match(html, /star-map-spatial-legend/);
+  assert.doesNotMatch(html, /star-map-spatial-legend/);
   assert.match(html, /universe-label-layer/);
   assert.match(html, /star-map-screen-label/);
   assert.match(html, /data-star-label-id="project:campus"/);
+  assert.match(html, /data-label-placement="below"/);
   assert.match(html, /star-map-node-glyph/);
   assert.doesNotMatch(html, /class="star-map-node-label"/);
-      assert.match(html, /data-detail-state="closed"/);
+  assert.match(html, /data-detail-state="closed"/);
   assert.match(html, /data-detail-state="closed"[\s\S]*?hidden/);
-  assert.equal(Number.isFinite(labelPosition.left), true);
-  assert.equal(Number.isFinite(labelPosition.top), true);
-  assert.ok(labelPosition.left > 0 && labelPosition.left < 100);
-  assert.ok(labelPosition.top > 0 && labelPosition.top < 100);
+  assert.equal(Number.isFinite(projectLabel.left), true);
+  assert.equal(Number.isFinite(projectLabel.top), true);
+  assert.ok(projectLabel.left > 0 && projectLabel.left < 100);
+  assert.ok(projectLabel.top > 0 && projectLabel.top < 100);
+  assert.equal(getNodeLabelPlacement(project), "below");
+  assert.equal(getNodeLabelPlacement(problem), "left");
+  assert.equal(getNodeLabelPlacement(decision), "right");
+  assert.equal(getNodeLabelPlacement(milestone), "below");
+  assert.equal(getNodeLabelPlacement(task), "above");
+  assert.equal(getNodeLabelPlacement(progress), "below");
 
-  assert.match(css, /Nexus AI v0\.8\.9 Project Universe Readability Fix/);
-  assert.match(css, /Nexus AI v0\.8\.11 Universe UI Layer Separation/);
-  assert.match(css, /\.universe-label-layer[\s\S]*?pointer-events: none/);
-  assert.match(css, /\.star-map-screen-label strong[\s\S]*?font-size: 15px/);
-  assert.match(css, /\.star-map-screen-label\[data-node-type="project"\] strong[\s\S]*?font-size: 20px/);
-  assert.match(css, /\.project-space-panel\[data-space-panel="universe"\] \.star-map-edge text[\s\S]*?display: none/);
-  assert.match(css, /\.project-space-panel\[data-space-panel="universe"\] \.star-map-detail\[data-detail-state="closed"\][\s\S]*?display: none/);
+  assert.match(css, /Nexus AI v0\.8\.12 Universe Simplification & Focus Mode/);
+  assert.match(css, /\.star-map-spatial-legend\s*\{[\s\S]*?display: none/);
+  assert.match(css, /data-focus-state="default"\]:not\(\[data-node-type="project"\]\)[\s\S]*?opacity: 0/);
+  assert.match(css, /min-height: clamp\(560px, calc\(100dvh - 300px\), 720px\)/);
+  assert.match(css, /\.star-map-edge\s*\{[\s\S]*?opacity: 0\.06/);
+  assert.match(css, /\.star-map-orbit\s*\{[\s\S]*?opacity: 0\.24/);
 });
+
 test("Project Universe camera uses content bounds instead of the full virtual canvas", () => {
   const view = createStarMapView(sampleGraph());
   const bounds = getUniverseContentBounds(view.nodes);
