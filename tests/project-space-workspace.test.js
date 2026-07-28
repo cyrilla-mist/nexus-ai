@@ -105,17 +105,17 @@ test("Universe keeps Project Core, semantic orbits, and subdued connections", ()
   assert.match(css, /\.project-space-panel \.star-map-edge\s*\{[\s\S]*?opacity: 0\.18/);
 });
 
-test("Context and Universe expose read-only detail panels", () => {
+test("Context and Universe keep read-only inspectors out of the default map layer", () => {
   const html = renderProjectSpace(workspaceExperience());
 
   assert.match(html, /data-context-map-detail/);
   assert.match(html, /data-star-map-detail/);
-  assert.match(html, /Context Inspector/);
-  assert.match(html, /这张图怎么读/);
-  assert.match(html, /来源/);
-  assert.match(html, /状态/);
+  assert.match(html, /data-detail-state="closed"/);
+  assert.match(html, /data-detail-state="closed"[\s\S]*?hidden/);
+  assert.match(html, /star-map-guide-popover/);
+  assert.match(html, /universe-label-layer/);
+  assert.doesNotMatch(html, /<aside class="star-map-detail"[\s\S]*?Context Inspector/);
 });
-
 test("Workspace preserves both themes and has a mobile bottom navigation", () => {
   assert.match(css, /:root\[data-theme="dark"\]/);
   assert.match(css, /@media \(max-width: 760px\)[\s\S]*?grid-template-areas:[\s\S]*?"main"[\s\S]*?"sidebar"/);
@@ -141,22 +141,19 @@ test("Desktop Universe gives the canvas priority over the Context Inspector", ()
   assert.match(css, /@media \(min-width: 761px\)[\s\S]*?\.project-space-panel\[data-space-panel="universe"\] \.star-map-layout\s*\{[\s\S]*?display: block/);
   assert.match(css, /@media \(min-width: 761px\)[\s\S]*?\.project-space-panel\[data-space-panel="universe"\] \.star-map-stage\s*\{[\s\S]*?min-height: clamp\(700px/);
   assert.match(css, /@media \(min-width: 761px\)[\s\S]*?\.project-space-panel\[data-space-panel="universe"\] \.star-map-detail\s*\{[\s\S]*?position: absolute/);
-  assert.match(css, /@media \(min-width: 761px\)[\s\S]*?\.star-map-detail\[data-detail-state="empty"\][\s\S]*?display: none/);
+  assert.match(css, /@media \(min-width: 761px\)[\s\S]*?\.star-map-detail\[data-detail-state="closed"\][\s\S]*?display: none/);
 });
 
-test("Universe includes a readable first-use guide instead of tiny unexplained labels", () => {
+test("Universe separates reading guide, spatial legend, labels, and inspector layers", () => {
   const html = renderProjectSpace(workspaceExperience());
 
-  assert.match(html, /star-map-reading-guide/);
-  assert.match(html, /阅读路径/);
-  assert.match(html, /左：问题/);
-  assert.match(html, /中：项目核心/);
-  assert.match(html, /右：决策/);
-  assert.match(html, /上：里程碑/);
-  assert.match(html, /下：任务/);
-  assert.match(html, /外：进展/);
+  assert.match(html, /star-map-guide-popover/);
+  assert.match(html, /<summary>/);
+  assert.match(html, /star-map-spatial-legend/);
+  assert.match(html, /universe-label-layer/);
+  assert.match(html, /star-map-screen-label-type/);
+  assert.doesNotMatch(html, /class="star-map-reading-guide"/);
 });
-
 test("Universe Inspector uses a compact overlay safe area instead of compressing the canvas", () => {
   assert.match(css, /Nexus AI v0\.8\.10 Project Universe Camera Calibration/);
   assert.match(css, /star-map-canvas\[data-camera="default"\]/);

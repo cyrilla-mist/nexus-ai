@@ -7,6 +7,7 @@ import {
   createStarMapFocusState,
   createStarMapView,
   getDefaultUniverseViewBox,
+  getNodeLabelPosition,
   getUniverseContentBounds,
   renderStarMap
 } from "../frontend/star-map.js";
@@ -243,13 +244,14 @@ test("Project Universe starts in observation mode before node selection", () => 
   assert.ok(Object.values(focus.nodes).every((state) => state === "default"));
   assert.ok(focus.edges.every((state) => state === "default"));
   assert.match(html, /data-universe-state="default"/);
-  assert.match(html, /data-detail-state="empty"/);
-  assert.match(html, /这张图怎么读/);
-  assert.match(html, /左侧问题、右侧决策、上方里程碑、下方任务和外围进展/);
-  assert.match(html, /star-map-reading-guide/);
-  assert.match(html, /阅读路径/);
+  assert.match(html, /data-detail-state="closed"/);
+  assert.match(html, /data-detail-state="closed"[\s\S]*?hidden/);
+  assert.doesNotMatch(html, /Context Inspector/);
+  assert.match(html, /star-map-guide-popover/);
+  assert.match(html, /<summary>/);
+  assert.match(html, /star-map-spatial-legend/);
+  assert.match(html, /universe-label-layer/);
 });
-
 test("keyboard Escape clears selection and restores observation mode", () => {
   const graph = sampleGraph();
   const listeners = new Map();
@@ -258,6 +260,9 @@ test("keyboard Escape clears selection and restores observation mode", () => {
     innerHTML: "",
     setAttribute(name, value) {
       attributes.set(`detail:${name}`, value);
+    },
+    removeAttribute(name) {
+      attributes.set(`detail:${name}`, "");
     }
   };
   const stage = {
@@ -291,6 +296,12 @@ test("keyboard Escape clears selection and restores observation mode", () => {
       attributes.set(`edge:${index}:${name}`, value);
     }
   }));
+  const visualLabels = controls.map((control) => ({
+    dataset: { starLabelId: control.dataset.starNodeId },
+    setAttribute(name, value) {
+      attributes.set(`label:${control.dataset.starNodeId}:${name}`, value);
+    }
+  }));
   const container = {
     querySelector(selector) {
       if (selector === "[data-star-map-detail]") {
@@ -316,8 +327,13 @@ test("keyboard Escape clears selection and restores observation mode", () => {
         return visualEdges;
       }
 
+      if (selector.startsWith(".star-map-screen-label")) {
+        return visualLabels;
+      }
+
       return controls;
-    }
+    },
+    addEventListener() {}
   };
 
   bindStarMapInteractions(container, graph);
@@ -333,13 +349,15 @@ test("keyboard Escape clears selection and restores observation mode", () => {
     preventDefault() {}
   });
 
-  assert.equal(attributes.get("detail:data-detail-state"), "empty");
+  assert.equal(attributes.get("detail:data-detail-state"), "closed");
+  assert.equal(attributes.get("detail:hidden"), "");
   assert.equal(attributes.get("stage:data-universe-state"), "default");
   assert.equal(attributes.get("canvas:data-selected-node"), "");
   assert.equal(attributes.get("decision:users:aria-pressed"), "false");
   assert.equal(attributes.get("visual:decision:users:data-focus-state"), "default");
+  assert.equal(attributes.get("label:decision:users:data-focus-state"), "default");
   assert.equal(attributes.get("edge:1:data-focus-state"), "default");
-  assert.match(detail.innerHTML, /这张图怎么读/);
+  assert.equal(detail.innerHTML, "");
 });
 test("theme tokens, reduced motion, and mobile semantic fallback are present", () => {
   const css = readFileSync(
@@ -468,21 +486,35 @@ test("Project Universe polish defines quiet core, node identity, orbit atmospher
   assert.match(css, /data-focus-state="related"\] line[\s\S]*?--universe-trail-focus/);
 });
 
-test("Project Universe readability fix keeps labels and guidance legible", () => {
+test("Project Universe readability fix separates map, label, inspector, and guide layers", () => {
   const html = renderStarMap(sampleGraph());
   const css = readFileSync(new URL("../frontend/style.css", import.meta.url), "utf8");
+  const view = createStarMapView(sampleGraph());
+  const project = view.nodes.find((node) => node.type === "project");
+  const labelPosition = getNodeLabelPosition(project, view.viewBox);
 
-  assert.match(html, /star-map-reading-guide/);
-  assert.match(html, /这不是流程图/);
-  assert.match(html, /这张图怎么读/);
-  assert.match(html, /<tspan x="0"/);
+  assert.match(html, /star-map-guide-popover/);
+  assert.match(html, /star-map-spatial-legend/);
+  assert.match(html, /universe-label-layer/);
+  assert.match(html, /star-map-screen-label/);
+  assert.match(html, /data-star-label-id="project:campus"/);
+  assert.match(html, /star-map-node-glyph/);
+  assert.doesNotMatch(html, /class="star-map-node-label"/);
+      assert.match(html, /data-detail-state="closed"/);
+  assert.match(html, /data-detail-state="closed"[\s\S]*?hidden/);
+  assert.equal(Number.isFinite(labelPosition.left), true);
+  assert.equal(Number.isFinite(labelPosition.top), true);
+  assert.ok(labelPosition.left > 0 && labelPosition.left < 100);
+  assert.ok(labelPosition.top > 0 && labelPosition.top < 100);
+
   assert.match(css, /Nexus AI v0\.8\.9 Project Universe Readability Fix/);
-  assert.match(css, /star-map-node-label[\s\S]*?font-size: 15px/);
-  assert.match(css, /star-map-node\[data-node-type="project"\] \.star-map-node-label[\s\S]*?font-size: 19px/);
-  assert.match(css, /star-map-orbit-label[\s\S]*?font-size: 13px/);
-  assert.match(css, /star-map-edge text[\s\S]*?font-size: 11px/);
+  assert.match(css, /Nexus AI v0\.8\.11 Universe UI Layer Separation/);
+  assert.match(css, /\.universe-label-layer[\s\S]*?pointer-events: none/);
+  assert.match(css, /\.star-map-screen-label strong[\s\S]*?font-size: 15px/);
+  assert.match(css, /\.star-map-screen-label\[data-node-type="project"\] strong[\s\S]*?font-size: 20px/);
+  assert.match(css, /\.project-space-panel\[data-space-panel="universe"\] \.star-map-edge text[\s\S]*?display: none/);
+  assert.match(css, /\.project-space-panel\[data-space-panel="universe"\] \.star-map-detail\[data-detail-state="closed"\][\s\S]*?display: none/);
 });
-
 test("Project Universe camera uses content bounds instead of the full virtual canvas", () => {
   const view = createStarMapView(sampleGraph());
   const bounds = getUniverseContentBounds(view.nodes);

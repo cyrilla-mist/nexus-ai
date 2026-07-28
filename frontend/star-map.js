@@ -609,6 +609,72 @@ function renderNodeLabel(node) {
       </text>`;
 }
 
+export function getNodeLabelPosition(node, viewBox) {
+  const safeViewBox = isPlainObject(viewBox)
+    ? viewBox
+    : { x: 0, y: 0, width: VIEWBOX.width, height: VIEWBOX.height };
+  const labelOffset = node.type === "project" ? 112 : node.size + 42;
+
+  return Object.freeze({
+    left: Number((((node.x - safeViewBox.x) / safeViewBox.width) * 100).toFixed(3)),
+    top: Number((((node.y + labelOffset - safeViewBox.y) / safeViewBox.height) * 100).toFixed(3))
+  });
+}
+
+function renderScreenLabel(node, viewBox, focusState = "default") {
+  const typeLabel = TYPE_LABELS[node.type] ?? "上下文";
+  const maximum = node.type === "project" ? 18 : 14;
+  const lines = labelLines(node.title, maximum);
+  const position = getNodeLabelPosition(node, viewBox);
+
+  return `
+    <div
+      class="star-map-screen-label"
+      data-star-label-id="${escapeMarkup(node.id)}"
+      data-node-type="${escapeMarkup(node.type)}"
+      data-layer="${escapeMarkup(node.layer)}"
+      data-focus-state="${escapeMarkup(focusState)}"
+      style="--label-x: ${position.left}%; --label-y: ${position.top}%;"
+      aria-hidden="true"
+    >
+      <span class="star-map-screen-label-type">${escapeMarkup(typeLabel)}</span>
+      <strong>${lines.map((line) => `<span>${escapeMarkup(line)}</span>`).join("")}</strong>
+    </div>
+  `;
+}
+
+function renderSpatialLegend() {
+  return `
+    <div class="star-map-spatial-legend" aria-label="项目宇宙阅读路径">
+      <strong>阅读路径</strong>
+      <span>问题 → 项目核心 → 决策</span>
+      <span>里程碑 ↑</span>
+      <span>任务 ↓</span>
+      <span>进展 · 外围</span>
+    </div>
+  `;
+}
+
+function renderGuidePopover() {
+  return `
+    <details class="star-map-guide-popover">
+      <summary>如何阅读</summary>
+      <div>
+        <p>先看中心 Project Core，再沿方向探索上下文。</p>
+        <ol>
+          <li>左侧是问题。</li>
+          <li>右侧是决策。</li>
+          <li>上方是阶段成果。</li>
+          <li>下方是下一步任务。</li>
+          <li>外围是项目进展。</li>
+          <li>点击节点查看解释。</li>
+        </ol>
+        <p>路径：问题 → 项目核心 → 决策 → 行动。</p>
+      </div>
+    </details>
+  `;
+}
+
 function renderOrbit(radius, { key, title }) {
   return `
     <g class="star-map-orbit-group" data-orbit="${escapeMarkup(key)}">
@@ -630,8 +696,6 @@ function renderOrbit(radius, { key, title }) {
 }
 
 function renderEdge(edge, index, focusState = "default") {
-  const labelX = Number(((edge.x1 + edge.x2) / 2).toFixed(2));
-  const labelY = Number(((edge.y1 + edge.y2) / 2).toFixed(2));
   const strength = RELATION_STRENGTH[edge.relation] ?? "secondary";
 
   return `
@@ -650,9 +714,7 @@ function renderEdge(edge, index, focusState = "default") {
         y2="${edge.y2}"
         marker-end="url(#star-map-arrow)"
       />
-      <text x="${labelX}" y="${labelY}">${escapeMarkup(
-        RELATION_LABELS[edge.relation] ?? edge.relation
-      )}</text>
+
     </g>
   `;
 }
@@ -685,8 +747,7 @@ function renderNode(node, focusState = "default") {
           : ""
       }
       <circle class="star-map-node-body" r="${node.size}" />
-      <text class="star-map-node-type" y="-6" text-anchor="middle">${escapeMarkup(typeLabel)}</text>
-      ${renderNodeLabel(node)}
+      <text class="star-map-node-glyph" y="4" text-anchor="middle" aria-hidden="true">${escapeMarkup(typeLabel.slice(0, 1))}</text>
     </g>
   `;
 }
@@ -770,18 +831,7 @@ function describeNodeContext(node) {
 }
 
 function renderStarMapEmptyDetail() {
-  return `
-    <div class="star-map-explanation-space star-map-detail-empty">
-      <p class="section-kicker">Context Inspector</p>
-      <h4>这张图怎么读？</h4>
-      <p>先看中心的 Project Core，再沿着方向观察：左侧是问题，右侧是决策，上方是阶段成果，下方是下一步任务，外围是项目进展。</p>
-      <ol class="star-map-reading-steps">
-        <li>点击任意节点查看它为什么存在。</li>
-        <li>被高亮的线表示当前节点的上下文路径。</li>
-        <li>完整说明会出现在这里，不堆在星图里。</li>
-      </ol>
-    </div>
-  `;
+  return "";
 }
 
 function renderStarMapDetail(node, nodes, edges) {
@@ -795,6 +845,7 @@ function renderStarMapDetail(node, nodes, edges) {
 
   return `
     <div class="star-map-explanation-space">
+      <button class="star-map-detail-close" type="button" data-star-map-close aria-label="关闭 Context Inspector">×</button>
       <p class="section-kicker">Context Inspector</p>
       <h4>${escapeMarkup(node.title)}</h4>
       <dl class="star-map-detail-grid" aria-label="节点上下文说明">
@@ -874,8 +925,12 @@ export function renderStarMap(contextMap = {}) {
           <h3 id="star-map-title">项目宇宙</h3>
           <p class="star-map-entry-copy">这不是流程图。先看中心项目，再看左侧问题、右侧决策、上方里程碑、下方任务和外围进展。</p>
         </div>
-        <p>${view.nodes.length} 个节点 · ${view.edges.length} 条关系</p>
+        <div class="star-map-heading-actions">
+          <p>${view.nodes.length} 个节点 · ${view.edges.length} 条关系</p>
+          ${renderGuidePopover()}
+        </div>
       </div>
+      ${renderSpatialLegend()}
       <div class="star-map-layout">
         <div class="star-map-stage" data-universe-state="default">
           <svg
@@ -924,14 +979,10 @@ export function renderStarMap(contextMap = {}) {
               .map((node) => renderNode(node, initialFocus.nodes[node.id]))
               .join("")}
           </svg>
-          <div class="star-map-reading-guide" aria-label="项目宇宙阅读指南">
-            <strong>阅读路径</strong>
-            <span>左：问题</span>
-            <span>中：项目核心</span>
-            <span>右：决策</span>
-            <span>上：里程碑</span>
-            <span>下：任务</span>
-            <span>外：进展</span>
+          <div class="universe-label-layer" aria-hidden="true">
+            ${view.nodes
+              .map((node) => renderScreenLabel(node, view.viewBox, initialFocus.nodes[node.id]))
+              .join("")}
           </div>
           ${renderSemanticOutline(view.nodes)}
         </div>
@@ -939,8 +990,9 @@ export function renderStarMap(contextMap = {}) {
           class="star-map-detail context-node-detail"
           id="star-map-detail"
           data-star-map-detail
-          data-detail-state="empty"
+          data-detail-state="closed"
           aria-live="polite"
+          hidden
         >
           ${renderStarMapEmptyDetail()}
         </aside>
@@ -968,6 +1020,11 @@ export function bindStarMapInteractions(container, contextMap = {}) {
       ".star-map-edge[data-edge-index]"
     ) ?? [])
   ];
+  const visualLabels = [
+    ...(container?.querySelectorAll?.(
+      ".star-map-screen-label[data-star-label-id]"
+    ) ?? [])
+  ];
 
   if (!detail || controls.length === 0 || view.nodes.length === 0) {
     return;
@@ -993,8 +1050,13 @@ export function bindStarMapInteractions(container, contextMap = {}) {
           const index = Number(item.dataset.edgeIndex);
           item.setAttribute("data-focus-state", focus.edges[index] ?? "default");
         });
+        visualLabels.forEach((item) => {
+          const itemId = String(item.dataset.starLabelId ?? "");
+          item.setAttribute("data-focus-state", focus.nodes[itemId] ?? "default");
+        });
         detail.innerHTML = renderStarMapEmptyDetail();
-        detail.setAttribute?.("data-detail-state", "empty");
+        detail.setAttribute?.("data-detail-state", "closed");
+        detail.setAttribute?.("hidden", "");
         stage?.setAttribute?.("data-universe-state", "default");
         canvas?.setAttribute?.("data-selected-node", "");
       }
@@ -1031,9 +1093,18 @@ export function bindStarMapInteractions(container, contextMap = {}) {
       const index = Number(item.dataset.edgeIndex);
       item.setAttribute("data-focus-state", focus.edges[index] ?? "quiet");
     });
+    visualLabels.forEach((item) => {
+      const itemId = String(item.dataset.starLabelId ?? "");
+      const state = focus.nodes[itemId] ?? "dimmed";
+      item.setAttribute(
+        "data-focus-state",
+        preview && itemId === node.id ? "hovered" : state
+      );
+    });
 
     if (commit) {
       detail.innerHTML = renderStarMapDetail(node, view.nodes, view.edges);
+      detail.removeAttribute?.("hidden");
       detail.setAttribute?.("data-detail-state", "selected");
       stage?.setAttribute?.("data-universe-state", "selected");
       canvas?.setAttribute?.("data-selected-node", node.id);
@@ -1043,6 +1114,23 @@ export function bindStarMapInteractions(container, contextMap = {}) {
   const restoreSelection = () => {
     applyFocus(selectedId);
   };
+
+  container?.addEventListener?.("click", (event) => {
+    if (!event.target?.closest?.("[data-star-map-close]")) {
+      return;
+    }
+
+    applyFocus("", { commit: true });
+  });
+
+  container?.addEventListener?.("keydown", (event) => {
+    if (event.key !== "Escape") {
+      return;
+    }
+
+    event.preventDefault();
+    applyFocus("", { commit: true });
+  });
 
   controls.forEach((control) => {
     control.addEventListener("click", () =>

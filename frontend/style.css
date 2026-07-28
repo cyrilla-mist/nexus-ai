@@ -4667,3 +4667,256 @@ body.demo-body .demo-case-note {
     width: min(360px, 22%);
   }
 }
+
+/* Nexus AI v0.8.11 Universe UI Layer Separation */
+.project-space-panel[data-space-panel="universe"] .star-map-heading {
+  align-items: flex-start;
+  gap: 18px;
+}
+
+.star-map-heading-actions {
+  display: grid;
+  justify-items: end;
+  gap: 8px;
+  min-width: fit-content;
+}
+
+.star-map-guide-popover {
+  position: relative;
+  z-index: 8;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.star-map-guide-popover summary {
+  cursor: pointer;
+  list-style: none;
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  font-weight: 760;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.star-map-guide-popover summary::-webkit-details-marker {
+  display: none;
+}
+
+.star-map-guide-popover summary::after {
+  content: " ?";
+  color: var(--accent-primary);
+}
+
+.star-map-guide-popover[open] > div {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: min(440px, calc(100vw - 48px));
+  padding: 18px 20px;
+  border: 1px solid color-mix(in srgb, var(--border-soft) 62%, transparent);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--surface-primary) 92%, transparent);
+  box-shadow: 0 24px 62px rgba(15, 23, 42, 0.16);
+  backdrop-filter: blur(18px);
+}
+
+.star-map-guide-popover p {
+  margin: 0 0 10px;
+  line-height: 1.65;
+}
+
+.star-map-guide-popover ol {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 18px;
+  margin: 0 0 10px;
+  padding-left: 1.1rem;
+}
+
+.star-map-spatial-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin: -4px 0 16px;
+  color: var(--text-secondary);
+  font-size: clamp(0.82rem, 0.86vw, 0.92rem);
+  line-height: 1.45;
+}
+
+.star-map-spatial-legend strong {
+  color: var(--text-primary);
+  font-size: 0.76rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.star-map-spatial-legend span {
+  color: var(--text-secondary);
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-stage {
+  overflow: hidden;
+}
+
+.universe-label-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.star-map-screen-label {
+  position: absolute;
+  left: var(--label-x);
+  top: var(--label-y);
+  display: grid;
+  gap: 3px;
+  width: max-content;
+  max-width: 172px;
+  text-align: center;
+  transform: translate(-50%, 0);
+  color: var(--text-primary);
+  opacity: 0.96;
+  transition: opacity 180ms ease, filter 180ms ease, transform 180ms ease;
+}
+
+.star-map-screen-label-type {
+  color: var(--text-tertiary);
+  font-size: 12px;
+  font-weight: 780;
+  letter-spacing: 0.08em;
+}
+
+.star-map-screen-label strong {
+  display: grid;
+  gap: 1px;
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 780;
+  line-height: 1.22;
+  text-shadow:
+    0 1px 0 color-mix(in srgb, var(--surface-primary) 88%, transparent),
+    0 8px 20px color-mix(in srgb, var(--surface-primary) 62%, transparent);
+}
+
+.star-map-screen-label[data-node-type="project"] {
+  max-width: 230px;
+}
+
+.star-map-screen-label[data-node-type="project"] .star-map-screen-label-type {
+  font-size: 12px;
+}
+
+.star-map-screen-label[data-node-type="project"] strong {
+  font-size: 20px;
+  font-weight: 840;
+}
+
+.star-map-screen-label[data-node-type="task"] strong,
+.star-map-screen-label[data-node-type="progress"] strong {
+  font-size: 14px;
+}
+
+.star-map-screen-label[data-focus-state="dimmed"] {
+  opacity: 0.35;
+}
+
+.star-map-screen-label[data-focus-state="selected"],
+.star-map-screen-label[data-focus-state="related"],
+.star-map-screen-label[data-focus-state="hovered"] {
+  opacity: 1;
+  filter: saturate(1.08);
+}
+
+.star-map-screen-label[data-focus-state="selected"] {
+  transform: translate(-50%, 0) scale(1.04);
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-node-glyph {
+  fill: color-mix(in srgb, var(--text-primary) 82%, transparent);
+  font-size: 13px;
+  font-weight: 800;
+  pointer-events: none;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-edge text,
+.project-space-panel[data-space-panel="universe"] .star-map-node-type,
+.project-space-panel[data-space-panel="universe"] .star-map-node-label,
+.project-space-panel[data-space-panel="universe"] .star-map-orbit-label,
+.project-space-panel[data-space-panel="universe"] .star-map-reading-guide {
+  display: none;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-edge {
+  opacity: 0.08;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-edge[data-focus-state="related"] {
+  opacity: 0.64;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-orbit {
+  opacity: 0.42;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-detail[hidden],
+.project-space-panel[data-space-panel="universe"] .star-map-detail[data-detail-state="closed"] {
+  display: none;
+}
+
+.project-space-panel[data-space-panel="universe"] .star-map-detail[data-detail-state="selected"] {
+  display: block;
+  z-index: 7;
+  width: min(380px, 28%);
+  max-width: 380px;
+  min-width: 320px;
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--surface-primary) 90%, transparent);
+}
+
+.star-map-detail-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 30px;
+  height: 30px;
+  border: 1px solid color-mix(in srgb, var(--border-soft) 72%, transparent);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  background: color-mix(in srgb, var(--surface-soft) 72%, transparent);
+  cursor: pointer;
+}
+
+.star-map-detail-close:hover,
+.star-map-detail-close:focus-visible {
+  color: var(--text-primary);
+  border-color: var(--focus-ring);
+}
+
+@media (min-width: 761px) {
+  .project-space-panel[data-space-panel="universe"] .star-map-detail[data-detail-state="selected"] {
+    top: 50%;
+    right: clamp(18px, 2vw, 30px);
+    bottom: auto;
+    transform: translateY(-50%);
+    max-height: min(620px, calc(100% - 80px));
+  }
+}
+
+@media (max-width: 760px) {
+  .star-map-heading-actions,
+  .star-map-guide-popover,
+  .star-map-spatial-legend,
+  .universe-label-layer {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .star-map-screen-label,
+  .star-map-detail-close,
+  .star-map-guide-popover[open] > div {
+    transition: none;
+  }
+}
