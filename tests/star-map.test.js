@@ -61,10 +61,10 @@ test("deterministic orbit layout is stable", () => {
   assert.deepEqual(first, second);
   assert.deepEqual(
     { x: byType(first, "project").x, y: byType(first, "project").y, layer: byType(first, "project").layer },
-    { x: 560, y: 400, layer: "core" }
+    { x: 750, y: 520, layer: "core" }
   );
-  assert.equal(byType(first, "problem").orbit, 190);
-  assert.equal(byType(first, "milestone").orbit, 300);
+  assert.equal(byType(first, "problem").orbit, 330);
+  assert.equal(byType(first, "milestone").orbit, 470);
   assert.equal(byType(first, "problem").layer, "understanding");
   assert.equal(byType(first, "decision").layer, "understanding");
   assert.equal(byType(first, "milestone").layer, "execution");
@@ -73,7 +73,7 @@ test("deterministic orbit layout is stable", () => {
   assert.ok(byType(first, "problem").x < byType(first, "project").x);
   assert.ok(byType(first, "decision").x > byType(first, "project").x);
   assert.ok(byType(first, "milestone").y < byType(first, "project").y);
-  assert.ok(byType(first, "task").y < byType(first, "project").y);
+  assert.ok(byType(first, "task").y > byType(first, "project").y);
   assert.ok(byType(first, "progress").y < byType(first, "milestone").y);
 });
 
@@ -125,7 +125,7 @@ test("Universe layout keeps wide spacing and avoids center-crossing edges", () =
   }
 
   assert.ok(view.edges.every((edge) => edge.crossesCore === false));
-  assert.ok(view.edges.find((edge) => edge.relation === "addresses").x1 > view.nodes.find((node) => node.type === "project").x - 90);
+  assert.ok(view.edges.find((edge) => edge.relation === "addresses").x1 >= view.nodes.find((node) => node.type === "project").x - 100);
 });
 
 test("Project Core and semantic orbits preserve visual hierarchy", () => {
@@ -154,9 +154,11 @@ test("focus state identifies selected, related, and quiet context", () => {
   assert.equal(focus.selectedId, "decision:users");
   assert.equal(focus.nodes["decision:users"], "selected");
   assert.equal(focus.nodes["project:campus"], "related");
-  assert.equal(focus.nodes["milestone:research"], "dimmed");
+  assert.equal(focus.nodes["problem:waste"], "related");
+  assert.equal(focus.nodes["milestone:research"], "related");
+  assert.equal(focus.nodes["task:interviews"], "related");
   assert.equal(focus.edges[edgeIndex("supports")], "related");
-  assert.equal(focus.edges[edgeIndex("contains")], "quiet");
+  assert.equal(focus.edges[edgeIndex("contains")], "related");
 });
 
 test("selection updates related nodes, edges, and relationship details", () => {
@@ -241,7 +243,7 @@ test("Project Universe starts in observation mode before node selection", () => 
   assert.match(html, /data-universe-state="default"/);
   assert.match(html, /data-detail-state="empty"/);
   assert.match(html, /选择一个节点/);
-  assert.match(html, /先观察 Project Core/);
+  assert.match(html, /Project Core 位于中心/);
 });
 
 test("keyboard Escape clears selection and restores observation mode", () => {
@@ -419,4 +421,18 @@ test("mobile Universe Explorer replaces compressed SVG with semantic node explor
   assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.star-map-canvas\s*\{[\s\S]*?display: none/);
   assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.star-map-outline-intro\s*\{[\s\S]*?display: grid/);
   assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.project-space-panel \.star-map-detail\s*\{[\s\S]*?border-top: 1px solid var\(--border-soft\)/);
+});
+test("Desktop Project Universe uses large semantic spatial regions", () => {
+  const view = createStarMapView(sampleGraph());
+  const byType = (type) => view.nodes.find((node) => node.type === type);
+
+  assert.equal(view.width, 1500);
+  assert.equal(view.height, 940);
+  assert.equal(byType("project").size, 86);
+  assert.equal(byType("problem").x, 300);
+  assert.equal(byType("decision").x, 1200);
+  assert.equal(byType("milestone").y, 250);
+  assert.equal(byType("task").y, 735);
+  assert.equal(byType("progress").y, 115);
+  assert.ok(Math.hypot(byType("progress").x - byType("project").x, byType("progress").y - byType("project").y) > 390);
 });

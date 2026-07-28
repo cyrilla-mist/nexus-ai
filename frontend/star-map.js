@@ -1,18 +1,18 @@
-const VIEWBOX = Object.freeze({ width: 1120, height: 760 });
-const CENTER = Object.freeze({ x: 560, y: 400 });
+const VIEWBOX = Object.freeze({ width: 1500, height: 940 });
+const CENTER = Object.freeze({ x: 750, y: 520 });
 const ORBITS = Object.freeze({
-  understanding: 190,
-  execution: 300,
-  growth: 360
+  understanding: 330,
+  execution: 470,
+  growth: 600
 });
 const NODE_SIZES = Object.freeze({
-  project: 68,
-  problem: 28,
-  decision: 31,
-  milestone: 34,
-  task: 23,
-  progress: 19,
-  context: 18
+  project: 86,
+  problem: 42,
+  decision: 44,
+  milestone: 50,
+  task: 34,
+  progress: 26,
+  context: 22
 });
 const TYPE_LABELS = Object.freeze({
   project: "项目",
@@ -40,6 +40,15 @@ const RELATION_STRENGTH = Object.freeze({
   supports: "primary",
   contains: "structural",
   updates: "history"
+});
+const SPATIAL_ZONES = Object.freeze({
+  project: Object.freeze({ x: CENTER.x, y: CENTER.y, stepX: 0, stepY: 0, orbit: 0 }),
+  problem: Object.freeze({ x: 300, y: CENTER.y, stepX: 0, stepY: 118, orbit: ORBITS.understanding }),
+  decision: Object.freeze({ x: 1200, y: CENTER.y, stepX: 0, stepY: 118, orbit: ORBITS.understanding }),
+  milestone: Object.freeze({ x: 540, y: 250, stepX: 120, stepY: 0, orbit: ORBITS.execution }),
+  task: Object.freeze({ x: 560, y: 735, stepX: 122, stepY: 0, orbit: ORBITS.execution }),
+  progress: Object.freeze({ x: CENTER.x, y: 115, stepX: 140, stepY: 0, orbit: ORBITS.growth }),
+  context: Object.freeze({ x: 1010, y: 765, stepX: 118, stepY: 0, orbit: ORBITS.growth })
 });
 
 function isPlainObject(value) {
@@ -190,6 +199,37 @@ function positionOrbit(nodes, radius, layer) {
   });
 }
 
+function positionSemanticNodes(nodes, layer) {
+  if (nodes.length === 0) {
+    return [];
+  }
+
+  const groups = new Map();
+
+  nodes.forEach((node) => {
+    groups.set(node.type, [...(groups.get(node.type) ?? []), node]);
+  });
+
+  return [...groups.entries()].flatMap(([type, groupNodes]) => {
+    const zone = SPATIAL_ZONES[type] ?? SPATIAL_ZONES.context;
+    const middle = (groupNodes.length - 1) / 2;
+
+    return groupNodes.map((node, index) => {
+      const offset = index - middle;
+
+      return {
+        ...node,
+        layer,
+        orbit: zone.orbit,
+        angle: null,
+        size: NODE_SIZES[node.type] ?? NODE_SIZES.context,
+        x: Number((zone.x + offset * zone.stepX).toFixed(2)),
+        y: Number((zone.y + offset * zone.stepY).toFixed(2))
+      };
+    });
+  });
+}
+
 function trimEdgeEndpoint(from, to, padding = 5) {
   const vectorX = to.x - from.x;
   const vectorY = to.y - from.y;
@@ -313,10 +353,10 @@ export function createStarMapView(contextMap = {}) {
           }
         ]
       : []),
-    ...positionOrbit(understanding, ORBITS.understanding, "understanding"),
-    ...positionOrbit(execution, ORBITS.execution, "execution"),
-    ...positionOrbit(progress, ORBITS.growth, "growth"),
-    ...positionOrbit(remaining, ORBITS.growth, "context")
+    ...positionSemanticNodes(understanding, "understanding"),
+    ...positionSemanticNodes(execution, "execution"),
+    ...positionSemanticNodes(progress, "growth"),
+    ...positionSemanticNodes(remaining, "context")
   ];
   const positions = new Map(laidOut.map((node) => [node.id, node]));
   const edges = sourceEdges
@@ -372,7 +412,9 @@ export function createStarMapFocusState(contextMap = {}, selectedId = "") {
     return createDefaultFocusState(view);
   }
 
+  const activeNode = view.nodes.find((node) => node.id === activeId);
   const relatedIds = new Set([activeId]);
+  const pathTypes = ["problem", "decision", "milestone", "task"];
 
   view.edges.forEach((edge) => {
     if (edge.from === activeId) {
@@ -383,6 +425,12 @@ export function createStarMapFocusState(contextMap = {}, selectedId = "") {
       relatedIds.add(edge.from);
     }
   });
+
+  if (activeNode?.type === "project" || pathTypes.includes(activeNode?.type)) {
+    view.nodes
+      .filter((node) => node.type === "project" || pathTypes.includes(node.type))
+      .forEach((node) => relatedIds.add(node.id));
+  }
 
   return Object.freeze({
     selectedId: activeId,
@@ -400,7 +448,11 @@ export function createStarMapFocusState(contextMap = {}, selectedId = "") {
     ),
     edges: Object.freeze(
       view.edges.map((edge) =>
-        edge.from === activeId || edge.to === activeId ? "related" : "quiet"
+        edge.from === activeId ||
+        edge.to === activeId ||
+        (relatedIds.has(edge.from) && relatedIds.has(edge.to))
+          ? "related"
+          : "quiet"
       )
     ),
     pathIds: Object.freeze([...relatedIds])
@@ -493,11 +545,6 @@ function renderNode(node, focusState = "default") {
       <circle class="star-map-node-body" r="${node.size}" />
       <text class="star-map-node-type" y="-4" text-anchor="middle">${escapeMarkup(typeLabel)}</text>
       <text class="star-map-node-label" y="${node.size + 17}" text-anchor="middle">${escapeMarkup(label)}</text>
-      ${
-        node.status
-          ? `<text class="star-map-node-status" y="${node.size + 31}" text-anchor="middle">${escapeMarkup(node.status)}</text>`
-          : ""
-      }
     </g>
   `;
 }
@@ -583,9 +630,9 @@ function describeNodeContext(node) {
 function renderStarMapEmptyDetail() {
   return `
     <div class="star-map-explanation-space star-map-detail-empty">
-      <p class="section-kicker">Context Explanation</p>
+      <p class="section-kicker">Context Inspector</p>
       <h4>选择一个节点</h4>
-      <p>进入项目宇宙后，先观察 Project Core 与三层 Orbit。点击任一节点，可以查看它的身份、状态、来源和关联路径。</p>
+      <p>默认先保留主宇宙视野。选择节点后，Context Inspector 会展开它的身份、上下文、影响和关联路径。</p>
     </div>
   `;
 }
@@ -601,7 +648,7 @@ function renderStarMapDetail(node, nodes, edges) {
 
   return `
     <div class="star-map-explanation-space">
-      <p class="section-kicker">Context Explanation</p>
+      <p class="section-kicker">Context Inspector</p>
       <h4>${escapeMarkup(node.title)}</h4>
       <dl class="star-map-detail-grid" aria-label="节点上下文说明">
         <div>
@@ -615,6 +662,10 @@ function renderStarMapDetail(node, nodes, edges) {
         <div>
           <dt>Context</dt>
           <dd>${escapeMarkup(describeNodeContext(node))}</dd>
+        </div>
+        <div>
+          <dt>Impact</dt>
+          <dd>${escapeMarkup(relationships.length > 0 ? "影响当前项目理解路径" : "等待更多上下文确认")}</dd>
         </div>
         <div>
           <dt>Source</dt>
@@ -674,7 +725,7 @@ export function renderStarMap(contextMap = {}) {
         <div>
           <p class="section-kicker">Star Map</p>
           <h3 id="star-map-title">项目宇宙</h3>
-          <p class="star-map-entry-copy">先观察 Project Core，再选择节点查看上下文路径。</p>
+          <p class="star-map-entry-copy">Project Core 位于中心；Problem、Decision、Milestone、Task 与 Progress 占据不同语义区域。</p>
         </div>
         <p>${view.nodes.length} 个节点 · ${view.edges.length} 条关系</p>
       </div>

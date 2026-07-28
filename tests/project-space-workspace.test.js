@@ -110,7 +110,7 @@ test("Context and Universe expose read-only detail panels", () => {
 
   assert.match(html, /data-context-map-detail/);
   assert.match(html, /data-star-map-detail/);
-  assert.match(html, /Context Explanation/);
+  assert.match(html, /Context Inspector/);
   assert.match(html, /选择一个节点/);
   assert.match(html, /来源/);
   assert.match(html, /状态/);
@@ -135,4 +135,11 @@ test("Mobile Project Space uses app-like identity, current space, and bottom nav
   assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.project-space-main\s*\{[\s\S]*?padding-bottom: 88px/);
   assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.project-space-sidebar\s*\{[\s\S]*?bottom: 10px/);
   assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.mobile-current-space\s*\{[\s\S]*?display: grid/);
+});
+test("Desktop Universe gives the canvas priority over the Context Inspector", () => {
+  assert.match(css, /Nexus AI v0\.8\.7 Project Universe Spatial Redesign/);
+  assert.match(css, /@media \(min-width: 761px\)[\s\S]*?\.project-space-panel\[data-space-panel="universe"\] \.star-map-layout\s*\{[\s\S]*?display: block/);
+  assert.match(css, /@media \(min-width: 761px\)[\s\S]*?\.project-space-panel\[data-space-panel="universe"\] \.star-map-stage\s*\{[\s\S]*?min-height: clamp\(700px/);
+  assert.match(css, /@media \(min-width: 761px\)[\s\S]*?\.project-space-panel\[data-space-panel="universe"\] \.star-map-detail\s*\{[\s\S]*?position: absolute/);
+  assert.match(css, /@media \(min-width: 761px\)[\s\S]*?\.star-map-detail\[data-detail-state="empty"\][\s\S]*?display: none/);
 });

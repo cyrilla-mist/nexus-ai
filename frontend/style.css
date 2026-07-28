@@ -4200,3 +4200,109 @@ body.demo-body .demo-case-note {
     align-self: flex-start;
   }
 }
+
+/* Nexus AI v0.8.7 Project Universe Spatial Redesign */
+@media (min-width: 761px) {
+  .project-space-panel[data-space-panel="universe"] {
+    background:
+      radial-gradient(circle at 52% 46%, color-mix(in srgb, var(--brand-celestial) 42%, transparent), transparent 34rem),
+      linear-gradient(145deg, color-mix(in srgb, var(--surface-primary) 80%, transparent), color-mix(in srgb, var(--surface-secondary) 58%, transparent));
+  }
+
+  .project-space-panel[data-space-panel="universe"] > .star-map {
+    height: 100%;
+    min-height: min(820px, calc(100dvh - 154px));
+    padding: clamp(24px, 3vw, 38px);
+  }
+
+  .project-space-panel[data-space-panel="universe"] .star-map-heading {
+    position: relative;
+    z-index: 3;
+    margin-bottom: 18px;
+  }
+
+  .project-space-panel[data-space-panel="universe"] .star-map-layout {
+    position: relative;
+    display: block;
+    min-height: clamp(700px, 74dvh, 880px);
+  }
+
+  .project-space-panel[data-space-panel="universe"] .star-map-stage {
+    min-height: clamp(700px, 74dvh, 880px);
+    border-color: color-mix(in srgb, var(--border-soft) 42%, transparent);
+    border-radius: 22px;
+    background:
+      radial-gradient(circle at 50% 55%, var(--universe-core-atmosphere), transparent 15rem),
+      radial-gradient(circle at 48% 47%, var(--universe-core-aura), transparent 30rem),
+      radial-gradient(circle at 20% 54%, color-mix(in srgb, var(--star-canvas-field) 78%, transparent), transparent 18rem),
+      radial-gradient(circle at 80% 54%, color-mix(in srgb, var(--background-blue) 52%, transparent), transparent 20rem),
+      linear-gradient(90deg, color-mix(in srgb, var(--universe-map-line) 58%, transparent) 1px, transparent 1px) 0 0 / 112px 112px,
+      linear-gradient(0deg, color-mix(in srgb, var(--universe-map-line) 46%, transparent) 1px, transparent 1px) 0 0 / 112px 112px,
+      linear-gradient(145deg, var(--star-canvas), var(--surface-secondary));
+  }
+
+  .project-space-panel[data-space-panel="universe"] .star-map-canvas {
+    min-height: clamp(700px, 74dvh, 880px);
+    max-height: none;
+  }
+
+  .project-space-panel[data-space-panel="universe"] .star-map-orbit-label {
+    opacity: 0.18;
+  }
+
+  .project-space-panel[data-space-panel="universe"] .star-map-edge {
+    opacity: 0.1;
+  }
+
+  .project-space-panel[data-space-panel="universe"] .star-map-edge[data-focus-state="related"] {
+    opacity: 0.72;
+  }
+
+  .project-space-panel[data-space-panel="universe"] .star-map-edge[data-focus-state="quiet"] {
+    opacity: 0.035;
+  }
+
+  .project-space-panel[data-space-panel="universe"] .star-map-node-label {
+    font-size: 10px;
+  }
+
+  .project-space-panel[data-space-panel="universe"] .star-map-node[data-node-type="project"] .star-map-node-label {
+    font-size: 15px;
+  }
+
+  .project-space-panel[data-space-panel="universe"] .star-map-node-status {
+    display: none;
+  }
+
+  .project-space-panel[data-space-panel="universe"] .star-map-detail {
+    position: absolute;
+    right: clamp(18px, 2.4vw, 30px);
+    bottom: clamp(18px, 2.4vw, 30px);
+    z-index: 4;
+    width: min(340px, 28%);
+    max-height: min(520px, calc(100% - 132px));
+    padding: 18px;
+    overflow: auto;
+    border-color: color-mix(in srgb, var(--border-soft) 62%, transparent);
+    border-radius: 18px;
+    background: color-mix(in srgb, var(--surface-soft) 70%, transparent);
+    box-shadow: 0 24px 62px rgba(15, 23, 42, 0.12);
+    opacity: 0.38;
+    transform: translateY(8px) scale(0.98);
+    backdrop-filter: blur(18px);
+  }
+
+  .project-space-panel[data-space-panel="universe"] .star-map-detail[data-detail-state="selected"] {
+    width: min(380px, 30%);
+    opacity: 0.96;
+    transform: translateY(0) scale(1);
+  }
+
+  .project-space-panel[data-space-panel="universe"] .star-map-detail[data-detail-state="empty"] .star-map-detail-empty p:last-child {
+    display: none;
+  }
+
+  .project-space-panel[data-space-panel="universe"] .star-map-detail-grid div {
+    padding: 10px 0;
+  }
+}
