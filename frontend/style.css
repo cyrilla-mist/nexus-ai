@@ -3885,3 +3885,318 @@ body.demo-body .demo-case-note {
     transition: none;
   }
 }
+
+/* Nexus AI v0.8.6 Mobile Universe & Final Experience Refinement */
+.mobile-current-space {
+  display: none;
+}
+
+.star-map-outline-intro {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .shell {
+    width: min(100% - 24px, 1180px);
+    padding-top: 14px;
+  }
+
+  .nexus-hero {
+    min-height: min(620px, 100svh);
+    padding: 58px 0 28px;
+  }
+
+  .hero-theme-toggle {
+    top: 0;
+    right: 0;
+    min-height: 38px;
+    padding: 8px 12px;
+  }
+
+  .hero-brand {
+    font-size: clamp(2.75rem, 15.5vw, 4.15rem);
+    letter-spacing: -0.07em;
+  }
+
+  .hero-product-position {
+    margin: 10px 0 20px;
+  }
+
+  .hero-slogan {
+    max-width: 360px;
+    margin-bottom: 16px;
+    font-size: clamp(1.28rem, 6.6vw, 1.88rem);
+  }
+
+  .hero-copy {
+    max-width: 31rem;
+    font-size: 0.92rem;
+    line-height: 1.65;
+  }
+
+  .hero-entry-actions {
+    margin-top: 22px;
+  }
+
+  .hero-enter-action {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .entry-space,
+  .workspace,
+  .result {
+    margin-top: 18px;
+  }
+
+  .project-space {
+    overflow: clip;
+    border-radius: 22px;
+  }
+
+  .project-workspace-shell {
+    min-height: auto;
+    grid-template-areas:
+      "main"
+      "sidebar";
+    grid-template-columns: 1fr;
+  }
+
+  .project-space-main {
+    padding: 10px;
+    padding-bottom: 88px;
+  }
+
+  .project-space-sidebar {
+    position: sticky;
+    bottom: 10px;
+    z-index: 12;
+    margin: 0 10px 10px;
+    padding: 7px;
+    border: 1px solid var(--border-soft);
+    border-radius: 18px;
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--surface-primary) 94%, transparent), color-mix(in srgb, var(--surface-soft) 82%, transparent));
+    box-shadow: 0 18px 42px rgba(16, 24, 44, 0.14);
+    backdrop-filter: blur(18px);
+  }
+
+  .project-space-sidebar-heading,
+  .project-space-sidebar-note,
+  .project-space-project-anchor {
+    display: none;
+  }
+
+  .project-space-mobile-anchor {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 4px 12px;
+    align-items: end;
+    padding: 14px 14px 16px;
+    color: var(--text-tertiary);
+  }
+
+  .project-space-mobile-anchor > span {
+    grid-column: 1 / -1;
+    color: var(--accent-strong);
+    font-size: 0.61rem;
+    font-weight: 780;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+  }
+
+  .project-space-mobile-anchor strong {
+    overflow: hidden;
+    color: var(--text-primary);
+    font-size: 0.92rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .project-space-mobile-anchor small {
+    color: var(--accent-strong);
+    font-size: 0.7rem;
+    font-weight: 720;
+  }
+
+  .mobile-current-space {
+    display: grid;
+    gap: 4px;
+    padding: 16px 18px 0;
+  }
+
+  .mobile-current-space span {
+    color: var(--text-tertiary);
+    font-size: 0.62rem;
+    font-weight: 780;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .mobile-current-space strong {
+    color: var(--text-primary);
+    font-size: 1rem;
+  }
+
+  .project-space-navigation {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 4px;
+  }
+
+  .project-space-nav-item {
+    min-height: 54px;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 2px;
+    padding: 8px 3px;
+    border-radius: 12px;
+    text-align: center;
+  }
+
+  .project-space-nav-item::after,
+  .project-space-nav-index,
+  .project-space-nav-copy small {
+    display: none;
+  }
+
+  .project-space-nav-copy strong {
+    font-size: 0.64rem;
+    letter-spacing: 0.01em;
+  }
+
+  .project-space-panel {
+    min-height: auto;
+    border-radius: 18px;
+  }
+
+  .project-space-panel > .project-overview,
+  .project-space-panel > .project-journey,
+  .project-space-panel > .context-map,
+  .project-space-panel > .star-map,
+  .project-space-panel > .action-navigator {
+    padding: 20px;
+    padding-top: 14px;
+  }
+
+  .project-space-panel .project-overview {
+    min-height: auto;
+  }
+
+  .project-space-panel .star-map-stage {
+    min-height: auto;
+    border-radius: 18px;
+    background:
+      radial-gradient(circle at 18% 12%, var(--brand-celestial), transparent 38%),
+      linear-gradient(145deg, color-mix(in srgb, var(--surface-primary) 90%, transparent), color-mix(in srgb, var(--surface-soft) 78%, transparent));
+  }
+
+  .star-map-outline {
+    display: grid;
+    gap: 14px;
+    padding: 14px;
+  }
+
+  .star-map-outline-intro {
+    display: grid;
+    gap: 6px;
+    padding: 10px 4px 4px;
+  }
+
+  .star-map-outline-intro h4 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 1.08rem;
+  }
+
+  .star-map-outline-intro p:last-child {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.84rem;
+    line-height: 1.6;
+  }
+
+  .star-map-outline-group {
+    padding: 12px;
+    border: 1px solid color-mix(in srgb, var(--border-soft) 80%, transparent);
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--surface-primary) 56%, transparent);
+  }
+
+  .star-map-outline-group h4 {
+    margin-bottom: 10px;
+  }
+
+  .star-map-outline button {
+    min-height: 54px;
+    border-radius: 14px;
+  }
+
+  .project-space-panel .star-map-detail {
+    border-top: 1px solid var(--border-soft);
+    border-left: 0;
+    border-radius: 0 0 18px 18px;
+  }
+}
+
+@media (max-width: 560px) {
+  .shell {
+    width: calc(100% - 20px);
+  }
+
+  .nexus-hero {
+    min-height: min(580px, 100svh);
+    padding-top: 52px;
+  }
+
+  .hero-brand {
+    font-size: clamp(2.55rem, 15vw, 3.55rem);
+  }
+
+  .hero-product-position {
+    max-width: 14rem;
+  }
+
+  .hero-entry-actions > span {
+    font-size: 0.7rem;
+  }
+
+  .project-space-main {
+    padding: 8px;
+    padding-bottom: 84px;
+  }
+
+  .project-space-sidebar {
+    bottom: 8px;
+    margin: 0 8px 8px;
+  }
+
+  .project-space-mobile-anchor {
+    padding: 12px 12px 14px;
+  }
+
+  .project-space-nav-item {
+    min-height: 50px;
+    border-radius: 10px;
+  }
+
+  .project-space-nav-copy strong {
+    font-size: 0.58rem;
+  }
+
+  .project-space-panel > .project-overview,
+  .project-space-panel > .project-journey,
+  .project-space-panel > .context-map,
+  .project-space-panel > .star-map,
+  .project-space-panel > .action-navigator {
+    padding: 18px;
+    padding-top: 12px;
+  }
+
+  .star-map-heading {
+    gap: 10px;
+  }
+
+  .star-map-heading > p:last-child {
+    align-self: flex-start;
+  }
+}

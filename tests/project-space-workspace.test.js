@@ -123,3 +123,16 @@ test("Workspace preserves both themes and has a mobile bottom navigation", () =>
   assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.star-map-canvas\s*\{[\s\S]*?display: none/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
 });
+
+test("Mobile Project Space uses app-like identity, current space, and bottom navigation", () => {
+  const html = renderProjectSpace(workspaceExperience());
+
+  assert.match(html, /Project Identity/);
+  assert.match(html, /data-mobile-label="Universe"/);
+  assert.match(html, /class="mobile-current-space"/);
+  assert.match(html, /Current Space/);
+  assert.match(css, /Nexus AI v0\.8\.6 Mobile Universe & Final Experience Refinement/);
+  assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.project-space-main\s*\{[\s\S]*?padding-bottom: 88px/);
+  assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.project-space-sidebar\s*\{[\s\S]*?bottom: 10px/);
+  assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.mobile-current-space\s*\{[\s\S]*?display: grid/);
+});

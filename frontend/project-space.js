@@ -156,7 +156,7 @@ function renderActionNavigator(actionNavigator) {
 function renderNavigation() {
   return SPACE_NAVIGATION.map(
     (item) => `
-      <label class="project-space-nav-item" for="project-space-tab-${item.id}" data-space-target="${item.id}">
+      <label class="project-space-nav-item" for="project-space-tab-${item.id}" data-space-target="${item.id}" data-mobile-label="${item.label}">
         <span class="project-space-nav-index" aria-hidden="true">${item.index}</span>
         <span class="project-space-nav-copy">
           <strong>${item.label}</strong>
@@ -191,6 +191,10 @@ function renderPanel(id, label, content) {
       data-space-panel="${id}"
       aria-label="${label}"
     >
+      <div class="mobile-current-space" aria-hidden="true">
+        <span>Current Space</span>
+        <strong>${escapeHtml(label)}</strong>
+      </div>
       ${content}
     </section>
   `;
@@ -243,7 +247,7 @@ export function renderProjectSpace(experience = {}) {
 
         <main class="project-space-main" tabindex="-1">
           <div class="project-space-mobile-anchor" aria-hidden="true">
-            <span>Nexus AI</span>
+            <span>Project Identity</span>
             <strong>${escapeHtml(title)}</strong>
             <small>${escapeHtml(stage)}</small>
           </div>

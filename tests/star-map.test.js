@@ -408,3 +408,15 @@ test("Project Universe maps all six node types to distinct visual roles", () => 
   assert.match(css, /data-node-type="progress"[\s\S]*?--universe-progress-core/);
   assert.match(css, /prefers-reduced-motion: reduce[\s\S]*?\.star-map-node/);
 });
+
+test("mobile Universe Explorer replaces compressed SVG with semantic node exploration", () => {
+  const html = renderStarMap(sampleGraph());
+  const css = readFileSync(new URL("../frontend/style.css", import.meta.url), "utf8");
+
+  assert.match(html, /aria-label="移动端 Universe Explorer"/);
+  assert.match(html, /Universe Explorer/);
+  assert.match(html, /移动端节点探索/);
+  assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.star-map-canvas\s*\{[\s\S]*?display: none/);
+  assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.star-map-outline-intro\s*\{[\s\S]*?display: grid/);
+  assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.project-space-panel \.star-map-detail\s*\{[\s\S]*?border-top: 1px solid var\(--border-soft\)/);
+});

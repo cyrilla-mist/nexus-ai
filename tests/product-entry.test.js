@@ -56,3 +56,10 @@ test("Product Entry inherits both themes and has responsive fallbacks", () => {
   assert.match(css, /@media \(max-width: 900px\)[\s\S]*?\.entry-choice-grid\s*\{[\s\S]*?grid-template-columns: 1fr/);
   assert.match(css, /@media \(max-width: 560px\)[\s\S]*?\.entry-route\s*\{[\s\S]*?grid-template-columns: 1fr/);
 });
+test("Mobile entry flow keeps the first screen focused on Nexus and project space", () => {
+  assert.match(html, /Nexus AI/);
+  assert.match(html, /AI Project Intelligence Space/);
+  assert.match(html, /进入项目空间/);
+  assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.nexus-hero\s*\{[\s\S]*?min-height: min\(620px, 100svh\)/);
+  assert.match(css, /@media \(max-width: 560px\)[\s\S]*?\.nexus-hero\s*\{[\s\S]*?min-height: min\(580px, 100svh\)/);
+});

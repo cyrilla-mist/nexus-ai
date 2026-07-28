@@ -68,3 +68,9 @@ test("Visual identity preserves mobile entry and first-stage Star Map adaptation
   assert.match(css, /\.project-space-panel \.star-map-orbit\s*\{[\s\S]*?stroke-dasharray/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
 });
+test("v0.8.6 keeps the mobile hero focused on Nexus identity and entry", () => {
+  assert.match(css, /Nexus AI v0\.8\.6 Mobile Universe & Final Experience Refinement/);
+  assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.nexus-hero\s*\{[\s\S]*?100svh/);
+  assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.hero-brand\s*\{[\s\S]*?clamp\(2\.75rem/);
+  assert.match(css, /@media \(max-width: 760px\)[\s\S]*?\.hero-enter-action\s*\{[\s\S]*?width: 100%/);
+});

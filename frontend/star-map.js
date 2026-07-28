@@ -512,7 +512,12 @@ function renderSemanticOutline(nodes) {
   let itemIndex = 0;
 
   return `
-    <div class="star-map-outline" aria-label="项目星图语义结构">
+    <div class="star-map-outline" aria-label="移动端 Universe Explorer">
+      <div class="star-map-outline-intro">
+        <p class="section-kicker">Universe Explorer</p>
+        <h4>移动端节点探索</h4>
+        <p>手机端不压缩桌面星图；Project Core 与核心节点按语义分组展示，选择节点后在下方查看 Context 与 Relationship。</p>
+      </div>
       ${groups
         .map(
           (group) => `
