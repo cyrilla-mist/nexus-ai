@@ -48,6 +48,16 @@ Dry-run is the default and does not write metadata:
 python datahub/scripts/ingest_nexus_context.py --dry-run
 ```
 
+The Continuity Domain mapping has a separate dry-run entry:
+
+```powershell
+python datahub/scripts/ingest_continuity_scenario.py --dry-run
+```
+
+It maps the `nexus-self-reentry` development fixture to one synthetic project
+Dataset, Continuity entity Datasets, deterministic custom properties, and
+aggregated lineage. See `docs/Nexus-DataHub-Continuity-Graph.md`.
+
 ## Apply
 
 Writing requires an explicit `--apply` flag:
@@ -59,12 +69,24 @@ python datahub/scripts/ingest_nexus_context.py --apply
 
 For an authenticated instance, provide `DATAHUB_TOKEN` only through the environment. The ingestion scripts must not print it.
 
+Continuity writes also require explicit apply:
+
+```powershell
+python datahub/scripts/ingest_continuity_scenario.py --server http://localhost:8080 --apply
+```
+
 ## Verify
 
 After applying metadata to a running DataHub instance:
 
 ```powershell
 python datahub/scripts/verify_nexus_context.py --project-id campus-low-carbon
+```
+
+For a manually applied Continuity scenario:
+
+```powershell
+python datahub/scripts/verify_continuity_scenario.py --server http://localhost:8080
 ```
 
 Runtime evidence captured on 2026-07-29 is documented in `datahub/runtime/README.md`. The idempotent verification passed against DataHub Core `v1.5.0.6`, confirming seven entities and five relationships. Verification failure is reported explicitly; it is never converted into a false pass.
