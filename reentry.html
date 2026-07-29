@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Nexus AI Project Re-entry Brief prototype, generated from the validated continuity fixture."
+    />
+    <title>Nexus AI · Project Re-entry Brief</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./frontend/continuity/reentry.css" />
+  </head>
+  <body>
+    <div class="paper-texture" aria-hidden="true"></div>
+    <header class="report-masthead">
+      <a class="wordmark" href="./reentry.html" aria-label="Nexus Project Re-entry Brief">
+        <span aria-hidden="true">◆</span>
+        <strong>NEXUS</strong>
+      </a>
+      <p>PROJECT RE-ENTRY BRIEF <span>v0.9.4 Prototype</span></p>
+      <div class="masthead-meta">
+        <time id="report-date">30 JUL 2026</time>
+        <span>Continuity fixture</span>
+        <span>Runtime mapping verified</span>
+      </div>
+    </header>
+
+    <div class="report-layout">
+      <aside class="report-rail">
+        <p class="rail-label">CONTINUITY ENGINE</p>
+        <nav aria-label="Continuity views">
+          <a href="#brief" aria-current="page">
+            <span>01</span>
+            <strong>RE-ENTRY BRIEF</strong>
+          </a>
+          <span class="planned-view" aria-disabled="true">
+            <span>02</span>
+            <strong>EVIDENCE &amp; CONFLICT</strong>
+            <small>Planned</small>
+          </span>
+          <span class="planned-view" aria-disabled="true">
+            <span>03</span>
+            <strong>MEMORY LEDGER</strong>
+            <small>Planned</small>
+          </span>
+          <span class="planned-view" aria-disabled="true">
+            <span>04</span>
+            <strong>DECISION &amp; ACTION</strong>
+            <small>Planned</small>
+          </span>
+        </nav>
+        <dl class="rail-project">
+          <div><dt>PROJECT</dt><dd id="rail-project-name">Nexus AI</dd></div>
+          <div><dt>STATUS</dt><dd id="rail-project-status">Recovering context</dd></div>
+          <div><dt>SOURCE</dt><dd>Development fixture</dd></div>
+        </dl>
+      </aside>
+
+      <main id="brief" class="report-main">
+        <h1 class="visually-hidden">Nexus AI Project Re-entry Brief</h1>
+        <div id="reentry-status" class="load-state" role="status">
+          Recovering project context…
+        </div>
+        <div id="reentry-app" aria-live="polite" hidden></div>
+      </main>
+    </div>
+
+    <script type="module" src="./frontend/continuity/reentry.js"></script>
+  </body>
+</html>
