@@ -77,7 +77,7 @@ function renderDecisions(decisions) {
   return `<ul class="decision-list">${decisions
     .map(
       (decision) => `
-        <li>
+        <li id="decision-record-${escapeHtml(decision.id)}" data-decision-record="${escapeHtml(decision.id)}">
           <span aria-hidden="true">●</span>
           <div>
             <strong>${escapeHtml(decision.title)}</strong>
@@ -132,14 +132,31 @@ function renderEvidenceChain(chain) {
     .map(
       (item) => `
         <li>
-          <span>${escapeHtml(item.type)}</span>
-          <div>
-            <strong>${escapeHtml(item.title)}</strong>
-            <small>${escapeHtml(item.relation)} · ${escapeHtml(item.source)}</small>
-          </div>
+          <span class="chain-type">${escapeHtml(statusLabel(item.type))}</span>
+          <strong class="chain-title">${escapeHtml(item.title)}</strong>
+            <small class="chain-meta">${escapeHtml(item.relation)} · ${escapeHtml(item.source)}</small>
         </li>`,
     )
     .join("")}</ol>`;
+}
+
+function renderAffectedDecision(decision) {
+  if (!decision) {
+    return `<p class="affected-decision-empty">No related decision was found.</p>`;
+  }
+  return `
+    <div class="affected-decision">
+      <strong>${escapeHtml(decision.title)}</strong>
+      <span>${escapeHtml(statusLabel(decision.status))}</span>
+      <p>${escapeHtml(decision.summary)}</p>
+      <small>${escapeHtml(decision.matchReason)} · ${escapeHtml(decision.source)}</small>
+      <button
+        type="button"
+        class="related-decision-action"
+        data-related-decision="${escapeHtml(decision.id)}"
+        aria-label="View related decision: ${escapeHtml(decision.title)}"
+      >View Related Decision</button>
+    </div>`;
 }
 
 function renderInspector(detail) {
@@ -162,7 +179,7 @@ function renderInspector(detail) {
       </section>
       <section>
         <h3>AFFECTED DECISION</h3>
-        <p>${escapeHtml(detail.affectedDecision)}</p>
+        ${renderAffectedDecision(detail.affectedDecision)}
       </section>
       <section>
         <h3>RECOMMENDED NEXT STEP</h3>
@@ -236,12 +253,22 @@ function bindInteractions() {
     });
   });
 
+  app.querySelector("[data-related-decision]")?.addEventListener("click", (event) => {
+    const id = event.currentTarget.dataset.relatedDecision;
+    const record = app.querySelector(`[data-decision-record="${CSS.escape(id)}"]`);
+    if (!record) return;
+    const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    record.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "center" });
+    record.classList.add("is-related-focus");
+    window.setTimeout(() => record.classList.remove("is-related-focus"), 1600);
+  });
+
   app.querySelector("[data-prototype-action]")?.addEventListener("click", (event) => {
     const feedback = event.currentTarget.parentElement.querySelector(
       ".prototype-feedback",
     );
     feedback.textContent =
-      "Action prepared for the prototype. Runtime write-back is not enabled in v0.9.4.";
+      "Action prepared for the prototype. Runtime write-back is not enabled in v0.9.4.1.";
   });
 }
 

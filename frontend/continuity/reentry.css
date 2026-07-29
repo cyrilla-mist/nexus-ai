@@ -6,7 +6,7 @@
   --ink-title: #2b2925;
   --ink-primary: #34312c;
   --ink-body: #514c45;
-  --ink-muted: #7b736a;
+  --ink-muted: #6f6860;
   --graphite: #3a3732;
   --paper-text: #eee8dc;
   --oxide: #a54b37;
@@ -175,9 +175,9 @@ a:focus-visible {
 }
 
 .rail-project {
-  margin: auto 0 0;
-  border: 1px solid var(--rule);
-  padding: 14px;
+  margin: 30px 10px 0;
+  border-top: 1px solid var(--rule);
+  padding: 16px 0 0;
 }
 
 .rail-project div + div {
@@ -200,7 +200,7 @@ a:focus-visible {
 
 .report-main {
   min-width: 0;
-  padding: 34px 28px 42px;
+  padding: 24px 28px 40px;
 }
 
 .load-state,
@@ -228,9 +228,9 @@ a:focus-visible {
 .project-intro {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(260px, 0.55fr);
-  gap: 44px;
+  gap: 34px;
   max-width: 1120px;
-  margin: 0 auto 30px;
+  margin: 0 auto 22px;
 }
 
 .section-index {
@@ -259,7 +259,7 @@ a:focus-visible {
 .project-intro h2 {
   margin: 8px 0 12px;
   color: var(--ink-title);
-  font: 400 clamp(4.25rem, 9vw, 8.8rem)/0.82 var(--serif);
+  font: 400 clamp(3.8rem, 7.5vw, 7.5rem)/0.88 var(--serif);
   letter-spacing: -0.05em;
 }
 
@@ -277,7 +277,7 @@ a:focus-visible {
 .current-state {
   align-self: center;
   border-left: 1px solid var(--rule);
-  padding: 24px 0 24px 36px;
+  padding: 17px 0 17px 30px;
 }
 
 .current-state > span,
@@ -290,9 +290,9 @@ a:focus-visible {
 .current-state strong {
   display: block;
   max-width: 360px;
-  margin: 14px 0 22px;
+  margin: 10px 0 16px;
   color: color-mix(in srgb, var(--oxide) 70%, var(--ink-title));
-  font: 400 clamp(2.2rem, 4vw, 4.2rem)/1.02 var(--serif);
+  font: 400 clamp(2rem, 3.5vw, 3.6rem)/1.03 var(--serif);
 }
 
 .current-state p b {
@@ -305,12 +305,14 @@ a:focus-visible {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   max-width: 1120px;
-  margin: 0 auto 36px;
+  margin: 0 auto 30px;
   border: 1px solid var(--rule);
 }
 
 .signal-reading {
   position: relative;
+  min-height: 132px;
+  transition: background-color 160ms ease, transform 160ms ease;
   min-width: 0;
   border: 0;
   border-right: 1px solid var(--rule);
@@ -325,9 +327,14 @@ a:focus-visible {
   border-right: 0;
 }
 
+.signal-reading:hover {
+  background: color-mix(in srgb, var(--paper-deep) 46%, transparent);
+  transform: translateY(-1px);
+}
+
 .signal-reading[aria-pressed="true"] {
   color: var(--paper-text);
-  background: var(--graphite);
+  background: color-mix(in srgb, var(--graphite) 94%, var(--paper) 6%);
 }
 
 .signal-reading > span {
@@ -374,8 +381,8 @@ a:focus-visible {
 
 .report-content-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
-  gap: 28px;
+  grid-template-columns: minmax(0, 1fr) minmax(350px, 370px);
+  gap: 24px;
   max-width: 1120px;
   margin: 0 auto;
 }
@@ -386,7 +393,7 @@ a:focus-visible {
 
 .report-section {
   border-top: 1px solid var(--rule);
-  padding: 24px 0 32px;
+  padding: 21px 0 28px;
 }
 
 .report-section > header {
@@ -394,7 +401,7 @@ a:focus-visible {
   grid-template-columns: 38px auto 1fr;
   align-items: baseline;
   gap: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 17px;
 }
 
 .report-section > header span {
@@ -425,7 +432,7 @@ a:focus-visible {
   display: grid;
   grid-template-columns: 74px 1fr;
   gap: 22px;
-  padding: 13px 0 13px 24px;
+  padding: 11px 0 11px 22px;
   border-left: 1px solid var(--rule);
 }
 
@@ -464,6 +471,8 @@ a:focus-visible {
 
 .decision-list li {
   display: grid;
+  scroll-margin-top: 28px;
+  transition: background-color 180ms ease, outline-color 180ms ease;
   grid-template-columns: 14px 1fr;
   gap: 12px;
   margin-bottom: 18px;
@@ -471,6 +480,12 @@ a:focus-visible {
 
 .decision-list > li > span {
   color: var(--mineral);
+}
+
+.decision-list li.is-related-focus {
+  outline: 1px solid color-mix(in srgb, var(--mineral) 58%, transparent);
+  outline-offset: 6px;
+  background: color-mix(in srgb, var(--mineral) 8%, transparent);
 }
 
 .broken-list {
@@ -583,36 +598,100 @@ a:focus-visible {
 
 .evidence-chain li {
   display: grid;
-  grid-template-columns: 52px 1fr;
-  gap: 10px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px;
+  min-width: 0;
   border-left: 1px solid var(--rule);
-  padding: 9px 0 9px 12px;
+  padding: 10px 0 10px 13px;
 }
 
-.evidence-chain > li > span {
+.chain-type,
+.chain-title,
+.chain-meta {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.chain-type {
   color: var(--cobalt);
-  font: 0.58rem var(--mono);
+  font: 500 0.62rem var(--mono);
+  letter-spacing: 0.07em;
   text-transform: uppercase;
 }
 
-.evidence-chain strong,
-.evidence-chain small {
-  display: block;
+.chain-title {
+  font-family: var(--serif);
+  font-size: 0.92rem;
+  line-height: 1.25;
 }
 
-.evidence-chain strong {
-  font-size: 0.78rem;
-}
-
-.evidence-chain small {
+.chain-meta {
   color: var(--ink-muted);
-  font-size: 0.62rem;
+  font-size: 0.67rem;
+  line-height: 1.35;
+}
+
+.affected-decision {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 5px 10px;
+  margin-top: 9px;
+  min-width: 0;
+}
+
+.affected-decision > strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-family: var(--serif);
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.affected-decision > span {
+  align-self: start;
+  border: 1px solid var(--rule);
+  padding: 2px 6px;
+  color: var(--mineral);
+  font: 500 0.56rem var(--mono);
+  text-transform: uppercase;
+}
+
+.affected-decision > p,
+.affected-decision > small,
+.related-decision-action {
+  grid-column: 1 / -1;
+}
+
+.affected-decision > p {
+  margin: 2px 0;
+  color: var(--ink-body);
+}
+
+.affected-decision > small,
+.affected-decision-empty {
+  color: var(--ink-muted);
+  font-size: 0.68rem;
+  overflow-wrap: anywhere;
+}
+
+.related-decision-action {
+  justify-self: start;
+  min-height: 44px;
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  padding: 8px 0 5px;
+  color: var(--cobalt);
+  background: transparent;
+  cursor: pointer;
+  font: 600 0.68rem var(--sans);
 }
 
 .primary-instrument-action {
   width: 100%;
   margin-top: 10px;
   border: 0;
+  min-height: 44px;
   padding: 11px 14px;
   color: var(--paper-text);
   background: var(--oxide);
@@ -704,7 +783,7 @@ code {
   }
 
   .project-intro h2 {
-    font-size: clamp(4rem, 15vw, 6.5rem);
+    font-size: clamp(3.6rem, 14vw, 6rem);
   }
 
   .current-state {
@@ -764,7 +843,7 @@ code {
   }
 
   .project-intro h2 {
-    font-size: 3.8rem;
+    font-size: 3.35rem;
   }
 
   .signal-reading {

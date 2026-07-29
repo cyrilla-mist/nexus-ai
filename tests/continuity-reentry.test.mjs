@@ -5,6 +5,7 @@ import test from "node:test";
 import {
   buildEvidenceChain,
   buildReentryViewModel,
+  findAffectedDecision,
   getContinuitySignals,
   getMeaningfulChanges,
   getRecommendedActions,
@@ -67,6 +68,105 @@ test("agent conflict is represented in selected signal details", () => {
   const conflict = view.selectedSignalDetails.conflict;
   assert.match(conflict.selectedTitle, /campus fixture|self-reentry/i);
   assert.ok(conflict.relations.some((item) => item.relation === "contradicts"));
+});
+
+test("conflict signal resolves a structured confirmed affected decision", () => {
+  const conflict = buildReentryViewModel(fixture).selectedSignalDetails.conflict;
+  assert.deepEqual(
+    Object.keys(conflict.affectedDecision),
+    ["id", "title", "summary", "status", "source", "matchReason"],
+  );
+  assert.equal(conflict.affectedDecision.status, "confirmed");
+  assert.equal(conflict.affectedDecision.id, "decision-no-campus-demo");
+});
+
+test("affected decision resolution is independent of entity array order", () => {
+  const selected = fixture.entities.find(
+    (entity) => entity.id === "memory-campus-scenario",
+  );
+  const reordered = structuredClone(fixture);
+  reordered.entities.reverse();
+  reordered.relationships.reverse();
+  assert.deepEqual(
+    findAffectedDecision(reordered, selected, "conflict"),
+    findAffectedDecision(fixture, selected, "conflict"),
+  );
+});
+
+test("affected decision returns null without semantic or graph relevance", () => {
+  const unrelated = {
+    id: "risk-isolated",
+    type: "risk",
+    status: "open",
+    title: "Unrelated lunar supply",
+    summary: "No shared context exists.",
+    metadata: {},
+    source: { provider: "isolated", reference: "remote" },
+  };
+  const scenario = structuredClone(fixture);
+  scenario.entities.push(unrelated);
+  assert.equal(findAffectedDecision(scenario, unrelated, "missing"), null);
+});
+
+test("confirmed decisions outrank disputed semantic matches", () => {
+  const selected = {
+    id: "memory-alpha",
+    type: "agent_memory",
+    status: "disputed",
+    title: "Alpha scenario candidate",
+    summary: "Alpha direction",
+    metadata: { scenarioCandidate: "alpha-scenario" },
+    source: { provider: "agent", reference: "alpha" },
+  };
+  const base = {
+    project: { id: "project", name: "Project" },
+    relationships: [],
+    expectedFindings: {},
+    entities: [
+      selected,
+      {
+        id: "decision-disputed",
+        type: "decision",
+        status: "disputed",
+        title: "Alpha scenario decision",
+        summary: "Alpha direction",
+        metadata: { decisionArea: "scenario" },
+        source: { provider: "agent", reference: "alpha" },
+      },
+      {
+        id: "decision-confirmed",
+        type: "decision",
+        status: "confirmed",
+        title: "Alpha scenario decision",
+        summary: "Alpha direction",
+        metadata: { decisionArea: "scenario" },
+        source: { provider: "user_decision", reference: "alpha" },
+      },
+    ],
+  };
+  assert.equal(
+    findAffectedDecision(base, selected, "conflict")?.id,
+    "decision-confirmed",
+  );
+});
+
+test("scenarioCandidate metadata links conflict memory to scenario decision", () => {
+  const selected = fixture.entities.find(
+    (entity) => entity.id === "memory-campus-scenario",
+  );
+  const affected = findAffectedDecision(fixture, selected, "conflict");
+  assert.equal(affected.id, "decision-no-campus-demo");
+  assert.equal(affected.matchReason, "Semantic scenario context");
+});
+
+test("a selected decision takes precedence over semantic scenario matching", () => {
+  const selectedDecision = fixture.entities.find(
+    (entity) => entity.id === "decision-archive-star-map",
+  );
+  const affected = findAffectedDecision(fixture, selectedDecision, "valid");
+
+  assert.equal(affected.id, "decision-archive-star-map");
+  assert.equal(affected.matchReason, "Selected record is the decision");
 });
 
 test("missing owner signal links to the blocked MCP bridge", () => {
@@ -153,6 +253,35 @@ test("page is fixture-backed without local runtime or mutation claims", () => {
   assert.match(script, /fetch\("\.\/continuity\/scenarios\/nexus-self-reentry\.json"\)/);
   assert.match(script, /Runtime write-back is not enabled in v0\.9\.4/);
   assert.doesNotMatch(page + script, /localhost:8080|Live from DataHub|MCP mutation|API[_ -]?KEY/i);
+});
+
+test("Evidence Chain renders type, title, and metadata as separate layers", () => {
+  assert.match(script, /class="chain-type"/);
+  assert.match(script, /class="chain-title"/);
+  assert.match(script, /class="chain-meta"/);
+  assert.doesNotMatch(script, /AGENT_MEMORYUse/);
+  assert.match(styles, /grid-template-columns: minmax\(0, 1fr\)/);
+  assert.match(styles, /overflow-wrap: anywhere/);
+});
+
+test("related decision uses an accessible in-page action", () => {
+  assert.match(script, /data-related-decision/);
+  assert.match(script, /aria-label="View related decision:/);
+  assert.match(script, /scrollIntoView/);
+  assert.match(script, /prefers-reduced-motion: reduce/);
+});
+
+test("rail project index follows navigation instead of auto bottom positioning", () => {
+  const railRule = styles.match(/\.rail-project \{[\s\S]*?\n\}/)?.[0] ?? "";
+  assert.match(railRule, /margin: 30px 10px 0/);
+  assert.doesNotMatch(railRule, /margin:\s*auto/);
+  assert.match(railRule, /border-top:/);
+});
+
+test("prototype version is consistent across page and View Model", () => {
+  const view = buildReentryViewModel(fixture);
+  assert.equal(view.reportMeta.prototype, "v0.9.4.1 Prototype");
+  assert.match(page, /v0\.9\.4\.1 Prototype/);
 });
 
 test("editorial palette avoids common purple template values", () => {

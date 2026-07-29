@@ -63,6 +63,22 @@ The supplied visual references informed hierarchy, paper tone, and inspector
 composition. The implementation does not reproduce unsupported account,
 ledger, collaboration, or write-back capabilities shown in those references.
 
+## v0.9.4.1 Refinement
+
+The v0.9.4.1 pass keeps the same report architecture and data boundary while
+improving:
+
+- Hero height and first-screen information balance;
+- Inspector width and Evidence Chain readability;
+- semantic affected-decision resolution with stable, order-independent matching;
+- the rail project index hierarchy;
+- muted text contrast and report spacing;
+- responsive behavior across desktop, tablet, and mobile widths.
+
+The refinement remains fixture-backed. It does not connect to live DataHub,
+call MCP, enable write-back, replace the homepage, or restore Star Map to the
+primary experience.
+
 ## Preview
 
 From the repository root:

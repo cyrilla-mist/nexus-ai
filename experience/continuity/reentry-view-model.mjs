@@ -55,6 +55,48 @@ function normalizeText(value) {
   return typeof value === "string" ? value.trim() : "";
 }
 
+const MATCH_STOP_WORDS = new Set([
+  "a", "an", "and", "as", "at", "be", "by", "for", "from", "in",
+  "is", "it", "of", "on", "or", "the", "to", "use", "used", "using",
+  "will", "with",
+]);
+
+function semanticTokens(...values) {
+  return new Set(
+    values
+      .flatMap((value) => {
+        if (Array.isArray(value)) return value;
+        if (value && typeof value === "object") return Object.values(value);
+        return [value];
+      })
+      .flatMap((value) =>
+        normalizeText(String(value ?? ""))
+          .toLowerCase()
+          .replaceAll(/[_-]+/g, " ")
+          .replaceAll(/[^\p{L}\p{N}\s]+/gu, " ")
+          .split(/\s+/),
+      )
+      .filter((token) => token.length > 1 && !MATCH_STOP_WORDS.has(token)),
+  );
+}
+
+function entityTokens(entity) {
+  return semanticTokens(
+    entity?.title,
+    entity?.summary,
+    entity?.metadata,
+    entity?.source,
+  );
+}
+
+function tokenOverlap(left, right) {
+  let score = 0;
+  for (const token of left) {
+    if (right.has(token)) score += 1;
+  }
+  return score;
+}
+
 function freezeList(values) {
   return Object.freeze(values.map((value) => Object.freeze(value)));
 }
@@ -291,6 +333,105 @@ export function getValidDecisions(scenario) {
   );
 }
 
+function decisionView(decision, matchReason) {
+  if (!decision) return null;
+  return Object.freeze({
+    id: decision.id,
+    title: decision.title,
+    summary: decision.summary,
+    status: decision.status,
+    source: summarizeSource(decision),
+    matchReason,
+  });
+}
+
+function rankDecisions(decisions, scoreFor) {
+  return decisions
+    .map((decision) => ({ decision, score: scoreFor(decision) }))
+    .filter((item) => item.score > 0)
+    .sort(
+      (left, right) =>
+        Number(right.decision.status === "confirmed") -
+          Number(left.decision.status === "confirmed") ||
+        right.score - left.score ||
+        String(left.decision.id).localeCompare(String(right.decision.id)),
+    );
+}
+
+export function findAffectedDecision(scenario, selectedEntity, signalKey = "") {
+  assertScenario(scenario);
+  if (!selectedEntity) return null;
+
+  if (selectedEntity.type === "decision") {
+    return decisionView(selectedEntity, "Selected record is the decision");
+  }
+
+  const { entities, byId, relationships } = getIndexes(scenario);
+  const decisions = entities.filter((entity) => entity.type === "decision");
+  const directlyConnected = directRelations(scenario, selectedEntity.id)
+    .map((item) => item.entity)
+    .filter((entity) => entity.type === "decision")
+    .sort(
+      (left, right) =>
+        Number(right.status === "confirmed") -
+          Number(left.status === "confirmed") ||
+        String(left.id).localeCompare(String(right.id)),
+    );
+
+  if (directlyConnected[0]) {
+    return decisionView(directlyConnected[0], "Direct semantic relationship");
+  }
+
+  const chainDecision = buildEvidenceChain(scenario, selectedEntity.id)
+    .filter((item) => item.type === "decision")
+    .sort(
+      (left, right) =>
+        left.depth - right.depth ||
+        Number(right.status === "confirmed") -
+          Number(left.status === "confirmed") ||
+        left.entityId.localeCompare(right.entityId),
+    )[0];
+
+  if (chainDecision) {
+    return decisionView(
+      byId.get(chainDecision.entityId),
+      `Nearest evidence-chain decision - ${chainDecision.relation}`,
+    );
+  }
+
+  const semanticEntities = [selectedEntity];
+  if (signalKey === "conflict" && selectedEntity.type === "agent_memory") {
+    for (const relationship of relationships) {
+      if (
+        relationship.type !== "contradicts" ||
+        !relationMatchesEntity(relationship, selectedEntity.id)
+      ) continue;
+      const relatedId =
+        relationship.from === selectedEntity.id
+          ? relationship.to
+          : relationship.from;
+      const related = byId.get(relatedId);
+      if (related?.type === "agent_memory") semanticEntities.push(related);
+    }
+  }
+
+  const primaryTokens = entityTokens(selectedEntity);
+  const relatedTokens = semanticTokens(
+    semanticEntities.slice(1).flatMap((entity) => [
+      entity.title, entity.summary, entity.metadata, entity.source,
+    ]),
+    signalKey,
+  );
+  const ranked = rankDecisions(decisions, (decision) => {
+    const tokens = entityTokens(decision);
+    return tokenOverlap(primaryTokens, tokens) * 3 + tokenOverlap(relatedTokens, tokens);
+  });
+
+  return ranked[0]
+    ? decisionView(ranked[0].decision, "Semantic scenario context")
+    : null;
+}
+
 function getBrokenContext(scenario) {
   const { entities, byId, relationships } = getIndexes(scenario);
   const broken = new Map();
@@ -486,9 +627,7 @@ export function buildSignalDetails(scenario) {
       whyItMatters: signal.summary,
       relations: freezeList(relations),
       evidenceChain,
-      affectedDecision:
-        evidenceChain.find((item) => item.type === "decision")?.title ||
-        (selected?.type === "decision" ? selected.title : "No linked decision"),
+      affectedDecision: findAffectedDecision(scenario, selected, signal.key),
       recommendedAction: signal.actionLabel,
     });
   }
@@ -541,7 +680,7 @@ export function buildReentryViewModel(scenario) {
     }),
     reportMeta: Object.freeze({
       title: "Project Re-entry Brief",
-      prototype: "v0.9.4 Prototype",
+      prototype: "v0.9.4.1 Prototype",
       reportDate:
         scenario.reentryQuery?.requestedAt || scenario.project.updatedAt,
       sourceLabel: "Continuity fixture",
