@@ -1,16 +1,19 @@
-﻿# Nexus DataHub Context Graph Foundation
+# Nexus DataHub Context Graph Foundation
 
 This folder contains the v0.9.1 DataHub Context Graph foundation for Nexus AI.
 
 It is a prototype bridge between Nexus project context and DataHub metadata. It does not modify Nexus Core, Project Atlas, Memory, Execution, Worker, or frontend behavior.
 
+> The campus low-carbon project is a development fixture used only to verify DataHub ingestion, metadata properties, search, and lineage. It is not the final Nexus AI hackathon scenario.
+
 ## Prerequisites
 
 - Python 3.10+
-- Docker Desktop, only if you want to run DataHub locally
-- DataHub CLI, only if you want to start the local DataHub quickstart
+- Docker Desktop or another Docker runtime, only for local DataHub
+- DataHub CLI, only to start or inspect a local quickstart
+- `uvx`, only for the official DataHub MCP server
 
-This repository does not install Docker Desktop, does not modify global MCP client settings, and does not store tokens.
+This repository does not install system tools, modify global MCP client settings, or store tokens.
 
 ## Create environment
 
@@ -22,11 +25,11 @@ python -m venv datahub/.venv
 python -m pip install -r datahub/requirements.txt
 ```
 
-If `python` is not available on Windows, install Python separately and rerun the commands. Do not commit `datahub/.venv`.
+Do not commit `datahub/.venv`.
 
 ## Start DataHub
 
-If DataHub CLI and Docker Desktop are available:
+If the DataHub CLI and Docker are available:
 
 ```powershell
 datahub docker quickstart
@@ -54,14 +57,7 @@ $env:DATAHUB_GMS_URL="http://localhost:8080"
 python datahub/scripts/ingest_nexus_context.py --apply
 ```
 
-If your DataHub instance requires authentication, provide the token through an environment variable:
-
-```powershell
-$env:DATAHUB_TOKEN="your-token"
-python datahub/scripts/ingest_nexus_context.py --apply
-```
-
-The scripts must not print tokens.
+For an authenticated instance, provide `DATAHUB_TOKEN` only through the environment. The ingestion scripts must not print it.
 
 ## Verify
 
@@ -71,33 +67,25 @@ After applying metadata to a running DataHub instance:
 python datahub/scripts/verify_nexus_context.py --project-id campus-low-carbon
 ```
 
-If DataHub is not running or the Python SDK is unavailable, verification reports a failure/skipped runtime status instead of pretending success.
+Runtime evidence captured on 2026-07-29 is documented in `datahub/runtime/README.md`. The idempotent verification passed against DataHub Core `v1.5.0.6`, confirming seven entities and five relationships. Verification failure is reported explicitly; it is never converted into a false pass.
 
 ## MCP
 
-An example MCP configuration is provided in:
-
-```text
-datahub/mcp/mcp-config.example.json
-```
-
-The official MCP package can be inspected with:
+The official self-hosted DataHub MCP server is the Python package `mcp-server-datahub`, normally launched over stdio with:
 
 ```powershell
-npx -y @acryldata/mcp-server-datahub --help
+uvx mcp-server-datahub@latest
 ```
 
-Some MCP initialization commands can modify global client configuration. This repository provides only an example config and does not automatically run client initialization.
+The repository example is `datahub/mcp/mcp-config.example.json`. It targets local GMS at `http://localhost:8080`, where the verified quickstart has authentication disabled, so no token is included. For a secured instance, set `DATAHUB_GMS_TOKEN` outside the repository.
 
-Official initialization, if the user intentionally wants to configure their own MCP client:
+The example forces mutation and document-writing capabilities off. The smoke harness in `datahub/mcp/smoke-test.mjs` is limited to `tools/list`, `search`, `get_entities`, and `get_lineage`.
 
-```powershell
-npx -y @acryldata/mcp-server-datahub init
-```
+The older npm command `@acryldata/mcp-server-datahub` returned npm registry `E404` on 2026-07-29 and is not used. No MCP client initialization or global configuration is performed by this repository. Because `uvx` was unavailable in the validation environment, the MCP read-only smoke test was not completed; this is recorded as blocked rather than passed.
 
 ## Prototype Boundary
 
-Nexus Context Nodes are mapped to DataHub Dataset entities as a Hackathon proof-of-concept. These Dataset entities represent project context assets, not real database tables.
+Nexus Context Nodes are mapped to DataHub Dataset entities as a proof-of-concept. These Dataset entities represent project context assets, not database tables.
 
 Current scope:
 
@@ -105,16 +93,15 @@ Current scope:
 - stable DataHub URN mapping
 - DatasetProperties mapping
 - lineage edge mapping
-- dry-run ingestion
-- explicit apply ingestion
-- runtime verification script
-- MCP configuration example
+- dry-run and explicit apply ingestion
+- runtime verification
+- read-only MCP configuration and smoke-test harness
 
-Not included in this version:
+Not included:
 
 - Nexus Core MCP runtime bridge
-- Worker to DataHub connection
+- Worker-to-DataHub connection
+- final hackathon scenario design
 - production DataHub deployment
-- cloud persistence
-- user accounts
+- cloud persistence or user accounts
 - automatic MCP client configuration

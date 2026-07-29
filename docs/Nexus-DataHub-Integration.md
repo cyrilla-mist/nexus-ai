@@ -1,70 +1,49 @@
-﻿# Nexus AI × DataHub Integration
+# Nexus AI × DataHub Integration
 
 ## 1. Goal
 
-Nexus AI converts fragmented project context into a searchable, traceable, agent-readable Context Graph.
+Nexus AI converts project context into a searchable, traceable, agent-readable Context Graph. The current foundation maps a bounded development fixture into DataHub and validates the mapping without connecting Nexus Core, the Worker, or Project Atlas to DataHub at runtime.
 
-The v0.9.1 goal is to create a DataHub Context Graph foundation that can later support MCP-based retrieval and write-back. This phase does not connect Nexus Core, the Worker, or Project Atlas to DataHub at runtime.
+> The campus low-carbon project is a development fixture used only to verify DataHub ingestion, metadata properties, search, and lineage. It is not the final Nexus AI hackathon scenario.
 
 ## 2. Why DataHub
 
-DataHub can serve as a context infrastructure layer for Nexus:
+DataHub is evaluated as a future context infrastructure layer for registering project context as metadata assets, representing semantic relationships, preserving source/status metadata, and exposing structured context to a future read-only MCP bridge.
 
-- **Context Registry:** store project context nodes as searchable metadata assets.
-- **Relationship Graph:** represent semantic project relationships through lineage in the prototype.
-- **Source Tracing:** preserve where a project context node came from.
-- **Agent-readable Metadata:** expose structured project context to future MCP-enabled agents.
-- **Knowledge Write-back:** provide a future target for confirmed decisions, tasks, and progress updates.
+No final Devpost scenario, cloud persistence, account system, or production integration is claimed here.
 
-## 3. Architecture
+## 3. Current Architecture Boundary
 
 ```mermaid
 flowchart TD
-  User[User]
-  Core[Nexus Core]
-  Adapter[DataHub MCP Adapter]
-  DataHub[DataHub Context Graph]
-  Atlas[Project Atlas]
-  Action[Action]
-  WriteBack[Context Write-back]
+  Fixture[Development fixture]
+  Mapping[Nexus to DataHub mapping]
+  DataHub[Local DataHub Core]
+  Verify[Read-only verification]
+  Future[Future MCP runtime bridge]
 
-  User --> Core
-  Core --> Adapter
-  Adapter --> DataHub
-  DataHub --> Atlas
-  Atlas --> Action
-  Action --> WriteBack
-  WriteBack --> DataHub
+  Fixture --> Mapping
+  Mapping --> DataHub
+  DataHub --> Verify
+  DataHub -. not connected .-> Future
 ```
 
-The DataHub MCP Adapter is a next-stage integration target for v0.9.2. It is not wired into Nexus Core in v0.9.1.
+Nexus Core and Project Atlas remain outside the DataHub runtime in this version.
 
 ## 4. Entity Mapping
 
-This version uses existing DataHub Dataset entities as a Hackathon proof-of-concept mapping. These entities represent Nexus Context Nodes. They are not real database tables.
+The prototype uses DataHub Dataset entities for Nexus Context Nodes. They are metadata assets, not database tables.
 
-| Nexus concept | DataHub prototype entity | Notes |
+| Nexus concept | DataHub prototype entity | Purpose |
 | --- | --- | --- |
-| Nexus Project | Dataset | Project context root |
-| Problem | Dataset | Project problem context |
-| Decision | Dataset | Confirmed or proposed decision context |
-| Milestone | Dataset | Execution milestone context |
-| Task | Dataset | Action context |
-| Progress | Dataset | Confirmed progress context |
+| Nexus Project | Dataset | project context root |
+| Problem | Dataset | problem context |
+| Decision | Dataset | decision context |
+| Milestone | Dataset | execution milestone |
+| Task | Dataset | action context |
+| Progress | Dataset | confirmed progress |
 
-Platform:
-
-```text
-urn:li:dataPlatform:nexus
-```
-
-Environment:
-
-```text
-DEV
-```
-
-Example dataset URN:
+Project URN:
 
 ```text
 urn:li:dataset:(urn:li:dataPlatform:nexus,nexus.campus-low-carbon.project,DEV)
@@ -72,87 +51,52 @@ urn:li:dataset:(urn:li:dataPlatform:nexus,nexus.campus-low-carbon.project,DEV)
 
 ## 5. Relationship Mapping
 
-Nexus relationships are mapped to DataHub lineage for the prototype.
+Nexus source maps to DataHub upstream and Nexus target maps to DataHub downstream. The prototype represents `addresses`, `supports`, `contains`, and `updates` through lineage. This preserves relationship direction and does not claim pipeline execution.
 
-Rule:
+## 6. Runtime Evidence
 
-```text
-Nexus relationship source -> DataHub upstream
-Nexus relationship target -> DataHub downstream
-```
+Validated on 2026-07-29:
 
-Supported relationship examples:
+- DataHub Core quickstart image: `v1.5.0.6`
+- DataHub CLI: `1.5.0.6+docker`
+- GMS health check: successful
+- fixture entities: 7
+- fixture relationships: 5
+- idempotent verification result: `PASS`
 
-| Nexus relation | DataHub prototype expression |
-| --- | --- |
-| addresses | Project upstream of Problem |
-| supports | Decision upstream of Project |
-| contains | Milestone upstream of Task |
-| updates | Progress upstream of Project |
+The verification was read-only and performed once after confirming the fixture had already been ingested. Detailed evidence is in `datahub/runtime/README.md`.
 
-Lineage is used here to preserve Context Graph semantics in a reusable DataHub-native mechanism. It does not imply data pipeline execution.
+## 7. MCP Runtime Boundary
 
-## 6. Read Flow
-
-In a later version, an MCP-enabled Nexus agent can read context through DataHub:
-
-1. Search for the Nexus project asset.
-2. Retrieve DatasetProperties for each context node.
-3. Read `customProperties` such as node type, source, status, and context text.
-4. Query lineage to reconstruct relationships.
-5. Pass the retrieved context to Project Atlas.
-
-## 7. Write-back Flow
-
-Future Nexus write-back should only write high-value, policy-approved context:
-
-- new confirmed Decision
-- new Task
-- Progress update
-- source and confidence information
-
-The current v0.9.1 scripts support explicit metadata apply, but Nexus Core does not automatically write to DataHub.
-
-## 8. Current Status
-
-Completed in v0.9.1:
-
-- schema mapping
-- sample graph
-- ingestion script
-- verification script
-- MCP configuration sample
-- DataHub integration documentation
-
-Not completed in v0.9.1:
-
-- Nexus Core MCP runtime
-- Worker-to-DataHub connection
-- production deployment
-- authentication flow
-- cloud persistence
-- DataHub-backed project memory
-
-## 9. Security
-
-Security rules:
-
-- tokens are provided only through environment variables or CLI arguments;
-- tokens are never committed;
-- tokens are never printed;
-- dry-run is the default behavior;
-- write operations require explicit `--apply`;
-- sample metadata contains no user names, API keys, local paths, private accounts, or unsupported personal information.
-
-## 10. Next Step
-
-v0.9.2 should focus on the DataHub MCP Runtime Bridge:
+The official current self-hosted implementation is the Python package `mcp-server-datahub`, launched over stdio with:
 
 ```text
-Nexus Core
--> DataHub MCP Adapter
--> DataHub Context Graph
--> Project Atlas context retrieval
+uvx mcp-server-datahub@latest
 ```
 
-That step should remain separate from this foundation so the metadata mapping can be verified before runtime integration.
+Configuration uses `DATAHUB_GMS_URL`, optional `DATAHUB_GMS_TOKEN`, and explicit mutation/document-writing disable flags. The verified local quickstart has authentication disabled, so the example omits a token.
+
+The npm package `@acryldata/mcp-server-datahub` returned `E404` from `https://registry.npmjs.org/` on 2026-07-29. Official PyPI metadata reported `mcp-server-datahub` version `0.6.0`, but `uvx` was not installed in the validation environment. Per the task boundary, no substitute package or installer was used.
+
+Therefore **MCP read-only smoke test not completed**. The server was not started, and `tools/list`, `search`, `get_entities`, and `get_lineage` were not executed through MCP. Mutation was configured off in the example and harness, but runtime tool exposure could not be confirmed.
+
+## 8. Intended Read-only MCP Flow
+
+When the official runtime is available, the harness will initialize stdio, require the three read tools, reject known mutation-tool exposure, search for the fixture, retrieve the project entity, and retrieve one-hop lineage. No mutation call is part of the smoke test.
+
+## 9. Future Write-back Boundary
+
+Future write-back may include confirmed decisions, tasks, progress, source, and confidence only after Nexus Memory Policy approval. The current foundation does not implement automatic write-back.
+
+## 10. Security
+
+- tokens remain in environment variables;
+- tokens and local absolute paths are never committed or printed;
+- ingestion defaults to dry-run;
+- writes require explicit `--apply`;
+- MCP configuration disables mutation;
+- the fixture contains no private account or secret data.
+
+## 11. Next Step
+
+A later, separate task may run the read-only MCP smoke test after the official `uvx` runtime is available. Nexus Core integration, final scenario design, and any write-back bridge remain out of scope until that evidence passes.

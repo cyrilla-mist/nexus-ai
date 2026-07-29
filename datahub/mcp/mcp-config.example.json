@@ -1,11 +1,14 @@
 ﻿{
   "mcpServers": {
     "datahub": {
-      "command": "npx",
-      "args": ["-y", "@acryldata/mcp-server-datahub"],
+      "command": "uvx",
+      "args": ["mcp-server-datahub@latest"],
       "env": {
-        "DATAHUB_GMS_URL": "${DATAHUB_GMS_URL}",
-        "DATAHUB_TOKEN": "${DATAHUB_TOKEN}"
+        "DATAHUB_GMS_URL": "http://localhost:8080",
+        "TOOLS_IS_MUTATION_ENABLED": "false",
+        "TOOLS_IS_USER_ENABLED": "false",
+        "DATAHUB_MCP_DOCUMENT_TOOLS_DISABLED": "true",
+        "SAVE_DOCUMENT_TOOL_ENABLED": "false"
       }
     }
   }
