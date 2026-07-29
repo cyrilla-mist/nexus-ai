@@ -147,3 +147,9 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# DataHub local development
+/datahub/.venv/
+/datahub/.env
+/datahub/__pycache__/
+/datahub/**/__pycache__/

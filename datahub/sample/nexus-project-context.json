@@ -1,0 +1,99 @@
+﻿{
+  "projectId": "campus-low-carbon",
+  "projectName": "校园低碳循环计划",
+  "schemaVersion": 1,
+  "platform": "nexus",
+  "environment": "DEV",
+  "nodes": [
+    {
+      "id": "project:campus-loop",
+      "type": "project",
+      "name": "校园低碳循环计划",
+      "status": "active",
+      "context": "用可验证的校园循环机制减少一次性用品浪费。",
+      "source": "demo_static_context",
+      "urnName": "nexus.campus-low-carbon.project"
+    },
+    {
+      "id": "problem:single-use",
+      "type": "problem",
+      "name": "一次性用品使用原因尚未验证",
+      "status": "open",
+      "context": "校园一次性用品使用原因仍需要通过访谈和观察验证。",
+      "source": "Project Atlas",
+      "urnName": "nexus.campus-low-carbon.problem.usage-reason"
+    },
+    {
+      "id": "decision:student-first",
+      "type": "decision",
+      "name": "首轮聚焦在校大学生",
+      "status": "confirmed",
+      "context": "校园场景明确，便于完成小范围验证。",
+      "source": "user_confirmed",
+      "urnName": "nexus.campus-low-carbon.decision.student-focus"
+    },
+    {
+      "id": "milestone:needs-validation",
+      "type": "milestone",
+      "name": "完成真实需求验证",
+      "status": "in_progress",
+      "context": "通过访谈和实地观察确认真实需求与关键障碍。",
+      "source": "execution_plan",
+      "urnName": "nexus.campus-low-carbon.milestone.validation"
+    },
+    {
+      "id": "task:interviews",
+      "type": "task",
+      "name": "完成 20 份校园访谈",
+      "status": "in_progress",
+      "context": "形成 20 份可追溯访谈记录，并归纳前三个高频障碍。",
+      "source": "execution_plan",
+      "urnName": "nexus.campus-low-carbon.task.interviews"
+    },
+    {
+      "id": "task:observation",
+      "type": "task",
+      "name": "记录 3 个高频消费场景",
+      "status": "todo",
+      "context": "每个场景至少完成两次实地观察。",
+      "source": "execution_plan",
+      "urnName": "nexus.campus-low-carbon.task.scenarios"
+    },
+    {
+      "id": "progress:explore",
+      "type": "progress",
+      "name": "项目进入 Explore 阶段",
+      "status": "confirmed",
+      "context": "项目已经从想法进入需求探索阶段。",
+      "source": "execution_confirmed",
+      "urnName": "nexus.campus-low-carbon.progress.explore"
+    }
+  ],
+  "relationships": [
+    {
+      "source": "project:campus-loop",
+      "target": "problem:single-use",
+      "type": "addresses"
+    },
+    {
+      "source": "decision:student-first",
+      "target": "project:campus-loop",
+      "type": "supports"
+    },
+    {
+      "source": "milestone:needs-validation",
+      "target": "task:interviews",
+      "type": "contains"
+    },
+    {
+      "source": "milestone:needs-validation",
+      "target": "task:observation",
+      "type": "contains"
+    },
+    {
+      "source": "progress:explore",
+      "target": "project:campus-loop",
+      "type": "updates"
+    }
+  ]
+}
