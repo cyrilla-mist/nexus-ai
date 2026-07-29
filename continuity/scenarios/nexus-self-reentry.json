@@ -1,0 +1,1007 @@
+{
+  "schemaVersion": "0.9.2",
+  "project": {
+    "id": "project-nexus-ai",
+    "name": "Nexus AI",
+    "description": "An AI continuity workspace that keeps complex projects understandable, trustworthy, and actionable.",
+    "status": "in_progress",
+    "createdAt": "2026-07-24T00:00:00Z",
+    "updatedAt": "2026-07-30T00:00:00Z"
+  },
+  "entities": [
+    {
+      "id": "owner-product",
+      "type": "owner",
+      "title": "Product stewardship",
+      "summary": "Human authority for product direction and scenario approval.",
+      "status": "confirmed",
+      "createdAt": "2026-07-24T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "nexus",
+        "reference": "project-governance"
+      },
+      "confidence": 1,
+      "metadata": {
+        "role": "product"
+      }
+    },
+    {
+      "id": "owner-engineering",
+      "type": "owner",
+      "title": "Engineering stewardship",
+      "summary": "Implementation authority for validated technical work.",
+      "status": "confirmed",
+      "createdAt": "2026-07-24T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "nexus",
+        "reference": "project-governance"
+      },
+      "confidence": 1,
+      "metadata": {
+        "role": "engineering"
+      }
+    },
+    {
+      "id": "source-datahub-integration",
+      "type": "source",
+      "title": "DataHub integration documentation",
+      "summary": "Repository documentation defining the DataHub boundary and verified development fixture.",
+      "status": "confirmed",
+      "createdAt": "2026-07-29T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "github",
+        "reference": "docs/Nexus-DataHub-Integration.md"
+      },
+      "confidence": 1,
+      "metadata": {
+        "documentType": "technical-boundary"
+      }
+    },
+    {
+      "id": "source-runtime-record",
+      "type": "source",
+      "title": "Runtime verification record",
+      "summary": "Recorded DataHub Core and read-only MCP verification evidence.",
+      "status": "confirmed",
+      "createdAt": "2026-07-29T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "github",
+        "reference": "datahub/runtime/README.md"
+      },
+      "confidence": 1,
+      "metadata": {
+        "documentType": "runtime-evidence"
+      }
+    },
+    {
+      "id": "source-star-map-experiment",
+      "type": "source",
+      "title": "Star Map design experiment",
+      "summary": "Historical visual experiment retained for design history but removed from the primary experience.",
+      "status": "archived",
+      "createdAt": "2026-07-27T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "github",
+        "reference": "docs/Nexus-Star-Map-Design.md"
+      },
+      "confidence": 1,
+      "metadata": {
+        "archivedVisualExperiment": true,
+        "primaryExperience": false
+      }
+    },
+    {
+      "id": "source-editorial-exploration",
+      "type": "source",
+      "title": "Editorial design exploration",
+      "summary": "Approved Editorial Atlas and Signal Instrument design direction.",
+      "status": "confirmed",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "local_file",
+        "reference": "approved-design-direction"
+      },
+      "confidence": 1,
+      "metadata": {
+        "designDirection": "Editorial Atlas × Signal Instrument"
+      }
+    },
+    {
+      "id": "evidence-runtime-pass",
+      "type": "evidence",
+      "title": "DataHub runtime verification passed",
+      "summary": "DataHub Core v1.5.0.6 verified seven fixture entities and five relationships.",
+      "status": "confirmed",
+      "createdAt": "2026-07-29T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "runtime_record",
+        "reference": "runtime-pass"
+      },
+      "ownerId": "owner-engineering",
+      "confidence": 1,
+      "metadata": {
+        "result": "PASS"
+      },
+      "confirmedBy": "owner-engineering",
+      "confirmedAt": "2026-07-30T00:00:00Z"
+    },
+    {
+      "id": "evidence-mcp-pass",
+      "type": "evidence",
+      "title": "MCP read-only smoke test passed",
+      "summary": "The official Python MCP server completed search, entity, and lineage reads with mutation disabled.",
+      "status": "confirmed",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "runtime_record",
+        "reference": "mcp-read-only-pass"
+      },
+      "ownerId": "owner-engineering",
+      "confidence": 1,
+      "metadata": {
+        "result": "PASS",
+        "mutationEnabled": false
+      },
+      "confirmedBy": "owner-engineering",
+      "confirmedAt": "2026-07-30T00:00:00Z"
+    },
+    {
+      "id": "evidence-campus-rejected",
+      "type": "evidence",
+      "title": "Campus fixture rejected for final Demo",
+      "summary": "The campus low-carbon scenario remains a development fixture and is not the final public showcase.",
+      "status": "confirmed",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "user_decision",
+        "reference": "fixture-boundary"
+      },
+      "ownerId": "owner-product",
+      "confidence": 1,
+      "metadata": {
+        "finalDemo": false,
+        "developmentFixture": true
+      },
+      "confirmedBy": "owner-product",
+      "confirmedAt": "2026-07-30T00:00:00Z"
+    },
+    {
+      "id": "evidence-star-map-archived",
+      "type": "evidence",
+      "title": "Star Map removed from primary experience",
+      "summary": "The visual experiment is retained in history but excluded from the new primary product flow.",
+      "status": "confirmed",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "user_decision",
+        "reference": "star-map-archive"
+      },
+      "ownerId": "owner-product",
+      "confidence": 1,
+      "metadata": {
+        "primaryExperience": false
+      },
+      "confirmedBy": "owner-product",
+      "confirmedAt": "2026-07-30T00:00:00Z"
+    },
+    {
+      "id": "evidence-editorial-approved",
+      "type": "evidence",
+      "title": "Editorial Atlas and Signal Instrument approved",
+      "summary": "The editorial and instrument design language is the approved next product direction.",
+      "status": "confirmed",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "user_decision",
+        "reference": "visual-direction-approval"
+      },
+      "ownerId": "owner-product",
+      "confidence": 1,
+      "metadata": {
+        "designDirection": "Editorial Atlas × Signal Instrument"
+      },
+      "confirmedBy": "owner-product",
+      "confirmedAt": "2026-07-30T00:00:00Z"
+    },
+    {
+      "id": "claim-datahub-operational",
+      "type": "claim",
+      "title": "DataHub integration is technically operational",
+      "summary": "The bounded DataHub runtime and read-only MCP access path have real verification evidence.",
+      "status": "confirmed",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "nexus",
+        "reference": "runtime-evidence-synthesis"
+      },
+      "ownerId": "owner-engineering",
+      "confidence": 0.98,
+      "metadata": {
+        "scope": "local-read-only-foundation"
+      }
+    },
+    {
+      "id": "claim-campus-showcase",
+      "type": "claim",
+      "title": "Campus fixture is suitable for public showcase",
+      "summary": "An earlier proposal treated the development fixture as the final Demo scenario.",
+      "status": "superseded",
+      "createdAt": "2026-07-29T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "agent",
+        "reference": "earlier-showcase-proposal"
+      },
+      "ownerId": "owner-product",
+      "confidence": 0.2,
+      "metadata": {
+        "finalDemo": false,
+        "developmentFixture": true
+      },
+      "supersededBy": "decision-no-campus-demo"
+    },
+    {
+      "id": "claim-star-map-primary",
+      "type": "claim",
+      "title": "Star Map should remain the primary product experience",
+      "summary": "An earlier product narrative centered the visual experiment as the main experience.",
+      "status": "disputed",
+      "createdAt": "2026-07-28T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "agent",
+        "reference": "earlier-product-narrative"
+      },
+      "ownerId": "owner-product",
+      "confidence": 0.25,
+      "metadata": {
+        "primaryExperience": false
+      },
+      "supersededBy": "decision-archive-star-map"
+    },
+    {
+      "id": "claim-continuity-direction",
+      "type": "claim",
+      "title": "Continuity Engine is the long-term product direction",
+      "summary": "Nexus should preserve trustworthy project continuity across time, tools, people, and agents.",
+      "status": "confirmed",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "user_decision",
+        "reference": "continuity-direction"
+      },
+      "ownerId": "owner-product",
+      "confidence": 1,
+      "metadata": {
+        "longTermDirection": true
+      }
+    },
+    {
+      "id": "decision-no-campus-demo",
+      "type": "decision",
+      "title": "Campus fixture will not be used in the final Demo",
+      "summary": "Keep the low-carbon scenario only as technical development data.",
+      "status": "confirmed",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "user_decision",
+        "reference": "fixture-boundary"
+      },
+      "ownerId": "owner-product",
+      "confidence": 1,
+      "metadata": {
+        "decisionArea": "scenario"
+      },
+      "supersedes": "claim-campus-showcase",
+      "confirmedBy": "owner-product",
+      "confirmedAt": "2026-07-30T00:00:00Z"
+    },
+    {
+      "id": "decision-archive-star-map",
+      "type": "decision",
+      "title": "Star Map is removed from the primary experience",
+      "summary": "Retain the experiment as history and stop using it in the primary flow.",
+      "status": "confirmed",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "user_decision",
+        "reference": "star-map-archive"
+      },
+      "ownerId": "owner-product",
+      "confidence": 1,
+      "metadata": {
+        "decisionArea": "experience",
+        "primaryExperience": false
+      },
+      "supersedes": "claim-star-map-primary",
+      "confirmedBy": "owner-product",
+      "confirmedAt": "2026-07-30T00:00:00Z"
+    },
+    {
+      "id": "decision-editorial-direction",
+      "type": "decision",
+      "title": "Editorial Atlas and Signal Instrument becomes the design direction",
+      "summary": "Future continuity experiences use editorial evidence hierarchy and instrument signals.",
+      "status": "confirmed",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "user_decision",
+        "reference": "visual-direction-approval"
+      },
+      "ownerId": "owner-product",
+      "confidence": 1,
+      "metadata": {
+        "decisionArea": "design"
+      },
+      "confirmedBy": "owner-product",
+      "confirmedAt": "2026-07-30T00:00:00Z"
+    },
+    {
+      "id": "decision-self-reentry-demo",
+      "type": "decision",
+      "title": "Nexus will demonstrate project continuity using its own history",
+      "summary": "Use Nexus re-entering its own project history as the current development scenario.",
+      "status": "confirmed",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "user_decision",
+        "reference": "self-reentry-scenario"
+      },
+      "ownerId": "owner-product",
+      "confidence": 1,
+      "metadata": {
+        "decisionArea": "scenario",
+        "finalHackathonScenario": false
+      },
+      "confirmedBy": "owner-product",
+      "confirmedAt": "2026-07-30T00:00:00Z"
+    },
+    {
+      "id": "memory-star-map-advice",
+      "type": "agent_memory",
+      "title": "Continue investing in Star Map polish",
+      "summary": "An earlier recommendation prioritized further spatial visual refinement.",
+      "status": "stale",
+      "createdAt": "2026-07-28T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "agent",
+        "reference": "visual-refinement-memory"
+      },
+      "confidence": 0.1,
+      "metadata": {
+        "inherit": false
+      },
+      "agent": "Project Atlas"
+    },
+    {
+      "id": "memory-continuity-direction",
+      "type": "agent_memory",
+      "title": "Continuity is the durable Nexus direction",
+      "summary": "The stable product direction is trustworthy project continuity rather than isolated output generation.",
+      "status": "confirmed",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "agent",
+        "reference": "continuity-memory"
+      },
+      "confidence": 0.95,
+      "metadata": {
+        "inherit": true,
+        "longTermDirection": true
+      },
+      "agent": "Project Atlas",
+      "confirmedBy": "owner-product",
+      "confirmedAt": "2026-07-30T00:00:00Z"
+    },
+    {
+      "id": "memory-campus-scenario",
+      "type": "agent_memory",
+      "title": "Use the campus fixture as the competition scenario",
+      "summary": "One agent suggestion proposed promoting the technical fixture into the public scenario.",
+      "status": "disputed",
+      "createdAt": "2026-07-29T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "agent",
+        "reference": "competition-scenario-a"
+      },
+      "confidence": 0.2,
+      "metadata": {
+        "scenarioCandidate": "campus-fixture",
+        "finalDemo": false
+      },
+      "agent": "Scenario Agent A"
+    },
+    {
+      "id": "memory-self-reentry-scenario",
+      "type": "agent_memory",
+      "title": "Use Nexus self-reentry as the competition scenario",
+      "summary": "A conflicting suggestion proposes demonstrating continuity through Nexus project history.",
+      "status": "confirmed",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "agent",
+        "reference": "competition-scenario-b"
+      },
+      "confidence": 0.9,
+      "metadata": {
+        "scenarioCandidate": "nexus-self-reentry",
+        "developmentScenario": true
+      },
+      "agent": "Scenario Agent B",
+      "confirmedBy": "owner-product",
+      "confirmedAt": "2026-07-30T00:00:00Z"
+    },
+    {
+      "id": "task-define-schema",
+      "type": "task",
+      "title": "Define continuity schema",
+      "summary": "Create a provider-neutral domain model for continuity entities and relationships.",
+      "status": "completed",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "nexus",
+        "reference": "continuity-foundation-plan"
+      },
+      "ownerId": "owner-engineering",
+      "confidence": 1,
+      "metadata": {
+        "recommended": false
+      },
+      "completionCriteria": "Schema and validator express the approved domain boundary.",
+      "priority": "high"
+    },
+    {
+      "id": "task-create-self-reentry",
+      "type": "task",
+      "title": "Create Nexus self-reentry scenario",
+      "summary": "Finalize a truthful continuity scenario based on current repository history.",
+      "status": "in_progress",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "nexus",
+        "reference": "continuity-foundation-plan"
+      },
+      "ownerId": "owner-product",
+      "confidence": 1,
+      "metadata": {
+        "recommended": true,
+        "recommendedAction": "Finalize the Nexus continuity scenario"
+      },
+      "completionCriteria": "Scenario facts, conflicts, stale records, decisions, tasks, and expected findings validate.",
+      "priority": "high"
+    },
+    {
+      "id": "task-build-datahub-graph",
+      "type": "task",
+      "title": "Build DataHub continuity graph",
+      "summary": "Map the approved provider-neutral continuity domain into a later DataHub graph.",
+      "status": "open",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "nexus",
+        "reference": "continuity-roadmap"
+      },
+      "ownerId": "owner-engineering",
+      "confidence": 0.9,
+      "metadata": {
+        "recommended": true,
+        "recommendedAction": "Build the DataHub continuity graph"
+      },
+      "completionCriteria": "A separate version maps validated continuity entities without changing domain meaning.",
+      "priority": "high"
+    },
+    {
+      "id": "task-project-reentry-brief",
+      "type": "task",
+      "title": "Build Project Re-entry Brief",
+      "summary": "Prototype the primary recovery experience from validated continuity findings.",
+      "status": "open",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "nexus",
+        "reference": "continuity-roadmap"
+      },
+      "ownerId": "owner-product",
+      "confidence": 0.9,
+      "metadata": {
+        "recommended": true,
+        "recommendedAction": "Prototype the Project Re-entry Brief"
+      },
+      "completionCriteria": "A user can understand changes, trust, conflicts, and the next action without reading raw history.",
+      "priority": "high"
+    },
+    {
+      "id": "task-core-mcp-bridge",
+      "type": "task",
+      "title": "Implement Nexus Core MCP bridge",
+      "summary": "Connect Nexus Core to a future read-only provider bridge after the domain graph exists.",
+      "status": "blocked",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "nexus",
+        "reference": "continuity-roadmap"
+      },
+      "confidence": 0.85,
+      "metadata": {
+        "recommended": true,
+        "recommendedAction": "Implement the read-only Nexus Core MCP bridge",
+        "implementationStarted": false
+      },
+      "completionCriteria": "Nexus Core retrieves approved context through a read-only provider interface.",
+      "priority": "high"
+    },
+    {
+      "id": "risk-old-fixture-leakage",
+      "type": "risk",
+      "title": "Old fixture leakage",
+      "summary": "Development fixture content could be mistaken for the final public scenario.",
+      "status": "open",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "nexus",
+        "reference": "continuity-risk-review"
+      },
+      "ownerId": "owner-product",
+      "confidence": 0.9,
+      "metadata": {
+        "riskArea": "scenario"
+      },
+      "priority": "high"
+    },
+    {
+      "id": "risk-outdated-narrative",
+      "type": "risk",
+      "title": "Outdated product narrative",
+      "summary": "Archived Star Map language could continue to describe the primary Nexus experience.",
+      "status": "open",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "nexus",
+        "reference": "continuity-risk-review"
+      },
+      "ownerId": "owner-product",
+      "confidence": 0.85,
+      "metadata": {
+        "riskArea": "narrative"
+      },
+      "priority": "medium"
+    },
+    {
+      "id": "risk-scenario-conflict",
+      "type": "risk",
+      "title": "Unresolved scenario conflict",
+      "summary": "Agent memories still contain incompatible competition scenario proposals.",
+      "status": "open",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "nexus",
+        "reference": "continuity-risk-review"
+      },
+      "ownerId": "owner-product",
+      "confidence": 0.8,
+      "metadata": {
+        "riskArea": "agent-memory"
+      },
+      "priority": "high"
+    },
+    {
+      "id": "risk-missing-owner",
+      "type": "risk",
+      "title": "Missing implementation owner",
+      "summary": "The Nexus Core MCP bridge has no confirmed implementation owner.",
+      "status": "blocked",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "nexus",
+        "reference": "continuity-risk-review"
+      },
+      "confidence": 1,
+      "metadata": {
+        "riskArea": "ownership",
+        "blockedTaskId": "task-core-mcp-bridge",
+        "missingOwner": true
+      },
+      "priority": "critical"
+    },
+    {
+      "id": "event-runtime-verified",
+      "type": "event",
+      "title": "DataHub runtime verified",
+      "summary": "The local Core runtime verified the bounded development graph.",
+      "status": "completed",
+      "createdAt": "2026-07-29T00:00:00Z",
+      "updatedAt": "2026-07-29T00:00:00Z",
+      "source": {
+        "provider": "runtime_record",
+        "reference": "runtime-pass"
+      },
+      "ownerId": "owner-engineering",
+      "confidence": 1,
+      "metadata": {
+        "meaningfulChange": true
+      }
+    },
+    {
+      "id": "event-mcp-passed",
+      "type": "event",
+      "title": "MCP smoke test passed",
+      "summary": "The official read-only MCP path completed search, entity, and lineage access.",
+      "status": "completed",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "runtime_record",
+        "reference": "mcp-read-only-pass"
+      },
+      "ownerId": "owner-engineering",
+      "confidence": 1,
+      "metadata": {
+        "meaningfulChange": true
+      }
+    },
+    {
+      "id": "event-star-map-archived",
+      "type": "event",
+      "title": "Star Map archived",
+      "summary": "The visual experiment left the primary product experience.",
+      "status": "completed",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "user_decision",
+        "reference": "star-map-archive"
+      },
+      "ownerId": "owner-product",
+      "confidence": 1,
+      "metadata": {
+        "meaningfulChange": true
+      }
+    },
+    {
+      "id": "event-visual-approved",
+      "type": "event",
+      "title": "Visual direction approved",
+      "summary": "Editorial Atlas and Signal Instrument became the approved experience direction.",
+      "status": "completed",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "user_decision",
+        "reference": "visual-direction-approval"
+      },
+      "ownerId": "owner-product",
+      "confidence": 1,
+      "metadata": {
+        "meaningfulChange": true
+      }
+    },
+    {
+      "id": "outcome-datahub-foundation",
+      "type": "outcome",
+      "title": "DataHub technical foundation completed",
+      "summary": "The bounded runtime, fixture verification, and read-only MCP path are complete.",
+      "status": "completed",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "nexus",
+        "reference": "datahub-foundation-outcome"
+      },
+      "ownerId": "owner-engineering",
+      "confidence": 1,
+      "metadata": {
+        "scope": "technical-foundation"
+      }
+    },
+    {
+      "id": "outcome-continuity-foundation",
+      "type": "outcome",
+      "title": "Continuity foundation established",
+      "summary": "The provider-neutral domain and self-reentry scenario provide an actionable continuity foundation.",
+      "status": "in_progress",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "updatedAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "nexus",
+        "reference": "continuity-foundation-outcome"
+      },
+      "ownerId": "owner-product",
+      "confidence": 0.9,
+      "metadata": {
+        "scope": "domain-foundation"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "rel-source-runtime-evidence",
+      "type": "produces",
+      "from": "source-runtime-record",
+      "to": "evidence-runtime-pass",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "metadata": {}
+    },
+    {
+      "id": "rel-source-mcp-evidence",
+      "type": "produces",
+      "from": "source-runtime-record",
+      "to": "evidence-mcp-pass",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "metadata": {}
+    },
+    {
+      "id": "rel-integration-campus-evidence",
+      "type": "produces",
+      "from": "source-datahub-integration",
+      "to": "evidence-campus-rejected",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "metadata": {}
+    },
+    {
+      "id": "rel-star-source-evidence",
+      "type": "produces",
+      "from": "source-star-map-experiment",
+      "to": "evidence-star-map-archived",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "metadata": {}
+    },
+    {
+      "id": "rel-editorial-source-evidence",
+      "type": "produces",
+      "from": "source-editorial-exploration",
+      "to": "evidence-editorial-approved",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "metadata": {}
+    },
+    {
+      "id": "rel-runtime-supports-operational",
+      "type": "supports",
+      "from": "evidence-runtime-pass",
+      "to": "claim-datahub-operational",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "metadata": {}
+    },
+    {
+      "id": "rel-mcp-supports-operational",
+      "type": "supports",
+      "from": "evidence-mcp-pass",
+      "to": "claim-datahub-operational",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "metadata": {}
+    },
+    {
+      "id": "rel-operational-influences-scenario",
+      "type": "influences",
+      "from": "claim-datahub-operational",
+      "to": "decision-self-reentry-demo",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "metadata": {}
+    },
+    {
+      "id": "rel-scenario-produces-graph",
+      "type": "produces",
+      "from": "decision-self-reentry-demo",
+      "to": "task-build-datahub-graph",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "metadata": {}
+    },
+    {
+      "id": "rel-graph-produces-outcome",
+      "type": "produces",
+      "from": "task-build-datahub-graph",
+      "to": "outcome-continuity-foundation",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "metadata": {
+        "note": "The future graph completes the current domain foundation."
+      }
+    },
+    {
+      "id": "rel-no-campus-supersedes-claim",
+      "type": "supersedes",
+      "from": "decision-no-campus-demo",
+      "to": "claim-campus-showcase",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "metadata": {}
+    },
+    {
+      "id": "rel-star-decision-supersedes-claim",
+      "type": "supersedes",
+      "from": "decision-archive-star-map",
+      "to": "claim-star-map-primary",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "metadata": {}
+    },
+    {
+      "id": "rel-campus-memory-conflict",
+      "type": "contradicts",
+      "from": "memory-campus-scenario",
+      "to": "memory-self-reentry-scenario",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "metadata": {
+        "conflictArea": "competition-scenario"
+      }
+    },
+    {
+      "id": "rel-campus-evidence-influences-decision",
+      "type": "influences",
+      "from": "evidence-campus-rejected",
+      "to": "decision-no-campus-demo",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "metadata": {}
+    },
+    {
+      "id": "rel-star-evidence-influences-decision",
+      "type": "influences",
+      "from": "evidence-star-map-archived",
+      "to": "decision-archive-star-map",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "metadata": {}
+    },
+    {
+      "id": "rel-editorial-evidence-influences-decision",
+      "type": "influences",
+      "from": "evidence-editorial-approved",
+      "to": "decision-editorial-direction",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "metadata": {}
+    },
+    {
+      "id": "rel-continuity-claim-influences-scenario",
+      "type": "influences",
+      "from": "claim-continuity-direction",
+      "to": "decision-self-reentry-demo",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "metadata": {}
+    },
+    {
+      "id": "rel-old-fixture-blocks-graph",
+      "type": "blocks",
+      "from": "risk-old-fixture-leakage",
+      "to": "task-build-datahub-graph",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "metadata": {}
+    },
+    {
+      "id": "rel-outdated-narrative-blocks-brief",
+      "type": "blocks",
+      "from": "risk-outdated-narrative",
+      "to": "task-project-reentry-brief",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "metadata": {}
+    },
+    {
+      "id": "rel-scenario-conflict-blocks-scenario",
+      "type": "blocks",
+      "from": "risk-scenario-conflict",
+      "to": "task-create-self-reentry",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "metadata": {}
+    },
+    {
+      "id": "rel-missing-owner-blocks-bridge",
+      "type": "blocks",
+      "from": "risk-missing-owner",
+      "to": "task-core-mcp-bridge",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "metadata": {}
+    },
+    {
+      "id": "rel-schema-assigned-engineering",
+      "type": "assigned_to",
+      "from": "task-define-schema",
+      "to": "owner-engineering",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "metadata": {}
+    },
+    {
+      "id": "rel-scenario-assigned-product",
+      "type": "assigned_to",
+      "from": "task-create-self-reentry",
+      "to": "owner-product",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "metadata": {}
+    },
+    {
+      "id": "rel-graph-assigned-engineering",
+      "type": "assigned_to",
+      "from": "task-build-datahub-graph",
+      "to": "owner-engineering",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "metadata": {}
+    },
+    {
+      "id": "rel-brief-assigned-product",
+      "type": "assigned_to",
+      "from": "task-project-reentry-brief",
+      "to": "owner-product",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "metadata": {}
+    },
+    {
+      "id": "rel-runtime-event-recorded",
+      "type": "recorded_by",
+      "from": "event-runtime-verified",
+      "to": "source-runtime-record",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "metadata": {}
+    },
+    {
+      "id": "rel-mcp-event-recorded",
+      "type": "recorded_by",
+      "from": "event-mcp-passed",
+      "to": "source-runtime-record",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "metadata": {}
+    },
+    {
+      "id": "rel-runtime-produces-foundation",
+      "type": "produces",
+      "from": "event-runtime-verified",
+      "to": "outcome-datahub-foundation",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "metadata": {}
+    },
+    {
+      "id": "rel-mcp-produces-foundation",
+      "type": "produces",
+      "from": "event-mcp-passed",
+      "to": "outcome-datahub-foundation",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "metadata": {}
+    }
+  ],
+  "reentryQuery": {
+    "question": "What changed, what can I still trust, and what should happen next?",
+    "requestedAt": "2026-07-30T00:00:00Z",
+    "scope": [
+      "meaningful changes",
+      "evidence integrity",
+      "agent memory conflicts",
+      "valid decisions",
+      "blocked actions"
+    ]
+  },
+  "expectedFindings": {
+    "meaningfulChanges": 4,
+    "staleRecords": 2,
+    "agentConflicts": 1,
+    "missingOwners": 1,
+    "validDecisions": 4,
+    "recommendedActions": [
+      "Finalize the Nexus continuity scenario",
+      "Build the DataHub continuity graph",
+      "Prototype the Project Re-entry Brief",
+      "Implement the read-only Nexus Core MCP bridge"
+    ]
+  }
+}
