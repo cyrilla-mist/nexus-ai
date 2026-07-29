@@ -249,10 +249,21 @@ test("re-entry page has one h1 and loads a module script", () => {
   assert.match(page, /id="reentry-app"/);
 });
 
-test("page is fixture-backed without local runtime or mutation claims", () => {
-  assert.match(script, /fetch\("\.\/continuity\/scenarios\/nexus-self-reentry\.json"\)/);
-  assert.match(script, /Runtime write-back is not enabled in v0\.9\.4/);
-  assert.doesNotMatch(page + script, /localhost:8080|Live from DataHub|MCP mutation|API[_ -]?KEY/i);
+test("page defaults to fixture through the Continuity Provider", () => {
+  assert.match(script, /createContinuityProvider/);
+  assert.match(script, /mode = query\.get\("source"\) \|\| "fixture"/);
+  assert.match(script, /provider\.loadScenario\(\)/);
+  assert.match(script, /Runtime write-back is not enabled in v0\.9\.5/);
+  assert.doesNotMatch(page + script, /localhost:8080|MCP mutation|API[_ -]?KEY/i);
+});
+
+test("source=datahub reports live success and explicit failure states", () => {
+  assert.match(script, /mode === "datahub"/);
+  assert.match(script, /DataHub live read unavailable/);
+  assert.match(script, /DataHub live read is unavailable/);
+  assert.match(script, /Use fixture mode/);
+  assert.match(script, /source=fixture/);
+  assert.doesNotMatch(script, /fetch\([^)]*localhost:8080/);
 });
 
 test("Evidence Chain renders type, title, and metadata as separate layers", () => {
@@ -278,10 +289,10 @@ test("rail project index follows navigation instead of auto bottom positioning",
   assert.match(railRule, /border-top:/);
 });
 
-test("prototype version is consistent across page and View Model", () => {
+test("prototype page identifies the v0.9.5 live-read bridge layer", () => {
   const view = buildReentryViewModel(fixture);
   assert.equal(view.reportMeta.prototype, "v0.9.4.1 Prototype");
-  assert.match(page, /v0\.9\.4\.1 Prototype/);
+  assert.match(page, /v0\.9\.5 Prototype/);
 });
 
 test("editorial palette avoids common purple template values", () => {

@@ -103,7 +103,29 @@ The repository example is `datahub/mcp/mcp-config.example.json`. It targets loca
 
 The example forces mutation and document-writing capabilities off. The smoke harness in `datahub/mcp/smoke-test.mjs` is limited to `tools/list`, `search`, `get_entities`, and `get_lineage`.
 
-Successful local verification used the official Python MCP server `mcp-server-datahub` `0.6.0` with Node `v24.18.1` and npm `11.16.0`. The read-only smoke test completed `tools/list`, `search`, `get_entities`, and `get_lineage`, then printed `PASS: DataHub MCP read-only smoke test completed`. Mutation Tools, User Tools, and Data Quality Tools were disabled. No MCP client initialization or global configuration is performed by this repository.
+Successful local verification used the official Python MCP server `mcp-server-datahub` `0.6.0` with Node `v24.18.1` and npm `11.16.0`. The read-only smoke test completed `tools/list`, `search`, `get_entities`, and `get_lineage`, then printed `PASS: DataHub MCP read-only smoke test completed`. Mutation Tools, User Tools, and Data Quality Tools were disabled. The optional local bridge initializes its own stdio MCP process only when explicitly started; the repository does not modify global MCP client configuration.
+
+## Continuity Live Read Bridge
+
+The Project Re-entry Brief now has an optional local DataHub mode:
+
+```text
+http://localhost:8000/reentry.html?source=datahub
+```
+
+Start the loopback bridge first:
+
+```bash
+node datahub/mcp/continuity-live-bridge.mjs
+```
+
+The bridge uses the shared read-only MCP client and calls only `search`,
+`get_entities`, and `get_lineage`. Its default endpoint is
+`http://127.0.0.1:8789/api/continuity/reentry`; it does not expose an
+arbitrary tool proxy, perform mutation, or write to DataHub. The static fixture
+remains the default page mode. See
+`docs/Nexus-DataHub-Live-Read-Bridge.md` for architecture, startup, CORS, and
+security boundaries.
 
 ## Prototype Boundary
 
@@ -118,10 +140,11 @@ Current scope:
 - dry-run and explicit apply ingestion
 - runtime verification
 - read-only MCP configuration and smoke-test harness
+- optional loopback Continuity live-read bridge with explicit fixture fallback
 
 Not included:
 
-- Nexus Core MCP runtime bridge
+- Nexus Core MCP runtime integration or write-back
 - Worker-to-DataHub connection
 - final hackathon scenario design
 - production DataHub deployment

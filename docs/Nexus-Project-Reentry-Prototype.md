@@ -12,23 +12,18 @@ Map experiment.
 
 ## Data Source
 
-The page fetches:
+By default, the page fetches:
 
 ```text
 continuity/scenarios/nexus-self-reentry.json
 ```
 
 The scenario is a repository development fixture. It is not production data,
-live DataHub data, or the final Hackathon scenario.
+live DataHub data, or the final Hackathon scenario. The default interface
+labels its source as `Continuity fixture` and `Runtime mapping verified`.
 
-The interface labels its source as:
-
-- `Continuity fixture`
-- `Runtime mapping verified`
-
-The second label records that the fixture-to-runtime mapping has been verified
-elsewhere in the repository. The page itself does not call DataHub Runtime or
-MCP.
+An explicit `source=datahub` query uses the local read-only bridge described
+below. In both modes, the browser never calls DataHub GMS or MCP directly.
 
 ## Experience
 
@@ -78,6 +73,26 @@ improving:
 The refinement remains fixture-backed. It does not connect to live DataHub,
 call MCP, enable write-back, replace the homepage, or restore Star Map to the
 primary experience.
+
+## v0.9.5 DataHub Live Read
+
+The default page remains fixture-backed. An explicit query parameter adds a
+local read-only mode:
+
+```text
+reentry.html?source=datahub
+```
+
+In that mode, the browser calls a loopback HTTP bridge. The bridge starts the
+official DataHub MCP server over stdio, verifies that only the required read
+tools are available, reads the `nexus.continuity.project-nexus-ai` namespace,
+and validates representative lineage before returning a normalized scenario.
+The browser never connects to DataHub GMS or starts a local process.
+
+Live-read failure is explicit. The interface gives local startup steps and a
+user-controlled link back to fixture mode; it never silently mixes or replaces
+failed live data with the fixture. Primary actions remain prototype-only and do
+not write back. See `docs/Nexus-DataHub-Live-Read-Bridge.md`.
 
 ## Preview
 

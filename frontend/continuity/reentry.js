@@ -1,3 +1,4 @@
+import { createContinuityProvider } from "../../experience/continuity/continuity-provider.mjs";
 import { buildReentryViewModel } from "../../experience/continuity/reentry-view-model.mjs";
 
 const app = document.querySelector("#reentry-app");
@@ -5,10 +6,15 @@ const status = document.querySelector("#reentry-status");
 const reportDate = document.querySelector("#report-date");
 const railName = document.querySelector("#rail-project-name");
 const railStatus = document.querySelector("#rail-project-status");
+const railSource = document.querySelector("#rail-project-source");
+const sourceLabel = document.querySelector("#continuity-source-label");
+const sourceDetail = document.querySelector("#continuity-source-detail");
+const reportMain = document.querySelector("#brief");
 
 const state = {
   view: null,
   selectedSignal: "stale",
+  sourceInfo: null,
 };
 
 function escapeHtml(value) {
@@ -268,7 +274,7 @@ function bindInteractions() {
       ".prototype-feedback",
     );
     feedback.textContent =
-      "Action prepared for the prototype. Runtime write-back is not enabled in v0.9.4.1.";
+      "Action prepared for the prototype. Runtime write-back is not enabled in v0.9.5.";
   });
 }
 
@@ -283,24 +289,62 @@ function renderEmpty() {
     </section>`;
 }
 
-function renderError(error) {
+function renderSourceInfo(sourceInfo) {
+  state.sourceInfo = sourceInfo;
+  sourceLabel.textContent = sourceInfo.label;
+  sourceDetail.textContent =
+    sourceInfo.live && sourceInfo.fetchedAt
+      ? `${sourceInfo.detail} \u00b7 Last fetched ${formatDate(sourceInfo.fetchedAt, true)}`
+      : sourceInfo.detail;
+  sourceLabel.classList.toggle("source-live", sourceInfo.live);
+  railSource.textContent = sourceInfo.live
+    ? "DataHub MCP \u00b7 read-only"
+    : "Development fixture";
+}
+
+function renderError(error, mode) {
   status.hidden = true;
   app.hidden = false;
+  if (mode === "datahub") {
+    sourceLabel.textContent = "DataHub live read unavailable";
+    sourceDetail.textContent = "Local bridge required";
+    sourceLabel.classList.remove("source-live");
+    railSource.textContent = "Live read unavailable";
+    app.innerHTML = `
+      <section class="state-message error-message live-error" role="alert">
+        <p>DATAHUB LIVE READ UNAVAILABLE</p>
+        <h2>DataHub live read is unavailable.</h2>
+        <ol>
+          <li>Start DataHub.</li>
+          <li>Start the local read-only bridge.</li>
+          <li>Reload this page.</li>
+        </ol>
+        <p>${escapeHtml(error instanceof Error ? error.message : String(error))}</p>
+        <a class="fixture-mode-action" href="./reentry.html?source=fixture">Use fixture mode</a>
+      </section>`;
+    return;
+  }
+  const unsupportedSource = mode !== "fixture";
   app.innerHTML = `
     <section class="state-message error-message" role="alert">
-      <p>CONTEXT RECOVERY FAILED</p>
-      <h2>Unable to load the continuity fixture.</h2>
+      <p>${unsupportedSource ? "UNSUPPORTED CONTINUITY SOURCE" : "CONTEXT RECOVERY FAILED"}</p>
+      <h2>${unsupportedSource ? "The requested continuity source is not supported." : "Unable to load the continuity fixture."}</h2>
       <p>${escapeHtml(error instanceof Error ? error.message : String(error))}</p>
       <p>Run this page through a local HTTP server, for example <code>python -m http.server 8000</code>.</p>
     </section>`;
 }
 
 async function initialize() {
+  let mode = "fixture";
   try {
-    const response = await fetch("./continuity/scenarios/nexus-self-reentry.json");
-    if (!response.ok) throw new Error(`Fixture request returned ${response.status}.`);
-    const scenario = await response.json();
-    state.view = buildReentryViewModel(scenario);
+    const query = new URLSearchParams(window.location.search);
+    mode = query.get("source") || "fixture";
+    const bridgeUrl =
+      query.get("bridge") || reportMain.dataset.continuityBridgeUrl;
+    const provider = createContinuityProvider({ mode, bridgeUrl });
+    const loaded = await provider.loadScenario();
+    renderSourceInfo(loaded.sourceInfo);
+    state.view = buildReentryViewModel(loaded.scenario);
 
     if (state.view.empty) {
       renderEmpty();
@@ -314,7 +358,7 @@ async function initialize() {
     app.hidden = false;
     render(state.view);
   } catch (error) {
-    renderError(error);
+    renderError(error, mode);
   }
 }
 
