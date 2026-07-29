@@ -1,6 +1,6 @@
 # DataHub Runtime Evidence
 
-Validation date: 2026-07-29
+Validation date: 2026-07-30
 
 > The campus low-carbon project is a development fixture used only to verify DataHub ingestion, metadata properties, search, and lineage. It is not the final Nexus AI hackathon scenario.
 
@@ -13,39 +13,48 @@ Validation date: 2026-07-29
 | DataHub frontend image | `acryldata/datahub-frontend-react:v1.5.0.6` |
 | GMS health | successful at `http://localhost:8080/health` |
 | DataHub CLI | `1.5.0.6+docker` |
-| Verification Python | `3.11.15` in the existing actions container |
+| Fixture entities | 7 verified |
+| Fixture relationships | 5 verified |
+| Runtime verification | `PASS` |
 
-The fixture had already been ingested. One read-only, idempotent verification was executed against the running GMS service and returned `PASS`, confirming the expected seven entities and five relationships. Ingestion was not repeated and no fixture metadata was changed.
+The fixture had already been ingested. Verification was read-only and idempotent; ingestion was not repeated and no fixture metadata was changed.
 
-## MCP Package Evidence
+## Successful MCP Runtime Evidence
+
+The successful local verification environment reported:
 
 | Item | Result |
 | --- | --- |
-| Node | `v26.2.0` |
-| npm | `11.13.0` |
-| npx | `11.13.0` |
-| npm registry | `https://registry.npmjs.org/` |
-| npm package lookup | `E404` |
-| npm help launch | `E404` |
-| official PyPI package | `mcp-server-datahub` `0.6.0` |
-| official stdio command | `uvx mcp-server-datahub@latest` |
-| `uvx` in validation environment | unavailable |
+| Node | `v24.18.1` |
+| npm | `11.16.0` |
+| official MCP server | `mcp-server-datahub` `0.6.0` |
+| transport | stdio |
+| DataHub GMS | local Core Quickstart `v1.5.0.6` |
+| Mutation Tools | `DISABLED` |
+| User Tools | `DISABLED` |
+| Data Quality Tools | `DISABLED` |
 
-The npm errors contained no credentials and are summarized without local log paths.
+No token, credential, user name, local absolute path, or personal information is stored in this evidence.
 
 ## MCP Read-only Smoke Status
 
-**MCP read-only smoke test not completed.**
+**MCP read-only smoke test: PASS.**
 
-Following the stop condition, no substitute package, installer, or global MCP client configuration was used. The official Python implementation could not be started because `uvx` was unavailable.
+The official Python MCP server started successfully. The smoke harness completed the read-only chain:
 
-- MCP server started: no
-- `tools/list`: not executed
-- `search`: not executed
-- `get_entities`: not executed
-- `get_lineage`: not executed
-- mutation call: none
-- mutation configuration: explicitly disabled
-- mutation tool exposure at runtime: unconfirmed
+1. MCP initialization and `tools/list`;
+2. `search` for the development fixture;
+3. `get_entities` for the project entity and expected title;
+4. `get_lineage` for the fixture relationship graph.
 
-The repository contains a read-only smoke harness for a later environment with the official runtime. It prints `PASS` only after real tool results contain the expected fixture evidence.
+Final terminal output:
+
+```text
+PASS: DataHub MCP read-only smoke test completed
+```
+
+Runtime controls confirmed that Mutation Tools, User Tools, and Data Quality Tools were disabled. The smoke harness made no mutation call.
+
+## Scope Boundary
+
+This evidence verifies the local DataHub metadata and read-only MCP access path only. The final Hackathon scenario has not been selected, and the Nexus Core MCP Bridge has not started.

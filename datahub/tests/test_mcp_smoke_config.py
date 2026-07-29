@@ -49,12 +49,17 @@ class McpSmokeConfigTests(unittest.TestCase):
             with self.subTest(path=path):
                 self.assertIn(FIXTURE_STATEMENT, path.read_text(encoding="utf-8-sig"))
 
-    def test_runtime_does_not_claim_false_mcp_pass(self):
+    def test_runtime_records_successful_read_only_mcp_evidence(self):
         runtime = (ROOT / "datahub" / "runtime" / "README.md").read_text(encoding="utf-8")
-        self.assertIn("MCP read-only smoke test not completed", runtime)
-        self.assertIn("MCP server started: no", runtime)
-        self.assertIn("mutation tool exposure at runtime: unconfirmed", runtime)
-        self.assertNotIn("MCP read-only smoke test: PASS", runtime)
+        self.assertIn("MCP read-only smoke test: PASS", runtime)
+        self.assertIn("PASS: DataHub MCP read-only smoke test completed", runtime)
+        self.assertIn("`search`", runtime)
+        self.assertIn("`get_entities`", runtime)
+        self.assertIn("`get_lineage`", runtime)
+        self.assertIn("Mutation Tools | `DISABLED`", runtime)
+        self.assertIn("User Tools | `DISABLED`", runtime)
+        self.assertIn("Data Quality Tools | `DISABLED`", runtime)
+        self.assertNotIn("MCP read-only smoke test not completed", runtime)
 
 
 if __name__ == "__main__":

@@ -81,7 +81,7 @@ The repository example is `datahub/mcp/mcp-config.example.json`. It targets loca
 
 The example forces mutation and document-writing capabilities off. The smoke harness in `datahub/mcp/smoke-test.mjs` is limited to `tools/list`, `search`, `get_entities`, and `get_lineage`.
 
-The older npm command `@acryldata/mcp-server-datahub` returned npm registry `E404` on 2026-07-29 and is not used. No MCP client initialization or global configuration is performed by this repository. Because `uvx` was unavailable in the validation environment, the MCP read-only smoke test was not completed; this is recorded as blocked rather than passed.
+Successful local verification used the official Python MCP server `mcp-server-datahub` `0.6.0` with Node `v24.18.1` and npm `11.16.0`. The read-only smoke test completed `tools/list`, `search`, `get_entities`, and `get_lineage`, then printed `PASS: DataHub MCP read-only smoke test completed`. Mutation Tools, User Tools, and Data Quality Tools were disabled. No MCP client initialization or global configuration is performed by this repository.
 
 ## Prototype Boundary
 

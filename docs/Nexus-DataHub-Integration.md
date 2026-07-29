@@ -76,13 +76,13 @@ uvx mcp-server-datahub@latest
 
 Configuration uses `DATAHUB_GMS_URL`, optional `DATAHUB_GMS_TOKEN`, and explicit mutation/document-writing disable flags. The verified local quickstart has authentication disabled, so the example omits a token.
 
-The npm package `@acryldata/mcp-server-datahub` returned `E404` from `https://registry.npmjs.org/` on 2026-07-29. Official PyPI metadata reported `mcp-server-datahub` version `0.6.0`, but `uvx` was not installed in the validation environment. Per the task boundary, no substitute package or installer was used.
+Successful local verification used the official Python MCP server `mcp-server-datahub` `0.6.0` with Node `v24.18.1` and npm `11.16.0`. The server started over stdio and the smoke test completed MCP initialization, `tools/list`, `search`, `get_entities`, and `get_lineage` against the seven-entity, five-relationship development fixture.
 
-Therefore **MCP read-only smoke test not completed**. The server was not started, and `tools/list`, `search`, `get_entities`, and `get_lineage` were not executed through MCP. Mutation was configured off in the example and harness, but runtime tool exposure could not be confirmed.
+The final output was `PASS: DataHub MCP read-only smoke test completed`. Mutation Tools, User Tools, and Data Quality Tools were disabled, and no mutation call was made.
 
 ## 8. Intended Read-only MCP Flow
 
-When the official runtime is available, the harness will initialize stdio, require the three read tools, reject known mutation-tool exposure, search for the fixture, retrieve the project entity, and retrieve one-hop lineage. No mutation call is part of the smoke test.
+The verified harness initializes stdio, requires the three read tools, rejects known mutation-tool exposure, searches for the fixture, retrieves the project entity, and retrieves one-hop lineage. No mutation call is part of the smoke test.
 
 ## 9. Future Write-back Boundary
 
@@ -99,4 +99,4 @@ Future write-back may include confirmed decisions, tasks, progress, source, and 
 
 ## 11. Next Step
 
-A later, separate task may run the read-only MCP smoke test after the official `uvx` runtime is available. Nexus Core integration, final scenario design, and any write-back bridge remain out of scope until that evidence passes.
+The read-only MCP evidence is complete. Nexus Core integration, final Hackathon scenario design, and any write-back bridge remain separate future tasks and have not started.
