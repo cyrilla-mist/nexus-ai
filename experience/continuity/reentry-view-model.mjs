@@ -635,6 +635,94 @@ export function buildSignalDetails(scenario) {
   return Object.freeze(details);
 }
 
+export function getMemoryLedger(scenario) {
+  assertScenario(scenario);
+  const { entities } = getIndexes(scenario);
+  const records = entities
+    .filter((entity) => ["agent_memory", "claim"].includes(entity.type))
+    .map((entity) => {
+      const relations = directRelations(scenario, entity.id);
+      const group = entity.status === "confirmed"
+        ? "confirmed"
+        : ["disputed", "blocked"].includes(entity.status)
+          ? "disputed"
+          : "superseded";
+      return {
+        id: entity.id,
+        type: entity.type,
+        title: entity.title,
+        summary: entity.summary,
+        status: entity.status,
+        group,
+        source: summarizeSource(entity),
+        time: entity.updatedAt || entity.createdAt || "",
+        relationCount: relations.length,
+        relations: relations.map((item) => ({
+          relation: item.relation,
+          direction: item.direction,
+          title: item.entity.title,
+          type: item.entity.type,
+        })),
+      };
+    });
+
+  return Object.freeze({
+    all: freezeList(records),
+    confirmed: freezeList(records.filter((record) => record.group === "confirmed")),
+    disputed: freezeList(records.filter((record) => record.group === "disputed")),
+    superseded: freezeList(records.filter((record) => record.group === "superseded")),
+  });
+}
+
+export function getDecisionActionLedger(scenario) {
+  assertScenario(scenario);
+  const { entities, byId, relationships } = getIndexes(scenario);
+  const confirmedDecisions = getValidDecisions(scenario);
+  const pendingHumanDecisions = relationships
+    .filter((relationship) => {
+      const from = byId.get(relationship.from);
+      const to = byId.get(relationship.to);
+      return relationship.type === "contradicts" &&
+        from?.type === "agent_memory" && to?.type === "agent_memory";
+    })
+    .map((relationship) => {
+      const from = byId.get(relationship.from);
+      const to = byId.get(relationship.to);
+      const affected = findAffectedDecision(scenario, from, "conflict");
+      return {
+        id: relationship.id,
+        title: "Resolve conflicting project direction",
+        summary: `${from.title} conflicts with ${to.title}.`,
+        status: "requires_decision",
+        source: `${summarizeSource(from)} · ${summarizeSource(to)}`,
+        relatedDecisionId: affected?.id || "",
+      };
+    });
+  const recommendedActions = getRecommendedActions(scenario).map((action) => {
+    const owner = action.ownerId ? byId.get(action.ownerId) : null;
+    return {
+      ...action,
+      owner: owner?.title || "Owner not assigned",
+      ownershipRisk: !owner,
+    };
+  });
+  const ownershipRisks = entities
+    .filter((entity) => entity.type === "risk" && entity.metadata?.missingOwner === true)
+    .map((entity) => ({
+      id: entity.id,
+      title: entity.title,
+      summary: entity.summary,
+      status: entity.status,
+      source: summarizeSource(entity),
+    }));
+
+  return Object.freeze({
+    confirmedDecisions,
+    pendingHumanDecisions: freezeList(pendingHumanDecisions),
+    recommendedActions: freezeList(recommendedActions),
+    ownershipRisks: freezeList(ownershipRisks),
+  });
+}
 function continuityScore(signals) {
   const valid = signals.find((signal) => signal.key === "valid")?.count ?? 0;
   const stale = signals.find((signal) => signal.key === "stale")?.count ?? 0;
@@ -668,6 +756,8 @@ export function buildReentryViewModel(scenario) {
   const validDecisions = getValidDecisions(scenario);
   const brokenContext = getBrokenContext(scenario);
   const recommendedActions = getRecommendedActions(scenario);
+  const memoryLedger = getMemoryLedger(scenario);
+  const decisionActionLedger = getDecisionActionLedger(scenario);
   const hasRecords = scenario.entities.length > 0;
 
   return Object.freeze({
@@ -680,7 +770,7 @@ export function buildReentryViewModel(scenario) {
     }),
     reportMeta: Object.freeze({
       title: "Project Re-entry Brief",
-      prototype: "v0.9.4.1 Prototype",
+      prototype: "v0.9.6 Prototype",
       reportDate:
         scenario.reentryQuery?.requestedAt || scenario.project.updatedAt,
       sourceLabel: "Continuity fixture",
@@ -694,6 +784,8 @@ export function buildReentryViewModel(scenario) {
     validDecisions,
     brokenContext,
     recommendedActions,
+    memoryLedger,
+    decisionActionLedger,
     selectedSignalDetails: signalDetails,
     empty: !hasRecords,
   });

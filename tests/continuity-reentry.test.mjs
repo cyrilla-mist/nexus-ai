@@ -8,6 +8,8 @@ import {
   findAffectedDecision,
   getContinuitySignals,
   getMeaningfulChanges,
+  getMemoryLedger,
+  getDecisionActionLedger,
   getRecommendedActions,
   getValidDecisions,
 } from "../experience/continuity/reentry-view-model.mjs";
@@ -253,7 +255,7 @@ test("page defaults to fixture through the Continuity Provider", () => {
   assert.match(script, /createContinuityProvider/);
   assert.match(script, /mode = query\.get\("source"\) \|\| "fixture"/);
   assert.match(script, /provider\.loadScenario\(\)/);
-  assert.match(script, /Runtime write-back is not enabled in v0\.9\.5/);
+  assert.match(script, /Runtime write-back is not enabled in v0\.9\.6/);
   assert.doesNotMatch(page + script, /localhost:8080|MCP mutation|API[_ -]?KEY/i);
 });
 
@@ -289,10 +291,10 @@ test("rail project index follows navigation instead of auto bottom positioning",
   assert.match(railRule, /border-top:/);
 });
 
-test("prototype page identifies the v0.9.5 live-read bridge layer", () => {
+test("prototype page identifies the v0.9.6 workspace layer", () => {
   const view = buildReentryViewModel(fixture);
-  assert.equal(view.reportMeta.prototype, "v0.9.4.1 Prototype");
-  assert.match(page, /v0\.9\.5 Prototype/);
+  assert.equal(view.reportMeta.prototype, "v0.9.6 Prototype");
+  assert.match(page, /v0\.9\.6 Prototype/);
 });
 
 test("editorial palette avoids common purple template values", () => {
@@ -306,9 +308,148 @@ test("editorial palette avoids common purple template values", () => {
 
 test("responsive and accessibility foundations are present", () => {
   assert.match(page, /aria-live="polite"/);
-  assert.match(page, /<nav[\s\S]*?aria-label="Continuity views"/);
+  assert.match(page, /<nav[\s\S]*?aria-label="Continuity workspaces"/);
   assert.match(styles, /@media \(max-width: 1100px\)/);
-  assert.match(styles, /@media \(max-width: 720px\)/);
+  assert.match(styles, /@media \(max-width: 820px\)/);
   assert.match(styles, /min-height: 44px/);
   assert.match(styles, /:focus-visible/);
+});
+
+test("workspace navigation exposes four real hash-backed tabs", () => {
+  assert.equal((page.match(/role="tab"/g) ?? []).length, 4);
+  for (const key of ["brief", "evidence", "memory", "action"]) {
+    assert.match(page, new RegExp(`data-workspace="${key}"`));
+    assert.match(script, new RegExp(`\\b${key}:`));
+  }
+  assert.doesNotMatch(page, /Planned|planned-view/);
+});
+
+test("workspace tabs use a single semantic tablist and tabpanel", () => {
+  assert.equal((page.match(/role="tablist"/g) ?? []).length, 1);
+  assert.equal((page.match(/role="tabpanel"/g) ?? []).length, 1);
+  assert.match(page, /aria-controls="reentry-app"/);
+  assert.match(script, /aria-labelledby.*tab-/);
+});
+
+test("invalid or absent hashes normalize to brief without changing query parameters", () => {
+  assert.match(script, /WORKSPACES\.includes\(key\) \? key : "brief"/);
+  assert.match(script, /window\.location\.pathname.*window\.location\.search.*#\$\{workspace\}/s);
+  assert.match(script, /history\.replaceState/);
+});
+
+test("workspace switching keeps one provider load and does not refetch", () => {
+  assert.equal((script.match(/provider\.loadScenario\(\)/g) ?? []).length, 1);
+  assert.equal((script.match(/createContinuityProvider\(/g) ?? []).length, 1);
+  assert.match(script, /window\.addEventListener\("hashchange"/);
+});
+
+test("workspace navigation supports keyboard and live announcements", () => {
+  for (const key of ["ArrowRight", "ArrowLeft", "Home", "End", "Enter"]) {
+    assert.match(script, new RegExp(key));
+  }
+  assert.match(script, /event\.key.*" "/s);
+  assert.match(page, /id="workspace-announcement"[\s\S]*aria-live="polite"/);
+});
+
+test("workspace switching preserves selected signal and scrolls with reduced-motion support", () => {
+  assert.match(script, /selectedSignal: "stale"/);
+  assert.doesNotMatch(script, /activateWorkspace[\s\S]{0,450}selectedSignal\s*=/);
+  assert.match(script, /scrollWorkspaceTop/);
+  assert.match(script, /prefers-reduced-motion: reduce/);
+});
+
+test("brief is compact and delegates full ledgers to dedicated workspaces", () => {
+  assert.match(script, /class="brief-grid"/);
+  assert.match(script, /CURRENT FOCUS/);
+  assert.match(script, /NEXT BEST ACTION/);
+  assert.match(script, /renderChanges\(view\.meaningfulChanges, 3\)/);
+  const briefSource = script.slice(script.indexOf("function renderBrief"), script.indexOf("function renderSignalLens"));
+  assert.doesNotMatch(briefSource, /renderBroken|renderMemoryGroup|renderActionWorkspace/);
+});
+
+test("evidence workspace provides a compact sticky Signal Lens and explicit navigation", () => {
+  assert.match(script, /class="signal-lens/);
+  assert.match(script, /data-view-evidence/);
+  assert.match(script, /data-related-decision/);
+  assert.match(script, /activateWorkspace\("action"\)/);
+  assert.match(styles, /\.signal-lens \{[\s\S]*position: sticky/);
+  assert.match(styles, /@media \(max-width: 1024px\)[\s\S]*\.signal-lens \{ position: static/);
+});
+
+test("memory ledger groups real records without fabricated confidence", () => {
+  const ledger = getMemoryLedger(fixture);
+  assert.deepEqual(
+    { all: ledger.all.length, confirmed: ledger.confirmed.length, disputed: ledger.disputed.length, superseded: ledger.superseded.length },
+    { all: 8, confirmed: 4, disputed: 2, superseded: 2 },
+  );
+  assert.ok(ledger.all.every((record) => record.source && Number.isInteger(record.relationCount)));
+  assert.ok(ledger.all.every((record) => !("confidence" in record)));
+});
+
+test("memory ledger visibly retains the two conflicting scenario memories", () => {
+  const ledger = getMemoryLedger(fixture);
+  assert.ok(ledger.disputed.some((record) => record.id === "memory-campus-scenario"));
+  assert.ok(ledger.confirmed.some((record) => record.id === "memory-self-reentry-scenario"));
+});
+
+test("memory filters are local view state and do not mutate records", () => {
+  assert.match(script, /memoryFilter: "all"/);
+  assert.match(script, /data-memory-filter/);
+  assert.match(script, /<details class="memory-record"/);
+  const before = structuredClone(fixture);
+  getMemoryLedger(fixture);
+  assert.deepEqual(fixture, before);
+});
+
+test("decision and action ledger separates confirmed, pending, actions, and ownership risk", () => {
+  const ledger = getDecisionActionLedger(fixture);
+  assert.equal(ledger.confirmedDecisions.length, 4);
+  assert.equal(ledger.pendingHumanDecisions.length, 1);
+  assert.equal(ledger.recommendedActions.length, 4);
+  assert.equal(ledger.ownershipRisks.length, 1);
+  assert.equal(ledger.pendingHumanDecisions[0].status, "requires_decision");
+});
+
+test("missing task owners remain explicit rather than inferred", () => {
+  const ledger = getDecisionActionLedger(fixture);
+  const bridge = ledger.recommendedActions.find((action) => action.id === "task-core-mcp-bridge");
+  assert.equal(bridge.owner, "Owner not assigned");
+  assert.equal(bridge.ownershipRisk, true);
+});
+
+test("action workspace contains exactly one primary action renderer", () => {
+  const actionSource = script.slice(script.indexOf("function renderActionWorkspace"), script.indexOf("function updateTabs"));
+  assert.match(script, /index === 0 \? `<button class="primary-instrument-action"/);
+  assert.equal((actionSource.match(/renderAction/g) ?? []).length, 2);
+});
+
+test("prototype controls remain read-only feedback", () => {
+  assert.match(script, /Prototype feedback recorded locally/);
+  assert.match(script, /Runtime write-back is not enabled in v0\.9\.6/);
+  assert.doesNotMatch(script, /method:\s*["'](?:POST|PUT|PATCH|DELETE)/i);
+});
+
+test("mobile navigation is horizontal and body overflow is protected", () => {
+  assert.match(styles, /body \{[^}]*overflow-x: hidden/);
+  assert.match(styles, /@media \(max-width: 820px\)[\s\S]*\.workspace-tabs \{ display: flex; overflow-x: auto/);
+  assert.match(styles, /\.workspace-tabs button \{ flex: 1 0 92px; min-height: 54px/);
+});
+
+test("responsive workspace changes layout instead of adding a fixed bottom nav", () => {
+  assert.match(styles, /@media \(max-width: 820px\)[\s\S]*\.report-layout \{ display: block/);
+  assert.doesNotMatch(styles, /position:\s*fixed[\s\S]{0,120}(workspace-tabs|report-rail)/);
+});
+
+test("loading, empty, and live-error states render within the active panel", () => {
+  assert.match(script, /function renderEmpty/);
+  assert.match(script, /function renderError/);
+  assert.match(script, /DATAHUB LIVE READ UNAVAILABLE/);
+  assert.match(script, /does not contain records for this workspace/);
+});
+
+test("editorial visual language avoids rounded SaaS card stacks", () => {
+  assert.match(styles, /paper-texture\.svg/);
+  assert.match(styles, /font-family: var\(--serif\)/);
+  assert.doesNotMatch(styles, /border-radius:\s*(?:1[2-9]|[2-9]\d)px/);
+  assert.doesNotMatch(styles.toLowerCase(), /#7c3aed|#8b5cf6|#a855f7/);
 });

@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Nexus AI Project Re-entry Brief prototype with fixture and local DataHub MCP live-read modes."
+      content="Nexus AI Continuity workspace with fixture and local DataHub MCP live-read modes."
     />
-    <title>Nexus AI · Project Re-entry Brief</title>
+    <title>Nexus AI · Continuity Workspace</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -19,11 +19,11 @@
   <body>
     <div class="paper-texture" aria-hidden="true"></div>
     <header class="report-masthead">
-      <a class="wordmark" href="./reentry.html" aria-label="Nexus Project Re-entry Brief">
+      <a class="wordmark" href="./reentry.html#brief" aria-label="Nexus Continuity Workspace">
         <span aria-hidden="true">◆</span>
         <strong>NEXUS</strong>
       </a>
-      <p>PROJECT RE-ENTRY BRIEF <span>v0.9.5 Prototype</span></p>
+      <p>CONTINUITY WORKSPACE <span>v0.9.6 Prototype</span></p>
       <div class="masthead-meta">
         <time id="report-date">30 JUL 2026</time>
         <span id="continuity-source-label">Continuity fixture</span>
@@ -34,26 +34,23 @@
     <div class="report-layout">
       <aside class="report-rail">
         <p class="rail-label">CONTINUITY ENGINE</p>
-        <nav aria-label="Continuity views">
-          <a href="#brief" aria-current="page">
+        <nav class="workspace-tabs" aria-label="Continuity workspaces" role="tablist">
+          <button id="tab-brief" type="button" role="tab" aria-controls="reentry-app" aria-selected="true" tabindex="0" data-workspace="brief">
             <span>01</span>
-            <strong>RE-ENTRY BRIEF</strong>
-          </a>
-          <span class="planned-view" aria-disabled="true">
+            <strong><span class="tab-full">RE-ENTRY BRIEF</span><span class="tab-short">BRIEF</span></strong>
+          </button>
+          <button id="tab-evidence" type="button" role="tab" aria-controls="reentry-app" aria-selected="false" tabindex="-1" data-workspace="evidence">
             <span>02</span>
-            <strong>EVIDENCE &amp; CONFLICT</strong>
-            <small>Planned</small>
-          </span>
-          <span class="planned-view" aria-disabled="true">
+            <strong><span class="tab-full">EVIDENCE &amp; CONFLICT</span><span class="tab-short">EVIDENCE</span></strong>
+          </button>
+          <button id="tab-memory" type="button" role="tab" aria-controls="reentry-app" aria-selected="false" tabindex="-1" data-workspace="memory">
             <span>03</span>
-            <strong>MEMORY LEDGER</strong>
-            <small>Planned</small>
-          </span>
-          <span class="planned-view" aria-disabled="true">
+            <strong><span class="tab-full">MEMORY LEDGER</span><span class="tab-short">MEMORY</span></strong>
+          </button>
+          <button id="tab-action" type="button" role="tab" aria-controls="reentry-app" aria-selected="false" tabindex="-1" data-workspace="action">
             <span>04</span>
-            <strong>DECISION &amp; ACTION</strong>
-            <small>Planned</small>
-          </span>
+            <strong><span class="tab-full">DECISION &amp; ACTION</span><span class="tab-short">ACTION</span></strong>
+          </button>
         </nav>
         <dl class="rail-project">
           <div><dt>PROJECT</dt><dd id="rail-project-name">Nexus AI</dd></div>
@@ -63,15 +60,16 @@
       </aside>
 
       <main
-        id="brief"
+        id="continuity-workspace"
         class="report-main"
         data-continuity-bridge-url="http://127.0.0.1:8789/api/continuity/reentry"
       >
-        <h1 class="visually-hidden">Nexus AI Project Re-entry Brief</h1>
+        <h1 class="visually-hidden">Nexus AI Continuity Workspace</h1>
         <div id="reentry-status" class="load-state" role="status">
           Recovering project context…
         </div>
-        <div id="reentry-app" aria-live="polite" hidden></div>
+        <div id="reentry-app" role="tabpanel" aria-labelledby="tab-brief" tabindex="0" hidden></div>
+        <p id="workspace-announcement" class="visually-hidden" aria-live="polite"></p>
       </main>
     </div>
 
