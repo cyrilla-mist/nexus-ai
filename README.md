@@ -285,16 +285,6 @@ flowchart TD
   Outcomes --> Fabric
 ```
 
-The permanent product hierarchy is:
-
-```text
-Atlas Desk
-  → Atlas Map
-  → Territory Workspace
-  → Record / Decision / Agent / Action
-  → Outcome and Context Write-back
-```
-
 ---
 
 ## Repository Structure
@@ -308,6 +298,7 @@ experience/     continuity providers and view-model logic
 continuity/     deterministic scenario fixtures and schemas
 frontend/       Atlas and Continuity interface modules
 datahub/        Verity assets, readers, bridges, and ingestion
+examples/       sample contracts and deterministic output examples
 tests/          Node tests and validation scripts
 scripts/        scenario assembly and source verification
 docs/           architecture, integration, and product baselines
@@ -392,12 +383,6 @@ The Benchmark owner is intentionally left empty to create the real Missing Owner
 npm run datahub:verity:bridge
 ```
 
-Read endpoint:
-
-```text
-http://127.0.0.1:8790/api/continuity/reentry
-```
-
 ### 4. Configure the intended owner
 
 PowerShell:
@@ -418,12 +403,6 @@ export NEXUS_VERITY_OWNER_URN="urn:li:corpuser:your-datahub-user"
 npm run datahub:verity:ownership-bridge
 ```
 
-Mutation endpoint:
-
-```text
-http://127.0.0.1:8791/api/context/repair/benchmark-owner
-```
-
 ### 6. Open the live governed workspace
 
 ```text
@@ -442,6 +421,21 @@ Missing Ownership: 1
 ```
 
 See [Nexus DataHub Verity Asset Bridge](docs/Nexus-DataHub-Verity-Assets.md) for the full security and runtime contract.
+
+---
+
+## Examples
+
+The [`examples/`](examples/) directory contains deterministic sample outputs and planned contracts for reviewers.
+
+Important: these files are clearly marked as samples. They are **not** proof that the live DataHub mutation has already run.
+
+- `verity-reentry-summary.json` — deterministic fixture summary;
+- `context-repair-event.json` — expected verified repair-event contract;
+- `context-package.json` — planned workspace handoff contract;
+- `README.md` — interpretation and replacement rules.
+
+Real runtime evidence will be added only after local verification.
 
 ---
 
@@ -547,4 +541,6 @@ AI coding and documentation tools were used during development. Product directio
 
 ## License
 
-The repository currently contains an MIT license from the earlier prototype. It must be replaced with an Apache 2.0 license before the hackathon submission is finalized.
+Copyright 2026 cyrilla-mist.
+
+Licensed under the [Apache License 2.0](LICENSE).
