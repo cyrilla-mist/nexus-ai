@@ -293,8 +293,8 @@ test("rail project index follows navigation instead of auto bottom positioning",
 
 test("prototype page identifies the v0.9.6 workspace layer", () => {
   const view = buildReentryViewModel(fixture);
-  assert.equal(view.reportMeta.prototype, "v0.9.6 Prototype");
-  assert.match(page, /v0\.9\.6 Prototype/);
+  assert.equal(view.reportMeta.prototype, "v0.9.6.1 Prototype");
+  assert.match(page, /v0\.9\.6\.1 Prototype/);
 });
 
 test("editorial palette avoids common purple template values", () => {
@@ -367,12 +367,15 @@ test("brief is compact and delegates full ledgers to dedicated workspaces", () =
   assert.doesNotMatch(briefSource, /renderBroken|renderMemoryGroup|renderActionWorkspace/);
 });
 
-test("evidence workspace provides a compact sticky Signal Lens and explicit navigation", () => {
-  assert.match(script, /class="signal-lens/);
-  assert.match(script, /data-view-evidence/);
-  assert.match(script, /data-related-decision/);
+test("evidence workspace provides a compact sticky Signal Lens and clear action hierarchy", () => {
+  const lensSource = script.slice(script.indexOf("function renderSignalLens"), script.indexOf("function renderEvidence(view)"));
+  assert.match(lensSource, /Request Human Decision/);
+  assert.match(lensSource, /data-focus-evidence/);
+  assert.match(lensSource, /data-related-decision/);
+  assert.doesNotMatch(lensSource, /data-view-evidence|>View Evidence</);
   assert.match(script, /activateWorkspace\("action"\)/);
   assert.match(styles, /\.signal-lens \{[\s\S]*position: sticky/);
+  assert.match(styles, /grid-template-columns: minmax\(0, 1fr\) minmax\(310px, 340px\)/);
   assert.match(styles, /@media \(max-width: 1024px\)[\s\S]*\.signal-lens \{ position: static/);
 });
 
@@ -417,12 +420,63 @@ test("missing task owners remain explicit rather than inferred", () => {
   assert.equal(bridge.ownershipRisk, true);
 });
 
-test("action workspace contains exactly one primary action renderer", () => {
+test("action workspace contains one Decision Gate primary action", () => {
+  const gateSource = script.slice(script.indexOf("function renderDecisionGate"), script.indexOf("function renderActionWorkspace"));
   const actionSource = script.slice(script.indexOf("function renderActionWorkspace"), script.indexOf("function updateTabs"));
-  assert.match(script, /index === 0 \? `<button class="primary-instrument-action"/);
+  assert.match(gateSource, /CURRENT DECISION GATE/);
+  assert.match(gateSource, /Request Human Decision/);
+  assert.match(gateSource, /No confirmed owner/);
+  assert.match(gateSource, /data-review-evidence/);
+  assert.equal((gateSource.match(/primary-instrument-action/g) ?? []).length, 1);
+  assert.doesNotMatch(actionSource, /primary-instrument-action/);
   assert.equal((actionSource.match(/renderAction/g) ?? []).length, 2);
 });
 
+
+test("brief action is compact, left aligned, and routes to evidence", () => {
+  const briefSource = script.slice(script.indexOf("function renderBrief"), script.indexOf("function renderSignalLens"));
+  assert.equal((briefSource.match(/primary-instrument-action/g) ?? []).length, 1);
+  assert.match(briefSource, /data-workspace-link="evidence">Review evidence/);
+  assert.match(briefSource, /View decision context/);
+  assert.match(styles, /max-width: min\(100%, 300px\)/);
+  assert.doesNotMatch(styles, /\.next-best-action \.primary-instrument-action[^}]*width: 100%/);
+});
+
+test("Evidence focus control is accessible and reduced-motion aware", () => {
+  assert.match(script, /aria-label="Focus current evidence chain"/);
+  assert.match(script, /#evidence-title/);
+  assert.match(script, /heading\.focus\(\{ preventScroll: true \}\)/);
+  assert.match(script, /visible.*scrollIntoView.*prefersReducedMotion\(\) \? "auto" : "smooth"/s);
+});
+
+test("selected broken context is visually connected to the Signal Lens", () => {
+  assert.match(script, /renderBroken\(view\.brokenContext, detail\.selectedId\)/);
+  assert.match(script, /is-selected-signal/);
+  assert.match(styles, /\.broken-list article\.is-selected-signal::before/);
+  assert.match(script, /id="signal-lens-title">\$\{escapeHtml\(detail\.selectedTitle\)\}/);
+});
+
+test("recommended actions remain four real records in a full-width editorial ledger", () => {
+  const ledger = getDecisionActionLedger(fixture);
+  assert.equal(ledger.recommendedActions.length, 4);
+  assert.match(script, /actionDisplayStatus/);
+  assert.match(script, /RECORDED STATUS/);
+  assert.match(styles, /\.action-ledger \{ grid-column: 1 \/ -1/);
+  assert.match(styles, /grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
+});
+
+test("workspace action hierarchy never uses full-width marketing CTA rules", () => {
+  assert.match(styles, /\.primary-instrument-action \{ width: fit-content/);
+  assert.match(styles, /min-height: 45px/);
+  assert.doesNotMatch(styles, /\.primary-instrument-action[^}]*box-shadow/);
+  assert.doesNotMatch(styles, /\.primary-instrument-action[^}]*border-radius/);
+});
+
+test("responsive polish stacks Lens, Decision Gate, and action ledger safely", () => {
+  assert.match(styles, /@media \(max-width: 1024px\)[\s\S]*\.evidence-layout, \.action-layout \{ grid-template-columns: 1fr/);
+  assert.match(styles, /@media \(max-width: 820px\)[\s\S]*\.action-ledger \{ grid-template-columns: 1fr/);
+  assert.match(styles, /@media \(max-width: 560px\)[\s\S]*\.primary-instrument-action \{ width: auto; max-width: 100%/);
+});
 test("prototype controls remain read-only feedback", () => {
   assert.match(script, /Prototype feedback recorded locally/);
   assert.match(script, /Runtime write-back is not enabled in v0\.9\.6/);

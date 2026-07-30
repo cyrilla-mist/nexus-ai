@@ -100,10 +100,10 @@ function renderEvidenceChain(chain) {
     </li>`).join("")}</ol>`;
 }
 
-function renderBroken(records) {
+function renderBroken(records, selectedId = "") {
   if (!records.length) return `<p class="empty-copy">No broken context is currently detected.</p>`;
   return `<div class="broken-list">${records.map((record) => `
-    <article>
+    <article class="${record.id === selectedId ? "is-selected-signal" : ""}" data-broken-record="${escapeHtml(record.id)}">
       <div><span>${escapeHtml(record.type)}</span><em>${escapeHtml(statusLabel(record.status))}</em></div>
       <strong>${escapeHtml(record.title)}</strong>
       <p>${escapeHtml(record.reason)}</p>
@@ -141,7 +141,10 @@ function renderBrief(view) {
           <p>NEXT BEST ACTION</p>
           <h2 id="next-action-title">${escapeHtml(action?.label || "Review continuity evidence")}</h2>
           <small>${escapeHtml(action?.completionCriteria || "Inspect the evidence before continuing.")}</small>
-          <button class="primary-instrument-action" type="button" data-workspace-link="evidence">Review evidence</button>
+          <div class="workspace-actions">
+            <button class="primary-instrument-action" type="button" data-workspace-link="evidence">Review evidence</button>
+            <button class="secondary-action" type="button" data-workspace-link="action">View decision context <span aria-hidden="true">→</span></button>
+          </div>
         </section>
       </div>
     </section>`;
@@ -155,8 +158,11 @@ function renderSignalLens(detail) {
     <section><h3>WHY THIS MATTERS</h3><p>${escapeHtml(detail.whyItMatters)}</p></section>
     <dl class="lens-counts"><div><dt>Evidence links</dt><dd>${detail.evidenceChain.length}</dd></div><div><dt>Affected decisions</dt><dd>${detail.affectedDecision ? 1 : 0}</dd></div></dl>
     <p class="lens-next-action"><strong>Next:</strong> ${escapeHtml(detail.recommendedAction)}</p>
-    <button class="primary-instrument-action" type="button" data-view-evidence>View Evidence</button>
-    ${detail.affectedDecision ? `<button type="button" class="secondary-action" data-related-decision="${escapeHtml(detail.affectedDecision.id)}" aria-label="View related decision: ${escapeHtml(detail.affectedDecision.title)}">View Related Decision</button>` : ""}
+    <div class="workspace-actions lens-actions">
+      <button class="primary-instrument-action" type="button" data-prototype-action>Request Human Decision</button>
+      ${detail.affectedDecision ? `<button type="button" class="secondary-action" data-related-decision="${escapeHtml(detail.affectedDecision.id)}" aria-label="View related decision: ${escapeHtml(detail.affectedDecision.title)}">View Related Decision <span aria-hidden="true">→</span></button>` : ""}
+      <button type="button" class="auxiliary-action" data-focus-evidence aria-label="Focus current evidence chain">Focus evidence chain</button>
+    </div>
     <p class="prototype-feedback" aria-live="polite"></p>
   </aside>`;
 }
@@ -171,10 +177,10 @@ function renderEvidence(view) {
         <div class="evidence-main">
           <section class="report-section" aria-labelledby="conflict-title">
             <header><span>01</span><h2 id="conflict-title">BROKEN / CONFLICTING CONTEXT</h2><small>${view.brokenContext.length} records</small></header>
-            ${renderBroken(view.brokenContext)}
+            ${renderBroken(view.brokenContext, detail.selectedId)}
           </section>
           <section class="report-section" id="evidence-chain" aria-labelledby="evidence-title">
-            <header><span>02</span><h2 id="evidence-title">EVIDENCE CHAIN</h2><small>${detail.evidenceChain.length} links</small></header>
+            <header><span>02</span><h2 id="evidence-title" tabindex="-1">EVIDENCE CHAIN</h2><small>${detail.evidenceChain.length} links</small></header>
             ${renderEvidenceChain(detail.evidenceChain)}
           </section>
           ${detail.affectedDecision ? `<section class="linked-decision" aria-labelledby="linked-decision-title"><p>LINKED DECISION</p><h2 id="linked-decision-title">${escapeHtml(detail.affectedDecision.title)}</h2><span>${escapeHtml(statusLabel(detail.affectedDecision.status))}</span><small>${escapeHtml(detail.affectedDecision.source)}</small></section>` : ""}
@@ -221,8 +227,40 @@ function renderDecision(decision) {
   return `<article class="ledger-item${focus}" id="decision-record-${escapeHtml(decision.id)}" data-decision-record="${escapeHtml(decision.id)}"><div><span>DECISION</span><em>${escapeHtml(statusLabel(decision.status))}</em></div><h3>${escapeHtml(decision.title)}</h3><p>${escapeHtml(decision.summary)}</p><small>${escapeHtml(decision.source)}</small></article>`;
 }
 
+function actionDisplayStatus(action) {
+  if (action.status === "blocked") return "Blocked";
+  if (["completed", "confirmed"].includes(action.status)) return "Completed / Confirmed";
+  if (action.ownershipRisk) return "Requires Decision";
+  return "Recommended";
+}
+
 function renderAction(action, index) {
-  return `<article class="action-record"><span class="action-number">${String(index + 1).padStart(2, "0")}</span><div><h3>${escapeHtml(action.label)}</h3><p>${escapeHtml(action.summary)}</p><small>${escapeHtml(action.completionCriteria)}</small><dl><div><dt>OWNER</dt><dd class="${action.ownershipRisk ? "is-risk" : ""}">${escapeHtml(action.owner)}</dd></div><div><dt>STATUS</dt><dd>${escapeHtml(statusLabel(action.status))}</dd></div><div><dt>PRIORITY</dt><dd>${escapeHtml(action.priority)}</dd></div></dl></div>${index === 0 ? `<button class="primary-instrument-action" type="button" data-prototype-action>Prepare action</button>` : `<button class="text-action" type="button" data-prototype-action>Review</button>`}</article>`;
+  const displayStatus = actionDisplayStatus(action);
+  return `<article class="action-record ${index === 0 ? "is-priority-action" : ""}"><span class="action-number">${String(index + 1).padStart(2, "0")}</span><div><h3>${escapeHtml(action.label)}</h3><p>${escapeHtml(action.summary)}</p><small>${escapeHtml(action.completionCriteria)}</small><dl><div><dt>OWNER</dt><dd class="${action.ownershipRisk ? "is-risk" : ""}">${escapeHtml(action.owner)}</dd></div><div><dt>STATUS</dt><dd>${escapeHtml(displayStatus)}</dd></div><div><dt>RECORDED STATUS</dt><dd>${escapeHtml(statusLabel(action.status))}</dd></div></dl></div><button class="text-action" type="button" data-prototype-action>Review action</button></article>`;
+}
+
+function renderDecisionGate(ledger) {
+  const pending = ledger.pendingHumanDecisions[0];
+  const ownership = ledger.ownershipRisks[0];
+  if (!pending) return `<section class="decision-gate" aria-labelledby="decision-gate-title"><p>CURRENT DECISION GATE</p><h2 id="decision-gate-title">No human decision is pending.</h2></section>`;
+  const affected = ledger.confirmedDecisions.find((decision) => decision.id === pending.relatedDecisionId);
+  return `<section class="decision-gate" aria-labelledby="decision-gate-title">
+    <p>CURRENT DECISION GATE</p>
+    <h2 id="decision-gate-title">${escapeHtml(pending.title)}</h2>
+    <span class="decision-gate-status">REQUIRES DECISION</span>
+    <p class="decision-gate-summary">${escapeHtml(pending.summary)}</p>
+    <dl>
+      <div><dt>WHY A DECISION IS NEEDED</dt><dd>Conflicting project directions cannot both be inherited as current context.</dd></div>
+      <div><dt>AFFECTED DECISION</dt><dd>${escapeHtml(affected?.title || "No affected decision recorded")}</dd></div>
+      <div><dt>OWNERSHIP</dt><dd class="is-risk">${escapeHtml(ownership ? "No confirmed owner" : "Ownership confirmed")}</dd></div>
+      <div><dt>CURRENT RISK</dt><dd>${escapeHtml(ownership?.status ? statusLabel(ownership.status) : statusLabel(pending.status))}</dd></div>
+    </dl>
+    <div class="workspace-actions">
+      <button class="primary-instrument-action" type="button" data-prototype-action>Request Human Decision</button>
+      <button class="secondary-action" type="button" data-review-evidence>Review evidence <span aria-hidden="true">→</span></button>
+    </div>
+    <p class="prototype-feedback" aria-live="polite"></p>
+  </section>`;
 }
 
 function renderActionWorkspace(view) {
@@ -232,9 +270,8 @@ function renderActionWorkspace(view) {
       ${renderWorkspaceHeading(4, "ACTION", "Decision & Action", "Separate what is confirmed from what still needs a human decision or owner.", `${ledger.recommendedActions.length} recommended actions`)}
       <div class="action-layout">
         <section class="ledger-section" aria-labelledby="confirmed-title"><header><h2 id="confirmed-title">CONFIRMED DECISIONS</h2><span>${ledger.confirmedDecisions.length}</span></header>${ledger.confirmedDecisions.map(renderDecision).join("")}</section>
-        <section class="ledger-section" aria-labelledby="pending-title"><header><h2 id="pending-title">PENDING HUMAN DECISIONS</h2><span>${ledger.pendingHumanDecisions.length}</span></header>${ledger.pendingHumanDecisions.map((decision) => `<article class="ledger-item requires-decision"><div><span>CONFLICT</span><em>requires decision</em></div><h3>${escapeHtml(decision.title)}</h3><p>${escapeHtml(decision.summary)}</p><small>${escapeHtml(decision.source)}</small></article>`).join("") || `<p class="empty-copy">No human decision is pending.</p>`}</section>
-        <section class="ledger-section action-ledger" aria-labelledby="recommended-title"><header><h2 id="recommended-title">RECOMMENDED ACTIONS</h2><span>${ledger.recommendedActions.length}</span></header>${ledger.recommendedActions.map(renderAction).join("")}<p class="prototype-feedback" aria-live="polite"></p></section>
-        <section class="ledger-section" aria-labelledby="ownership-title"><header><h2 id="ownership-title">MISSING OWNERSHIP</h2><span>${ledger.ownershipRisks.length}</span></header>${ledger.ownershipRisks.map((risk) => `<article class="ledger-item ownership-risk"><div><span>RISK</span><em>${escapeHtml(risk.status)}</em></div><h3>${escapeHtml(risk.title)}</h3><p>${escapeHtml(risk.summary)}</p><small>Owner not assigned · ${escapeHtml(risk.source)}</small></article>`).join("")}</section>
+        ${renderDecisionGate(ledger)}
+        <section class="ledger-section action-ledger" aria-labelledby="recommended-title"><header><h2 id="recommended-title">RECOMMENDED ACTIONS</h2><span>${ledger.recommendedActions.length}</span></header>${ledger.recommendedActions.map(renderAction).join("")}</section>
       </div>
     </section>`;
 }
@@ -285,8 +322,13 @@ function bindPanelInteractions() {
     });
   });
   app.querySelectorAll("[data-workspace-link]").forEach((button) => button.addEventListener("click", () => activateWorkspace(button.dataset.workspaceLink)));
-  app.querySelector("[data-view-evidence]")?.addEventListener("click", () => {
-    app.querySelector("#evidence-chain")?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
+  app.querySelector("[data-focus-evidence]")?.addEventListener("click", () => {
+    const heading = app.querySelector("#evidence-title");
+    if (!heading) return;
+    const bounds = heading.getBoundingClientRect();
+    const visible = bounds.top >= 0 && bounds.bottom <= window.innerHeight;
+    if (!visible) heading.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
+    heading.focus({ preventScroll: true });
   });
   app.querySelectorAll("[data-memory-filter]").forEach((button) => button.addEventListener("click", () => {
     state.memoryFilter = button.dataset.memoryFilter;
@@ -300,6 +342,9 @@ function bindPanelInteractions() {
       const record = app.querySelector(`[data-decision-record="${CSS.escape(state.focusedDecision)}"]`);
       record?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "center" });
     });
+  });
+  app.querySelector("[data-review-evidence]")?.addEventListener("click", () => {
+    activateWorkspace("evidence");
   });
   app.querySelectorAll("[data-prototype-action]").forEach((button) => button.addEventListener("click", () => {
     const feedback = app.querySelector(".prototype-feedback");

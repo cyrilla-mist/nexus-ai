@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The v0.9.6 prototype is a four-view Continuity workspace for returning to a
+The v0.9.6.1 prototype is a four-view Continuity workspace for returning to a
 project without reading one long report. It helps a user recover the current
 state, inspect evidence, govern memory, and separate confirmed decisions from
 work that still needs a human decision or owner.
@@ -60,7 +60,7 @@ The workspace remains **Editorial Atlas × Signal Instrument**:
 - progressive disclosure instead of stacked SaaS cards;
 - a sticky Signal Lens only in the desktop Evidence view;
 - compact, source-aware records without invented confidence or timestamps;
-- one primary action per workspace where an action is offered.
+- one restrained primary action per workspace, supported by text links rather than`r`n  full-width marketing controls.
 
 Buttons provide prototype feedback only. They do not write to the fixture,
 DataHub, MCP, Nexus Core, or any remote system. Memory filtering and record
@@ -92,7 +92,7 @@ HTTP.
 
 ## Not Implemented
 
-The v0.9.6 prototype does not:
+The v0.9.6.1 prototype does not:
 
 - connect Nexus Core to DataHub or MCP;
 - enable DataHub mutation or write-back;

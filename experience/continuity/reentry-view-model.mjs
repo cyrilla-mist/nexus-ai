@@ -770,7 +770,7 @@ export function buildReentryViewModel(scenario) {
     }),
     reportMeta: Object.freeze({
       title: "Project Re-entry Brief",
-      prototype: "v0.9.6 Prototype",
+      prototype: "v0.9.6.1 Prototype",
       reportDate:
         scenario.reentryQuery?.requestedAt || scenario.project.updatedAt,
       sourceLabel: "Continuity fixture",
