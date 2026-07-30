@@ -2,7 +2,7 @@
 
 ## 1. Goal
 
-Nexus AI converts project context into a searchable, traceable, agent-readable Context Graph. The current foundation maps a bounded development fixture into DataHub and validates the mapping without connecting Nexus Core, the Worker, or Project Atlas to DataHub at runtime.
+Nexus AI converts project context into a searchable, traceable, agent-readable Context Graph. The current local prototype includes a bounded development fixture and a read-only Continuity live-read path through the official DataHub MCP server. Nexus Core, the Worker, and Project Atlas are not connected to DataHub at runtime.
 
 > The campus low-carbon project is a development fixture used only to verify DataHub ingestion, metadata properties, search, and lineage. It is not the final Nexus AI hackathon scenario.
 
@@ -16,16 +16,20 @@ No final Devpost scenario, cloud persistence, account system, or production inte
 
 ```mermaid
 flowchart TD
-  Fixture[Development fixture]
+  Fixture[Development fixtures and Continuity scenario]
   Mapping[Nexus to DataHub mapping]
   DataHub[Local DataHub Core]
-  Verify[Read-only verification]
-  Future[Future MCP runtime bridge]
+  MCP[Official read-only MCP server]
+  Bridge[Local Continuity live-read bridge]
+  Reentry[Project Re-entry experience]
+  Core[Nexus Core]
 
   Fixture --> Mapping
   Mapping --> DataHub
-  DataHub --> Verify
-  DataHub -. not connected .-> Future
+  DataHub --> MCP
+  MCP --> Bridge
+  Bridge --> Reentry
+  Core -. not connected .-> MCP
 ```
 
 Nexus Core and Project Atlas remain outside the DataHub runtime in this version.
@@ -80,9 +84,24 @@ Successful local verification used the official Python MCP server `mcp-server-da
 
 The final output was `PASS: DataHub MCP read-only smoke test completed`. Mutation Tools, User Tools, and Data Quality Tools were disabled, and no mutation call was made.
 
-## 8. Intended Read-only MCP Flow
+## 8. Verified Continuity Live-read Flow
 
-The verified harness initializes stdio, requires the three read tools, rejects known mutation-tool exposure, searches for the fixture, retrieves the project entity, and retrieves one-hop lineage. No mutation call is part of the smoke test.
+The live reader initializes stdio, requires `search`, `get_entities`, and `get_lineage`, and rejects mutation-shaped tool exposure. The verified search contract is:
+
+```text
+search(query, num_results, offset)
+```
+
+The reader uses the exact `nexus.continuity.project-nexus-ai` namespace, follows bounded pagination, and reads 39 matching Dataset assets. It excludes the seven campus fixture assets and requires one exact project root. Entity payloads are read from `structuredContent.result[]`; both object-map and key/value-array custom properties are normalized. The resulting scenario must contain 38 entities and 29 relationships, followed by at least two successful representative lineage checks.
+
+The local bridge exposes only:
+
+```text
+GET /health
+GET /api/continuity/reentry
+```
+
+It remains loopback-bound and read-only. There is no search, mutation, or write-back HTTP route.
 
 ## 9. Future Write-back Boundary
 
@@ -97,6 +116,6 @@ Future write-back may include confirmed decisions, tasks, progress, source, and 
 - MCP configuration disables mutation;
 - the fixture contains no private account or secret data.
 
-## 11. Next Step
+## 11. Current Boundary
 
-The read-only MCP evidence is complete. Nexus Core integration, final Hackathon scenario design, and any write-back bridge remain separate future tasks and have not started.
+The read-only MCP and Continuity live-read evidence is complete. Nexus Core integration, final Hackathon scenario design, and any write-back bridge remain separate future tasks and have not started.

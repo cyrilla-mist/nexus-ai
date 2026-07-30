@@ -12,7 +12,7 @@ import {
 
 const DEFAULT_BATCH_SIZE = 20;
 const DEFAULT_MAX_RECORDS = 200;
-const DEFAULT_SEARCH_RESULTS = 100;
+const DEFAULT_SEARCH_PAGE_SIZE = 20;
 const PREFERRED_LINEAGE_TYPES = new Set([
   "supports",
   "produces",
@@ -28,6 +28,66 @@ function chunks(values, size) {
     result.push(values.slice(index, index + size));
   }
   return result;
+}
+
+function searchPageInfo(result) {
+  const payload = result?.structuredContent;
+  if (!payload || typeof payload !== "object") return null;
+  const searchResults = Array.isArray(payload.searchResults)
+    ? payload.searchResults
+    : null;
+  const total = Number(payload.total);
+  const start = Number(payload.start);
+  if (!searchResults || !Number.isFinite(total)) return null;
+  return {
+    total,
+    start: Number.isFinite(start) ? start : 0,
+    returned: searchResults.length,
+  };
+}
+
+async function searchContinuityUrns(
+  client,
+  maxRecords,
+  pageSize = DEFAULT_SEARCH_PAGE_SIZE,
+) {
+  const boundedPageSize = Math.min(
+    50,
+    Math.max(1, Number(pageSize) || DEFAULT_SEARCH_PAGE_SIZE),
+  );
+  const pageLimit = Math.ceil(maxRecords / boundedPageSize) + 1;
+  const candidates = new Set();
+  let offset = 0;
+
+  for (let page = 0; page < pageLimit; page += 1) {
+    const result = await client.callTool("search", {
+      query: CONTINUITY_NAMESPACE,
+      num_results: boundedPageSize,
+      offset,
+    });
+    for (const urn of extractDatasetUrns(result)) candidates.add(urn);
+
+    const info = searchPageInfo(result);
+    if (!info) break;
+    if (info.total > maxRecords) {
+      throw new ContinuityLiveReadError(
+        `Continuity search returned more than the ${maxRecords} record limit.`,
+        "ENTITY_LIMIT_EXCEEDED",
+      );
+    }
+    if (info.returned === 0 || info.start + info.returned >= info.total) {
+      return filterContinuityDatasetUrns([...candidates], maxRecords);
+    }
+    offset = info.start + info.returned;
+  }
+
+  if (offset > 0) {
+    throw new ContinuityLiveReadError(
+      "Continuity search pagination exceeded its bounded page limit.",
+      "SEARCH_PAGE_LIMIT_EXCEEDED",
+    );
+  }
+  return filterContinuityDatasetUrns([...candidates], maxRecords);
 }
 
 function selectLineageAnchors(scenario, urnByEntityId, limit = 2) {
@@ -112,13 +172,10 @@ export async function readContinuitySnapshot(options = {}) {
 
   try {
     await client.initialize();
-    const searchResult = await client.callTool("search", {
-      query: CONTINUITY_NAMESPACE,
-      num_results: Math.max(DEFAULT_SEARCH_RESULTS, maxRecords),
-    });
-    const urns = filterContinuityDatasetUrns(
-      extractDatasetUrns(searchResult),
+    const urns = await searchContinuityUrns(
+      client,
       maxRecords,
+      options.searchPageSize,
     );
     if (!urns.includes(CONTINUITY_PROJECT_URN)) {
       throw new ContinuityLiveReadError(

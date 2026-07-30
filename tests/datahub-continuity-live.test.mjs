@@ -10,6 +10,7 @@ import {
   CONTINUITY_NAMESPACE,
   CONTINUITY_PROJECT_URN,
   extractDatasetUrns,
+  extractEntityRecords,
   filterContinuityDatasetUrns,
   normalizeContinuityRecords,
   parseCustomProperty,
@@ -135,6 +136,20 @@ function capturedRecords(source = scenario) {
   ];
 }
 
+function realMcpEntity(record) {
+  return {
+    urn: record.urn,
+    name: record.name,
+    properties: {
+      name: record.name,
+      description: record.description,
+      customProperties: Object.entries(record.customProperties).map(
+        ([key, value]) => ({ key, value }),
+      ),
+    },
+  };
+}
+
 function fakeTransport(tools = REQUIRED_READ_TOOLS) {
   const requests = [];
   return {
@@ -245,10 +260,13 @@ test("read-only environment overrides unsafe mutation flags", () => {
   assert.equal(environment.TOOLS_IS_USER_ENABLED, "false");
 });
 
-test("project namespace filtering keeps only Nexus Continuity DEV datasets", () => {
+test("project namespace filtering keeps only the exact Nexus Continuity DEV namespace", () => {
   const filtered = filterContinuityDatasetUrns([
     CONTINUITY_PROJECT_URN,
     "urn:li:dataset:(urn:li:dataPlatform:nexus,nexus.other.project,DEV)",
+    "urn:li:dataset:(urn:li:dataPlatform:other,nexus.continuity.project-nexus-ai.project,DEV)",
+    "urn:li:dataset:(urn:li:dataPlatform:nexus,nexus.continuity.project-nexus-ai.project,PROD)",
+    "urn:li:dataset:(urn:li:dataPlatform:nexus,nexus.continuity.project-nexus-ai-copy.project,DEV)",
   ]);
   assert.deepEqual(filtered, [CONTINUITY_PROJECT_URN]);
 });
@@ -269,6 +287,75 @@ test("duplicate search URNs are deduplicated and sorted", () => {
   );
 });
 
+test("real MCP searchResults entity URNs are extracted", () => {
+  const result = {
+    structuredContent: {
+      start: 0,
+      count: 1,
+      total: 1,
+      searchResults: [
+        { entity: { urn: CONTINUITY_PROJECT_URN, properties: {} } },
+      ],
+    },
+  };
+  assert.deepEqual(extractDatasetUrns(result), [CONTINUITY_PROJECT_URN]);
+});
+
+test("search pagination finds the project root beyond the first page", async () => {
+  const records = capturedRecords();
+  const ordered = [...records.slice(1), records[0]];
+  const client = fakeLiveClient(records);
+  const fallbackCall = client.callTool.bind(client);
+  const offsets = [];
+  client.callTool = async (name, args) => {
+    if (name === "search") {
+      offsets.push(args.offset);
+      const pageRecords = ordered.slice(
+        args.offset,
+        args.offset + args.num_results,
+      );
+      return {
+        structuredContent: {
+          start: args.offset,
+          count: args.num_results,
+          total: ordered.length,
+          searchResults: pageRecords.map((record) => ({
+            entity: { urn: record.urn, properties: {} },
+          })),
+        },
+      };
+    }
+    if (name === "get_entities") {
+      return {
+        structuredContent: {
+          result: records
+            .filter((record) => args.urns.includes(record.urn))
+            .map(realMcpEntity),
+        },
+      };
+    }
+    return fallbackCall(name, args);
+  };
+  const snapshot = await readContinuitySnapshot({
+    client,
+    searchPageSize: 20,
+  });
+  assert.deepEqual(offsets, [0, 20]);
+  assert.equal(snapshot.projectUrn, CONTINUITY_PROJECT_URN);
+  assert.equal(snapshot.diagnostics.totalDatasets, 39);
+});
+
+test("real MCP key-value customProperties are normalized", () => {
+  const root = capturedRecords()[0];
+  const records = extractEntityRecords({
+    structuredContent: { result: [realMcpEntity(root)] },
+  });
+  assert.equal(records.length, 1);
+  assert.equal(records[0].customProperties.nexusRecordKind, "project");
+  assert.equal(records[0].customProperties.nexusEntityCount, "38");
+  assert.equal(records[0].customProperties.nexusRelationshipCount, "29");
+});
+
 test("entity count mismatch is rejected", () => {
   const records = capturedRecords();
   records[0].customProperties.nexusEntityCount = "999";
@@ -279,6 +366,20 @@ test("entity count mismatch is rejected", () => {
 
 test("missing project root is rejected", () => {
   assert.throws(() => normalizeContinuityRecords(capturedRecords().slice(1)), {
+    code: "PROJECT_ROOT_MISSING",
+  });
+});
+
+test("multiple project-kind roots are rejected", () => {
+  const records = capturedRecords();
+  records.push({
+    ...records[0],
+    urn: CONTINUITY_PROJECT_URN.replace(
+      ".project,DEV)",
+      ".project.secondary,DEV)",
+    ),
+  });
+  assert.throws(() => normalizeContinuityRecords(records), {
     code: "PROJECT_ROOT_MISSING",
   });
 });

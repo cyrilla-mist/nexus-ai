@@ -60,6 +60,25 @@ export function toolResultValue(result) {
   });
 }
 
+function resultPayloads(result) {
+  const payloads = [];
+  if (result?.structuredContent !== undefined) {
+    payloads.push(result.structuredContent);
+  }
+  for (const item of result?.content || []) {
+    if (item?.type !== "text" || typeof item.text !== "string") continue;
+    const text = item.text.trim();
+    if (!text) continue;
+    try {
+      payloads.push(JSON.parse(text));
+    } catch {
+      payloads.push(text);
+    }
+  }
+  if (!payloads.length) payloads.push(result ?? {});
+  return payloads;
+}
+
 function walk(value, visitor, seen = new Set()) {
   if (value === null || value === undefined) return;
   if (typeof value === "string") {
@@ -78,13 +97,22 @@ function walk(value, visitor, seen = new Set()) {
 
 export function extractDatasetUrns(result) {
   const urns = new Set();
-  walk(toolResultValue(result), (value) => {
-    if (typeof value === "string") {
-      for (const match of value.match(DATASET_URN_PATTERN) || []) urns.add(match);
-    } else if (typeof value?.urn === "string") {
-      urns.add(value.urn);
+  for (const payload of resultPayloads(result)) {
+    for (const searchResult of payload?.searchResults || []) {
+      if (typeof searchResult?.entity?.urn === "string") {
+        urns.add(searchResult.entity.urn);
+      }
     }
-  });
+    walk(payload, (value) => {
+      if (typeof value === "string") {
+        for (const match of value.match(DATASET_URN_PATTERN) || []) {
+          urns.add(match);
+        }
+      } else if (typeof value?.urn === "string") {
+        urns.add(value.urn);
+      }
+    });
+  }
   return [...urns].sort();
 }
 
@@ -174,13 +202,40 @@ function aspectValue(record, key) {
   );
 }
 
+function customPropertiesMap(value) {
+  if (!value) return {};
+  if (Array.isArray(value)) {
+    const entries = [];
+    for (const item of value) {
+      if (Array.isArray(item) && item.length >= 2) {
+        entries.push([String(item[0]), item[1]]);
+      } else if (
+        item &&
+        typeof item === "object" &&
+        typeof item.key === "string"
+      ) {
+        entries.push([item.key, item.value]);
+      }
+    }
+    return Object.fromEntries(entries);
+  }
+  if (typeof value !== "object") return {};
+  if (typeof value.key === "string" && "value" in value) {
+    return { [value.key]: value.value };
+  }
+  return { ...value };
+}
+
 export function extractEntityRecords(result) {
-  const payload = toolResultValue(result);
-  const found = findRecords(payload);
+  const found = resultPayloads(result).flatMap((payload) =>
+    findRecords(payload),
+  );
   const byUrn = new Map();
   for (const record of found) {
     if (!isContinuityDatasetUrn(record.urn)) continue;
-    const customProperties = aspectValue(record, "customProperties") || {};
+    const customProperties = customPropertiesMap(
+      aspectValue(record, "customProperties"),
+    );
     byUrn.set(record.urn, {
       urn: record.urn,
       name: aspectValue(record, "name") || record.name || "",

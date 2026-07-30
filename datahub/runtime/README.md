@@ -55,6 +55,24 @@ PASS: DataHub MCP read-only smoke test completed
 
 Runtime controls confirmed that Mutation Tools, User Tools, and Data Quality Tools were disabled. The smoke harness made no mutation call.
 
+## Continuity Live Re-entry Verification
+
+The Continuity live reader was verified end to end against the running local DataHub and the official read-only MCP server:
+
+| Check | Result |
+| --- | --- |
+| Continuity Dataset assets | 39 |
+| Continuity entities | 38 |
+| Continuity relationships | 29 |
+| exact project root | found once |
+| representative lineage checks | 2 passed |
+| campus fixture records in live result | 0 |
+| live bridge check | `PASS` |
+
+The verified MCP contract uses `search(query, num_results, offset)`. Search results are returned as `structuredContent.searchResults[].entity.urn`, and the 39 Continuity assets were read in two bounded pages. Entity details are returned through `structuredContent.result[]`; the current server represents `customProperties` as a key/value array. The reader normalizes that form without weakening the exact project-root, entity-count, relationship-count, or lineage checks.
+
+The local HTTP bridge remains read-only and exposes only `GET /health` and `GET /api/continuity/reentry`. It does not expose search, mutation, or write-back routes.
+
 ## Scope Boundary
 
-This evidence verifies the local DataHub metadata and read-only MCP access path only. The final Hackathon scenario has not been selected, and the Nexus Core MCP Bridge has not started.
+This evidence verifies local DataHub metadata, read-only MCP access, and the local Continuity live-read bridge. The campus low-carbon data remains a separate development fixture. Nexus Core MCP integration, mutation/write-back, and the final Hackathon scenario remain outside this verification.
