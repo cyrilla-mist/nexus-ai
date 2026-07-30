@@ -18,7 +18,7 @@ function entityPayload(asset, owners = []) {
   };
 }
 
-function fakeClient({ benchmarkOwners = [] } = {}) {
+function fakeClient({ benchmarkOwners = [], keyedEntities = false } = {}) {
   const calls = [];
   return {
     calls,
@@ -31,16 +31,24 @@ function fakeClient({ benchmarkOwners = [] } = {}) {
     async callTool(name, args) {
       calls.push({ name, args });
       if (name === "get_entities") {
+        const entries = VERITY_ASSETS.map((asset) => [
+          asset.urn,
+          entityPayload(
+            asset,
+            asset.entityId === VERITY_BENCHMARK_ASSET.entityId
+              ? benchmarkOwners
+              : [],
+          ),
+        ]);
         return {
-          structuredContent: {
-            entities: VERITY_ASSETS.map((asset) =>
-              entityPayload(
-                asset,
-                asset.entityId === VERITY_BENCHMARK_ASSET.entityId
-                  ? benchmarkOwners
-                  : [],
-              ),
-          },
+          structuredContent: keyedEntities
+            ? Object.fromEntries(
+                entries.map(([urn, payload]) => {
+                  const { urn: ignored, ...withoutUrn } = payload;
+                  return [urn, withoutUrn];
+                }),
+              )
+            : { entities: entries.map(([, payload]) => payload) },
         };
       }
       if (name === "get_lineage" && args.upstream) {
@@ -97,6 +105,20 @@ test("overlays missing Benchmark ownership from DataHub", async () => {
   assert.equal(benchmark.metadata.ownerMissing, true);
   assert.equal(risk.metadata.missingOwner, true);
   assert.equal(risk.status, "blocked");
+});
+
+test("accepts get_entities responses keyed by URN", async () => {
+  const client = fakeClient({ keyedEntities: true });
+  const snapshot = await readVerityAssetSnapshot({ client });
+
+  assert.equal(snapshot.diagnostics.assetCount, VERITY_ASSETS.length);
+  assert.equal(snapshot.scenario.expectedFindings.missingOwners, 1);
+  assert.equal(
+    snapshot.scenario.entities.find(
+      (entity) => entity.id === "external-asset-benchmark",
+    ).source.reference,
+    VERITY_BENCHMARK_ASSET.urn,
+  );
 });
 
 test("closes the ownership signal only after DataHub returns an owner", async () => {
