@@ -1,18 +1,32 @@
-# Nexus Atlas Architecture Index
+# Nexus Atlas Architecture Documents
 
-## Canonical baseline
+## Document precedence
 
-The current product and architecture authority is:
+Use the following order when architecture documents overlap:
 
-- [`Nexus Atlas Architecture Review v1.0`](../Nexus-Atlas-Architecture-Review-v1.0.md)
+1. [`Nexus-Atlas-Architecture-Review-v1.0.md`](../Nexus-Atlas-Architecture-Review-v1.0.md) — canonical product and system baseline.
+2. [`Nexus-Atlas-Implementation-Audit-2026-07-31.md`](../Nexus-Atlas-Implementation-Audit-2026-07-31.md) — current readiness, merge blockers, and implementation boundaries.
+3. Verity blueprint, DataHub mapping, rule matrix, and screen-flow documents — detailed scenario references.
+4. Earlier Project Atlas documents — historical prototype context only.
 
-Implementation status and required follow-up are tracked in:
+The v1.0 Architecture Review has priority over earlier Star Map, Project Universe, or competition-only descriptions.
 
-- [`Nexus Atlas Implementation Audit — 2026-07-31`](../Nexus-Atlas-Implementation-Audit-2026-07-31.md)
+## Submission baseline
 
-## Supporting documents
+PR #10 also carries the repository-facing submission baseline:
 
-The following documents remain valid detailed references where they do not conflict with Architecture Review v1.0:
+- rewritten Nexus Atlas README;
+- Apache License 2.0;
+- updated package description;
+- deterministic sample outputs;
+- planned Context Package and ContextRepairEvent contracts;
+- sample-versus-runtime-evidence rules.
+
+These files improve reviewability but do not replace local runtime verification.
+
+## Supporting references
+
+The following documents remain useful when they do not conflict with the canonical baseline:
 
 - `Nexus-Atlas-Long-Term-Product-Baseline.md`
 - `Nexus-Atlas-Verity-Blueprint.md`
@@ -20,11 +34,19 @@ The following documents remain valid detailed references where they do not confl
 - `Nexus-Atlas-Verity-DataHub-Asset-Mapping.md`
 - `Nexus-Atlas-Verity-Demo-Screen-Flow.md`
 
-## Precedence
+## Change control
 
-When two documents disagree:
+A future change requires an Architecture Decision Record when it would modify one of the following frozen decisions:
 
-1. Architecture Review v1.0 governs product philosophy, Context model, Territory contracts, experience hierarchy, Agent/Capability boundaries, system states, governance, Archive Cartography, and long-term roadmap.
-2. The Implementation Audit governs the current PR stack readiness and follow-up classification.
-3. Supporting documents govern scenario-specific implementation details that remain compatible with the canonical baseline.
-4. Code and Demo shortcuts do not silently redefine the architecture. A frozen decision change requires an Architecture Decision Record.
+- Nexus as Personal Intelligence Infrastructure;
+- the Context Fabric / Projection model;
+- Territory as a view rather than a database;
+- Atlas Desk as the default entry;
+- route-first Atlas Map behavior;
+- Agent / Capability separation;
+- human authority for consequential mutation;
+- read-after-write verification;
+- Nexus / DataHub responsibility boundaries;
+- Archive Cartography as the permanent system language.
+
+Implementation details may evolve without an ADR when they preserve these contracts.
