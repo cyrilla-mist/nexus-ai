@@ -42,6 +42,78 @@ async function responsePayload(response) {
   return response.json().catch(() => ({}));
 }
 
+function ensureGovernanceSheet() {
+  let dialog = document.querySelector("#governance-confirmation-sheet");
+  if (dialog) return dialog;
+
+  dialog = document.createElement("dialog");
+  dialog.id = "governance-confirmation-sheet";
+  dialog.className = "governance-sheet";
+  dialog.setAttribute("aria-labelledby", "governance-sheet-title");
+  dialog.innerHTML = `
+    <form method="dialog" class="governance-sheet__form">
+      <header class="governance-sheet__header">
+        <div>
+          <p>ATLAS GOVERNANCE</p>
+          <h2 id="governance-sheet-title">Confirm context repair</h2>
+        </div>
+        <button class="governance-sheet__close" type="submit" value="cancel" aria-label="Cancel ownership repair">×</button>
+      </header>
+      <section class="governance-sheet__body">
+        <p class="governance-sheet__summary">Review the exact DataHub mutation before it is submitted. Nexus will not close the signal until a fresh read verifies the result.</p>
+        <dl class="governance-sheet__data">
+          <div><dt>Operation</dt><dd data-governance-operation></dd></div>
+          <div><dt>Target</dt><dd data-governance-target></dd></div>
+          <div><dt>Current owners</dt><dd data-governance-current></dd></div>
+          <div><dt>Proposed owner</dt><dd data-governance-proposed></dd></div>
+        </dl>
+        <section class="governance-sheet__verification">
+          <span>VERIFICATION CONTRACT</span>
+          <strong data-governance-verification></strong>
+        </section>
+        <p class="governance-sheet__warning">This action changes governed DataHub metadata. Cancelling leaves the current ownership state unchanged.</p>
+      </section>
+      <footer class="governance-sheet__footer">
+        <button type="submit" value="cancel">Cancel</button>
+        <button class="governance-sheet__confirm" type="submit" value="confirm">Confirm ownership update</button>
+      </footer>
+    </form>`;
+  document.body.append(dialog);
+  return dialog;
+}
+
+function proposalText(dialog, selector, value) {
+  const element = dialog.querySelector(selector);
+  if (element) element.textContent = value;
+}
+
+function confirmOwnershipProposal(proposal) {
+  if (typeof HTMLDialogElement === "undefined") {
+    return Promise.resolve(
+      window.confirm(
+        `Confirm ${proposal.operation} for ${proposal.targetUrn}?\nProposed owner: ${proposal.proposedOwner}\nVerification: ${proposal.verification}`,
+      ),
+    );
+  }
+
+  const dialog = ensureGovernanceSheet();
+  proposalText(dialog, "[data-governance-operation]", proposal.operation);
+  proposalText(dialog, "[data-governance-target]", proposal.targetUrn);
+  proposalText(
+    dialog,
+    "[data-governance-current]",
+    proposal.existingOwners.length ? proposal.existingOwners.join(", ") : "None",
+  );
+  proposalText(dialog, "[data-governance-proposed]", proposal.proposedOwner);
+  proposalText(dialog, "[data-governance-verification]", proposal.verification);
+
+  return new Promise((resolve) => {
+    const onClose = () => resolve(dialog.returnValue === "confirm");
+    dialog.addEventListener("close", onClose, { once: true });
+    dialog.showModal();
+  });
+}
+
 async function requestOwnershipRepair(button) {
   const config = queryConfiguration();
   if (config.source !== "datahub" || !config.mutationBridge) {
@@ -65,16 +137,7 @@ async function requestOwnershipRepair(button) {
       );
     }
     const proposal = proposalPayload.proposal;
-    const confirmed = window.confirm(
-      [
-        "Confirm governed DataHub ownership repair?",
-        "",
-        `Target: ${proposal.targetUrn}`,
-        `Current owners: ${proposal.existingOwners.length ? proposal.existingOwners.join(", ") : "none"}`,
-        `Proposed owner: ${proposal.proposedOwner}`,
-        `Verification: ${proposal.verification}`,
-      ].join("\n"),
-    );
+    const confirmed = await confirmOwnershipProposal(proposal);
     if (!confirmed) {
       setFeedback("Ownership repair cancelled. DataHub was not changed.");
       return;
@@ -114,6 +177,11 @@ async function requestOwnershipRepair(button) {
     setFeedback(
       `Ownership remains unresolved: ${error instanceof Error ? error.message : String(error)}`,
     );
+  } finally {
+    if (button.textContent === "Loading proposal…") {
+      button.disabled = false;
+      button.textContent = originalLabel;
+    }
   }
 }
 
