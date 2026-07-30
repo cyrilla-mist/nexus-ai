@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Nexus Atlas — a personal intelligence infrastructure for restoring context, tracing decisions, and continuing complex work."
+    />
+    <title>Nexus Atlas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./frontend/atlas/atlas.css" />
+  </head>
+  <body>
+    <div class="atlas-paper" aria-hidden="true"></div>
+
+    <header class="atlas-masthead">
+      <a class="atlas-wordmark" href="#desk" data-atlas-route="desk" aria-label="Open Atlas Desk">
+        <span class="atlas-mark" aria-hidden="true">N</span>
+        <span><strong>NEXUS</strong><small>ATLAS</small></span>
+      </a>
+
+      <nav class="atlas-primary-nav" aria-label="Nexus Atlas">
+        <button type="button" data-atlas-route="desk" aria-current="page">Desk</button>
+        <button type="button" data-atlas-route="map">Map</button>
+        <button type="button" data-atlas-route="territory">Workspace</button>
+      </nav>
+
+      <div class="atlas-source-health" aria-label="Context source health">
+        <span class="source-pulse" aria-hidden="true"></span>
+        <div><small>CONTEXT SOURCES</small><strong id="atlas-source-summary">Loading…</strong></div>
+      </div>
+    </header>
+
+    <div class="atlas-shell">
+      <aside class="territory-index" aria-label="Territory index">
+        <header>
+          <p>ATLAS INDEX</p>
+          <span>05 territories</span>
+        </header>
+        <nav id="territory-navigation"></nav>
+        <section class="index-note">
+          <span>ACTIVE ROUTE</span>
+          <strong id="active-route-label">Atlas Desk</strong>
+          <p>One Context Graph, viewed through different working territories.</p>
+        </section>
+      </aside>
+
+      <main id="atlas-main" class="atlas-main" tabindex="-1">
+        <div class="atlas-loading" role="status">Opening the Atlas…</div>
+      </main>
+
+      <aside id="context-inspector" class="context-inspector" aria-label="Context Inspector">
+        <header>
+          <p>CONTEXT INSPECTOR</p>
+          <button type="button" data-close-inspector aria-label="Close inspector">×</button>
+        </header>
+        <div id="inspector-content">
+          <p class="inspector-empty">Select a project, decision, signal, or mapped asset to inspect its provenance.</p>
+        </div>
+      </aside>
+    </div>
+
+    <footer id="atlas-action-tray" class="atlas-action-tray" aria-label="Action tray">
+      <span class="tray-label">CURRENT ROUTE</span>
+      <div id="tray-actions" class="tray-actions">
+        <button type="button" data-atlas-route="territory">Continue</button>
+        <button type="button" data-open-signal="stale">Verify</button>
+        <button type="button" data-open-signal="ownership">Repair</button>
+        <button type="button" data-atlas-route="reentry" class="tray-primary">Act</button>
+      </div>
+    </footer>
+
+    <p id="atlas-announcement" class="visually-hidden" aria-live="polite"></p>
+    <script type="module" src="./frontend/atlas/atlas.js"></script>
+  </body>
+</html>
