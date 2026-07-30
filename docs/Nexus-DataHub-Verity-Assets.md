@@ -72,7 +72,7 @@ The Benchmark owner is intentionally left unassigned. This creates the real Miss
 ## 3. Start the read-only MCP bridge
 
 ```bash
-node datahub/verity/verity-asset-bridge.mjs
+npm run datahub:verity:bridge
 ```
 
 Default endpoint:
@@ -99,10 +99,44 @@ The bridge:
 - never treats an unavailable source as a missing owner;
 - does not expose an arbitrary MCP proxy.
 
-## 4. Open the live Re-entry workspace
+## 4. Configure and start the ownership bridge
+
+Configure the intended DataHub CorpUser or CorpGroup owner through the environment:
+
+```bash
+# PowerShell
+$env:NEXUS_VERITY_OWNER_URN="urn:li:corpuser:your-datahub-user"
+
+# macOS / Linux
+export NEXUS_VERITY_OWNER_URN="urn:li:corpuser:your-datahub-user"
+```
+
+Then start the isolated mutation bridge:
+
+```bash
+npm run datahub:verity:ownership-bridge
+```
+
+Default proposal and mutation endpoint:
 
 ```text
-http://localhost:8000/reentry.html?source=datahub&bridge=http%3A%2F%2F127.0.0.1%3A8790%2Fapi%2Fcontinuity%2Freentry#evidence
+http://127.0.0.1:8791/api/context/repair/benchmark-owner
+```
+
+The bridge does not expose an arbitrary mutation proxy. It allows only:
+
+```text
+Tool: add_owners
+Target: Verity Benchmark v1
+Owner: NEXUS_VERITY_OWNER_URN
+```
+
+A GET request returns the exact proposal without changing DataHub. A POST request is accepted only when the browser sends explicit confirmation and the operation, entity ID, and target URN all match the allow-list.
+
+## 5. Open the governed live Re-entry workspace
+
+```text
+http://localhost:8000/reentry.html?source=datahub&bridge=http%3A%2F%2F127.0.0.1%3A8790%2Fapi%2Fcontinuity%2Freentry&mutationBridge=http%3A%2F%2F127.0.0.1%3A8791%2Fapi%2Fcontext%2Frepair%2Fbenchmark-owner#evidence
 ```
 
 When the Benchmark has no DataHub owner, the live scenario reports:
@@ -111,7 +145,20 @@ When the Benchmark has no DataHub owner, the live scenario reports:
 Missing Ownership: 1
 ```
 
-When DataHub later returns a verified owner, the adapter changes the live result to:
+The repair interaction follows this sequence:
+
+```text
+GET proposal
+  → show target, current owners, proposed owner, verification method
+  → explicit browser confirmation
+  → POST allow-listed add_owners request
+  → read-only DataHub MCP re-read
+  → verify intended owner appears
+  → close Missing Ownership
+  → record ContextRepairEvent
+```
+
+When DataHub returns the intended owner on the verified re-read, the adapter changes the live result to:
 
 ```text
 Missing Ownership: 0
@@ -119,14 +166,15 @@ Risk status: resolved
 Ownership repair task: completed
 ```
 
-The UI does not close the signal based only on a mutation response. It requires a fresh MCP read that returns the intended owner.
+If the mutation call succeeds but the re-read does not contain the intended owner, Nexus returns a failed repair, keeps the signal open, and records no successful ContextRepairEvent.
 
-## Current write boundary
+## Security boundary
 
-This branch remains read-only. A later branch will add a separate, explicitly enabled mutation client for the official DataHub MCP `add_owners` tool. It will require:
-
-1. a fixed Benchmark target URN;
-2. an allow-listed CorpUser or CorpGroup owner URN;
-3. explicit human confirmation;
-4. a post-write read through the read-only bridge;
-5. a verified ContextRepairEvent before the signal closes.
+- Both bridges bind to loopback only.
+- Browser origins are allow-listed.
+- The read process starts with mutation tools disabled.
+- The mutation process starts separately and calls only `add_owners`.
+- Target URN and owner URN cannot be supplied freely by browser input.
+- No credentials are returned to the browser.
+- No lineage, schema, quality, tags, descriptions, or domains can be mutated through this bridge.
+- A successful write response is not treated as proof of repair.
