@@ -1,0 +1,32 @@
+{
+  "exampleType": "expected-contract",
+  "runtimeVerified": false,
+  "eventType": "ContextRepairEvent",
+  "eventStatus": "sample-only",
+  "operation": "add_owners",
+  "target": {
+    "entityType": "dataset",
+    "urn": "urn:li:dataset:(urn:li:dataPlatform:nexus,verity_benchmark_v1,PROD)"
+  },
+  "before": {
+    "owners": []
+  },
+  "proposed": {
+    "owners": [
+      "urn:li:corpuser:example-owner"
+    ]
+  },
+  "verificationContract": {
+    "method": "read-after-write",
+    "source": "DataHub MCP read-only bridge",
+    "successCondition": "The intended owner appears in a fresh DataHub response.",
+    "failureBehavior": "Keep Missing Ownership open and do not emit a successful repair event."
+  },
+  "audit": {
+    "humanConfirmationRequired": true,
+    "confirmedAt": null,
+    "verifiedAt": null,
+    "verifiedOwner": null
+  },
+  "notice": "This is an expected event contract, not captured runtime evidence. Replace it only with a sanitized event produced by a verified local run."
+}
