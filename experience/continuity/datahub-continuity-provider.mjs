@@ -1,3 +1,5 @@
+import { normalizeContinuityScenario } from "./normalize-continuity-scenario.mjs";
+
 const DEFAULT_BRIDGE_URL =
   "http://127.0.0.1:8789/api/continuity/reentry";
 
@@ -25,14 +27,21 @@ export function createDataHubContinuityProvider(options = {}) {
       if (payload?.source !== "datahub-mcp" || !payload?.readOnly) {
         throw new Error("The bridge returned an invalid live-read response.");
       }
+
+      const scenario = normalizeContinuityScenario(payload.scenario, {
+        sourceMode: "datahub-mcp",
+        normalizedAt: payload.fetchedAt,
+      });
+
       return {
-        scenario: payload.scenario,
+        scenario,
         sourceInfo: {
           mode: "datahub",
           label: "DataHub MCP",
-          detail: "Live read · read-only",
+          detail: "Live read · governed context",
           live: true,
-          readOnly: true,
+          readOnly: payload.readOnly === true,
+          mutationEnabled: payload.mutationEnabled === true,
           fetchedAt: payload.fetchedAt,
           diagnostics: payload.diagnostics || {},
         },
