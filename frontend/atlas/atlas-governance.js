@@ -65,7 +65,7 @@ function handleOwnership(button) {
   const feedback = feedbackElement();
   if (feedback) {
     feedback.innerHTML =
-      'Ownership is not marked repaired in fixture mode. Open the <a href="./reentry.html?source=datahub&amp;bridge=http%3A%2F%2F127.0.0.1%3A8790%2Fapi%2Fcontinuity%2Freentry#evidence">Verity DataHub live workspace</a> after running the governed asset ingestion.';
+      'Ownership is not marked repaired in fixture mode. Open the <a href="./reentry.html?source=datahub&amp;bridge=http%3A%2F%2F127.0.0.1%3A8790%2Fapi%2Fcontinuity%2Freentry&amp;mutationBridge=http%3A%2F%2F127.0.0.1%3A8791%2Fapi%2Fcontext%2Frepair%2Fbenchmark-owner#evidence">governed Verity DataHub workspace</a> after ingesting the assets and configuring the owner URN.';
   }
   button.textContent = "Live verification required";
 }
