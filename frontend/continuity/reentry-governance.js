@@ -12,8 +12,8 @@ function readEvents() {
 function writeEvent(event) {
   const events = readEvents();
   const record = {
-    id: `audit-${Date.now()}`,
-    recordedAt: new Date().toISOString(),
+    id: event.id || `audit-${Date.now()}`,
+    recordedAt: event.recordedAt || event.verifiedAt || new Date().toISOString(),
     ...event,
   };
   events.push(record);
@@ -30,7 +30,94 @@ function setFeedback(message) {
   if (feedback) feedback.textContent = message;
 }
 
-document.addEventListener("click", (event) => {
+function queryConfiguration() {
+  const query = new URLSearchParams(window.location.search);
+  return {
+    source: query.get("source") || "fixture",
+    mutationBridge: query.get("mutationBridge") || "",
+  };
+}
+
+async function responsePayload(response) {
+  return response.json().catch(() => ({}));
+}
+
+async function requestOwnershipRepair(button) {
+  const config = queryConfiguration();
+  if (config.source !== "datahub" || !config.mutationBridge) {
+    setFeedback(
+      "No repair was claimed. Ownership requires the live DataHub source and the separate governed mutation bridge.",
+    );
+    return;
+  }
+
+  button.disabled = true;
+  const originalLabel = button.textContent;
+  button.textContent = "Loading proposal…";
+  try {
+    const proposalResponse = await fetch(config.mutationBridge, {
+      headers: { Accept: "application/json" },
+    });
+    const proposalPayload = await responsePayload(proposalResponse);
+    if (!proposalResponse.ok || !proposalPayload.proposal) {
+      throw new Error(
+        proposalPayload?.error?.message || "Ownership proposal is unavailable.",
+      );
+    }
+    const proposal = proposalPayload.proposal;
+    const confirmed = window.confirm(
+      [
+        "Confirm governed DataHub ownership repair?",
+        "",
+        `Target: ${proposal.targetUrn}`,
+        `Current owners: ${proposal.existingOwners.length ? proposal.existingOwners.join(", ") : "none"}`,
+        `Proposed owner: ${proposal.proposedOwner}`,
+        `Verification: ${proposal.verification}`,
+      ].join("\n"),
+    );
+    if (!confirmed) {
+      setFeedback("Ownership repair cancelled. DataHub was not changed.");
+      return;
+    }
+
+    button.textContent = "Writing and verifying…";
+    const repairResponse = await fetch(config.mutationBridge, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        confirmed: true,
+        operation: proposal.operation,
+        entityId: proposal.entityId,
+        targetUrn: proposal.targetUrn,
+      }),
+    });
+    const result = await responsePayload(repairResponse);
+    if (!repairResponse.ok || result.verified !== true) {
+      throw new Error(
+        result?.error?.message ||
+          "Ownership mutation did not pass read-after-write verification.",
+      );
+    }
+
+    writeEvent(result.auditEvent);
+    button.textContent = "Ownership verified";
+    setFeedback(
+      `ContextRepairEvent recorded. DataHub returned ${result.proposal.proposedOwner} on the verified re-read; refreshing the live Continuity state.`,
+    );
+    window.setTimeout(() => window.location.reload(), 900);
+  } catch (error) {
+    button.disabled = false;
+    button.textContent = originalLabel;
+    setFeedback(
+      `Ownership remains unresolved: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+}
+
+document.addEventListener("click", async (event) => {
   const button = event.target.closest("[data-prototype-action]");
   if (!button) return;
 
@@ -53,9 +140,7 @@ document.addEventListener("click", (event) => {
   }
 
   if (title.includes("owner")) {
-    setFeedback(
-      "No repair was claimed. Ownership requires a live DataHub mutation followed by a successful re-read.",
-    );
+    await requestOwnershipRepair(button);
     return;
   }
 
