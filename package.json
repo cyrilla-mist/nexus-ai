@@ -8,9 +8,10 @@
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
     "test": "node --test",
-    "check": "node --check worker/index.js && node --check core/nexus-core.js && node --check atlas/project-atlas/index.js && node --check atlas/project-atlas/stage.js && node --check model/deepseek-client.js && node --check model/model-router.js && node --check frontend/session-state.js && node --check frontend/app.js && node --check scripts/build-verity-reentry-scenario.mjs",
+    "check": "node --check worker/index.js && node --check core/nexus-core.js && node --check atlas/project-atlas/index.js && node --check atlas/project-atlas/stage.js && node --check model/deepseek-client.js && node --check model/model-router.js && node --check frontend/session-state.js && node --check frontend/app.js && node --check frontend/atlas/atlas.js && node --check scripts/build-verity-reentry-scenario.mjs && node --check scripts/verify-atlas-source.mjs && node scripts/verify-atlas-source.mjs",
     "verify:multiturn": "node tests/verify-multiturn.js",
-    "build:verity-scenario": "node scripts/build-verity-reentry-scenario.mjs"
+    "build:verity-scenario": "node scripts/build-verity-reentry-scenario.mjs",
+    "verify:atlas": "node scripts/verify-atlas-source.mjs"
   },
   "devDependencies": {
     "wrangler": "^4.0.0"
