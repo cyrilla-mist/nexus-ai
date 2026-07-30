@@ -91,9 +91,14 @@ function extractOwners(value) {
 function findEntityPayload(result, urn) {
   const candidates = [];
   for (const payload of resultPayloads(result)) {
+    if (payload && typeof payload === "object" && payload[urn]) {
+      candidates.push({ urn, ...payload[urn] });
+    }
     walk(payload, (value) => {
-      if (value && typeof value === "object" && value.urn === urn) {
-        candidates.push(value);
+      if (!value || typeof value !== "object") return;
+      if (value.urn === urn) candidates.push(value);
+      if (value[urn] && typeof value[urn] === "object") {
+        candidates.push({ urn, ...value[urn] });
       }
     });
   }
