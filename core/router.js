@@ -1,3 +1,5 @@
+import { describeLegacyAtlas } from "./capability-registry.js";
+
 const INTENT_RULES = [
   {
     intent: "project_creation",
@@ -44,7 +46,7 @@ export function detectIntent(message = "") {
   return {
     name: "unknown",
     confidence: 0.3,
-    reason: "No Atlas routing rule matched the current input."
+    reason: "No capability-engine routing rule matched the current input."
   };
 }
 
@@ -54,28 +56,7 @@ export function selectAtlas(intentName) {
 }
 
 export function listAvailableAtlases() {
-  return [
-    {
-      id: "project-atlas",
-      name: "Project Atlas",
-      status: "active",
-      capabilities: [
-        "idea_understanding",
-        "problem_definition",
-        "project_planning",
-        "risk_review",
-        "execution_guidance"
-      ]
-    },
-    {
-      id: "evidence-atlas",
-      name: "Evidence Atlas",
-      status: "planned",
-      capabilities: [
-        "claim_evidence_mapping",
-        "source_traceability",
-        "evidence_gap_detection"
-      ]
-    }
-  ];
+  return ["project-atlas", "evidence-atlas"]
+    .map(describeLegacyAtlas)
+    .filter(Boolean);
 }
