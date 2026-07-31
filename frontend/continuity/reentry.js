@@ -150,6 +150,16 @@ function renderBrief(view) {
     </section>`;
 }
 
+function governanceActionForSignal(key) {
+  const actions = {
+    stale: "create-revalidation-task",
+    conflict: "confirm-decision",
+    missing: "repair-ownership",
+    valid: "confirm-inheritance",
+  };
+  return actions[key] || "review-action";
+}
+
 function renderSignalLens(detail) {
   return `<aside class="signal-lens signal-${escapeHtml(detail.tone)}" aria-labelledby="signal-lens-title">
     <div class="inspector-heading"><p>SIGNAL LENS</p><span>${escapeHtml(statusLabel(detail.status))}</span></div>
@@ -159,7 +169,7 @@ function renderSignalLens(detail) {
     <dl class="lens-counts"><div><dt>Evidence links</dt><dd>${detail.evidenceChain.length}</dd></div><div><dt>Affected decisions</dt><dd>${detail.affectedDecision ? 1 : 0}</dd></div></dl>
     <p class="lens-next-action"><strong>Next:</strong> ${escapeHtml(detail.recommendedAction)}</p>
     <div class="workspace-actions lens-actions">
-      <button class="primary-instrument-action" type="button" data-prototype-action>Request Human Decision</button>
+      <button class="primary-instrument-action" type="button" data-prototype-action data-governance-action="${escapeHtml(governanceActionForSignal(detail.key))}" data-entity-id="${escapeHtml(detail.selectedId)}" data-decision-id="${escapeHtml(detail.affectedDecision?.id || '')}">Request Human Decision</button>
       ${detail.affectedDecision ? `<button type="button" class="secondary-action" data-related-decision="${escapeHtml(detail.affectedDecision.id)}" aria-label="View related decision: ${escapeHtml(detail.affectedDecision.title)}">View Related Decision <span aria-hidden="true">→</span></button>` : ""}
       <button type="button" class="auxiliary-action" data-focus-evidence aria-label="Focus current evidence chain">Focus evidence chain</button>
     </div>
@@ -236,7 +246,7 @@ function actionDisplayStatus(action) {
 
 function renderAction(action, index) {
   const displayStatus = actionDisplayStatus(action);
-  return `<article class="action-record ${index === 0 ? "is-priority-action" : ""}"><span class="action-number">${String(index + 1).padStart(2, "0")}</span><div><h3>${escapeHtml(action.label)}</h3><p>${escapeHtml(action.summary)}</p><small>${escapeHtml(action.completionCriteria)}</small><dl><div><dt>OWNER</dt><dd class="${action.ownershipRisk ? "is-risk" : ""}">${escapeHtml(action.owner)}</dd></div><div><dt>STATUS</dt><dd>${escapeHtml(displayStatus)}</dd></div><div><dt>RECORDED STATUS</dt><dd>${escapeHtml(statusLabel(action.status))}</dd></div></dl></div><button class="text-action" type="button" data-prototype-action>Review action</button></article>`;
+  return `<article class="action-record ${index === 0 ? "is-priority-action" : ""}"><span class="action-number">${String(index + 1).padStart(2, "0")}</span><div><h3>${escapeHtml(action.label)}</h3><p>${escapeHtml(action.summary)}</p><small>${escapeHtml(action.completionCriteria)}</small><dl><div><dt>OWNER</dt><dd class="${action.ownershipRisk ? "is-risk" : ""}">${escapeHtml(action.owner)}</dd></div><div><dt>STATUS</dt><dd>${escapeHtml(displayStatus)}</dd></div><div><dt>RECORDED STATUS</dt><dd>${escapeHtml(statusLabel(action.status))}</dd></div></dl></div><button class="text-action" type="button" data-prototype-action data-governance-action="review-action" data-entity-id="${escapeHtml(action.id)}">Review action</button></article>`;
 }
 
 function renderDecisionGate(ledger) {
@@ -256,7 +266,7 @@ function renderDecisionGate(ledger) {
       <div><dt>CURRENT RISK</dt><dd>${escapeHtml(ownership?.status ? statusLabel(ownership.status) : statusLabel(pending.status))}</dd></div>
     </dl>
     <div class="workspace-actions">
-      <button class="primary-instrument-action" type="button" data-prototype-action>Request Human Decision</button>
+      <button class="primary-instrument-action" type="button" data-prototype-action data-governance-action="confirm-decision" data-entity-id="${escapeHtml(pending.id)}" data-decision-id="${escapeHtml(affected?.id || '')}">Request Human Decision</button>
       <button class="secondary-action" type="button" data-review-evidence>Review evidence <span aria-hidden="true">→</span></button>
     </div>
     <p class="prototype-feedback" aria-live="polite"></p>
@@ -346,7 +356,7 @@ function bindPanelInteractions() {
   app.querySelector("[data-review-evidence]")?.addEventListener("click", () => {
     activateWorkspace("evidence");
   });
-  app.querySelectorAll("[data-prototype-action]").forEach((button) => button.addEventListener("click", () => {
+  app.querySelectorAll("[data-prototype-action]:not([data-governance-action])").forEach((button) => button.addEventListener("click", () => {
     const feedback = app.querySelector(".prototype-feedback");
     if (feedback) feedback.textContent = "Prototype feedback recorded locally. Runtime write-back is not enabled in v0.9.6.";
   }));
