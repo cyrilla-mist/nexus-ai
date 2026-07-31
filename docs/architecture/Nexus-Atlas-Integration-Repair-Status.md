@@ -21,11 +21,12 @@ The repair branch has completed and statically verified the following contracts:
 - DataHub ownership proposals use fresh owner state, one-time proposal IDs, expiry, replay protection, exact target validation, and read-after-write verification;
 - live DataHub read caching defaults to zero milliseconds;
 - Context Package generation is provider-neutral and explicitly session-local;
-- legacy Project Atlas and Evidence Atlas are mapped as Territory capability engines.
+- legacy Project Atlas and Evidence Atlas are mapped as Territory capability engines;
+- one-time repair migrations and temporary write-enabled workflows have been removed after successful application.
 
 ## Automated validation
 
-The GitHub Actions static-validation job currently passes:
+The retained GitHub Actions `static-validation` job currently passes:
 
 - full Node test suite;
 - repository syntax and source checks;
