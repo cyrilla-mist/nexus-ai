@@ -6,13 +6,45 @@ const memoryManager = new MemoryManager({
   store: new MemoryStore()
 });
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type"
-};
+const DEFAULT_ALLOWED_ORIGINS = Object.freeze([
+  "https://cyrilla-mist.github.io",
+  "http://localhost:8000",
+  "http://127.0.0.1:8000"
+]);
 
-function jsonResponse(data, status = 200) {
+function parseAllowedOrigins(value) {
+  if (!value) return new Set(DEFAULT_ALLOWED_ORIGINS);
+  return new Set(
+    String(value)
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean)
+  );
+}
+
+export function resolveCorsPolicy(request, env = {}) {
+  const origin = request.headers.get("Origin") || "";
+  const allowedOrigins = parseAllowedOrigins(env.NEXUS_ALLOWED_ORIGINS);
+  const originAllowed = !origin || allowedOrigins.has(origin);
+  const headers = {
+    "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Vary": "Origin"
+  };
+
+  if (origin && originAllowed) {
+    headers["Access-Control-Allow-Origin"] = origin;
+  }
+
+  return {
+    origin,
+    originAllowed,
+    allowedOrigins,
+    headers
+  };
+}
+
+function jsonResponse(data, status = 200, corsHeaders = {}) {
   return new Response(JSON.stringify(data, null, 2), {
     status,
     headers: {
@@ -22,13 +54,14 @@ function jsonResponse(data, status = 200) {
   });
 }
 
-function badRequest(code, message) {
+function badRequest(code, message, corsHeaders) {
   return jsonResponse(
     {
       ok: false,
       error: { code, message }
     },
-    400
+    400,
+    corsHeaders
   );
 }
 
@@ -111,21 +144,40 @@ export function validateNexusPayload(payload) {
 export default {
   async fetch(request, env = {}) {
     const url = new URL(request.url);
+    const cors = resolveCorsPolicy(request, env);
+
+    if (!cors.originAllowed) {
+      return jsonResponse(
+        {
+          ok: false,
+          error: {
+            code: "ORIGIN_NOT_ALLOWED",
+            message: "当前请求来源未被允许。"
+          }
+        },
+        403,
+        cors.headers
+      );
+    }
 
     if (request.method === "OPTIONS") {
       return new Response(null, {
         status: 204,
-        headers: corsHeaders
+        headers: cors.headers
       });
     }
 
     if (request.method === "GET" && url.pathname === "/health") {
-      return jsonResponse({
-        ok: true,
-        service: "nexus-ai-core",
-        version: "0.1.1",
-        mode: env.DEEPSEEK_API_KEY ? "deepseek" : "mock"
-      });
+      return jsonResponse(
+        {
+          ok: true,
+          service: "nexus-ai-core",
+          version: "0.1.1",
+          mode: env.DEEPSEEK_API_KEY ? "deepseek" : "mock"
+        },
+        200,
+        cors.headers
+      );
     }
 
     if (request.method === "POST" && url.pathname === "/api/nexus") {
@@ -134,13 +186,17 @@ export default {
       try {
         payload = await request.json();
       } catch {
-        return badRequest("INVALID_JSON", "请求内容不是有效 JSON。");
+        return badRequest("INVALID_JSON", "请求内容不是有效 JSON。", cors.headers);
       }
 
       const validationError = validateNexusPayload(payload);
 
       if (validationError) {
-        return badRequest(validationError.code, validationError.message);
+        return badRequest(
+          validationError.code,
+          validationError.message,
+          cors.headers
+        );
       }
 
       try {
@@ -150,7 +206,7 @@ export default {
             apiKey: env.DEEPSEEK_API_KEY
           }
         });
-        return jsonResponse(result, result.ok ? 200 : 400);
+        return jsonResponse(result, result.ok ? 200 : 400, cors.headers);
       } catch {
         return jsonResponse(
           {
@@ -160,7 +216,8 @@ export default {
               message: "Nexus 暂时无法完成分析，请稍后重试。"
             }
           },
-          500
+          500,
+          cors.headers
         );
       }
     }
@@ -173,7 +230,8 @@ export default {
           message: "可用接口为 GET /health 和 POST /api/nexus。"
         }
       },
-      404
+      404,
+      cors.headers
     );
   }
 };
