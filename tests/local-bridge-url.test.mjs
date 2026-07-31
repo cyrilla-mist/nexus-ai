@@ -23,6 +23,16 @@ test("accepts only the allow-listed read bridge endpoints", () => {
   );
 });
 
+test("canonicalizes the legacy read bridge without preserving port 8789", () => {
+  assert.equal(
+    validateLocalBridgeUrl(
+      "http://127.0.0.1:8789/api/continuity/reentry",
+      "read",
+    ),
+    "http://127.0.0.1:8790/api/continuity/reentry",
+  );
+});
+
 test("accepts only the allow-listed mutation bridge endpoints", () => {
   assert.equal(
     validateLocalBridgeUrl(
