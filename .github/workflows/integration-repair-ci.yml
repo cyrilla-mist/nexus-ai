@@ -1,0 +1,65 @@
+name: Nexus Atlas Integration Repair CI
+
+on:
+  push:
+    branches:
+      - repair/nexus-atlas-integration-v1
+  pull_request:
+    branches:
+      - agent/nexus-atlas-architecture-review-v1
+
+permissions:
+  contents: read
+
+concurrency:
+  group: integration-repair-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run full Node test suite
+        run: npm test
+
+      - name: Run repository syntax and source checks
+        run: npm run check
+
+      - name: Verify multi-turn behavior
+        run: npm run verify:multiturn
+
+      - name: Verify security contracts
+        run: npm run verify:security-contracts
+
+      - name: Verify Context Package contract
+        run: npm run verify:context-package
+
+      - name: Verify Territory capability mapping
+        run: npm run verify:capability-registry
+
+      - name: Verify Verity continuity contract
+        run: npm run verify:verity-continuity
+
+      - name: Verify Verity DataHub static contracts
+        run: npm run verify:verity-datahub
+
+      - name: Verify Verity ingestion dry-run
+        run: npm run verify:verity-ingestion
+
+      - name: Confirm clean generated diff
+        run: git diff --check
