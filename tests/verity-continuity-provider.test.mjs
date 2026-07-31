@@ -33,7 +33,9 @@ test("normalizes Verity into the provider-neutral continuity contract", async ()
   });
 
   assert.equal(scenario.project.id, "project-verity");
-  assert.equal(scenario.project.updatedAt, scenario.project.lastActiveAt);
+  assert.equal(scenario.project.updatedAt, "2026-07-30T00:00:00Z");
+  assert.equal(scenario.project.lastActiveAt, "2026-07-09T00:00:00Z");
+  assert.equal(scenario.runtime.reentryFromAt, "2026-07-09T00:00:00Z");
   assert.equal(
     scenario.project.metadata.currentUpdatedAt,
     "2026-07-30T00:00:00Z",
@@ -61,7 +63,10 @@ test("builds truthful Verity re-entry findings", async () => {
   assert.ok(view.signals.every((signal) => signal.compatible));
   assert.equal(view.meaningfulChanges.length, 4);
   assert.equal(view.validDecisions.length, 4);
-  assert.equal(view.reportMeta.elapsedLabel, "21 days since last update");
+  assert.equal(
+    view.reportMeta.elapsedLabel,
+    "21 days since last active session",
+  );
   assert.equal(view.decisionActionLedger.ownershipRisks.length, 1);
   assert.equal(
     view.selectedSignalDetails.missing.selectedId,

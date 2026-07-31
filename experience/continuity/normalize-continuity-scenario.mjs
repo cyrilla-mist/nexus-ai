@@ -55,7 +55,6 @@ export function normalizeContinuityScenario(input, options = {}) {
   if (scenario.project?.lastActiveAt) {
     scenario.project.metadata.currentUpdatedAt = scenario.project.updatedAt;
     scenario.project.metadata.lastActiveAt = scenario.project.lastActiveAt;
-    scenario.project.updatedAt = scenario.project.lastActiveAt;
   }
 
   scenario.entities = Array.isArray(scenario.entities)
@@ -76,6 +75,10 @@ export function normalizeContinuityScenario(input, options = {}) {
     ...(isObject(scenario.runtime) ? scenario.runtime : {}),
     normalizedAt: options.normalizedAt || new Date().toISOString(),
     sourceMode: options.sourceMode || "unknown",
+    reentryFromAt:
+      scenario.project?.lastActiveAt ||
+      scenario.project?.updatedAt ||
+      requestedAt,
   };
 
   return scenario;

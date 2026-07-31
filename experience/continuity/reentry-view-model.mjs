@@ -739,13 +739,22 @@ function continuityScore(signals) {
 }
 
 function elapsedLabel(scenario) {
-  const updated = Date.parse(scenario.project.updatedAt);
+  const reentryFrom = Date.parse(
+    scenario.runtime?.reentryFromAt ||
+      scenario.project.lastActiveAt ||
+      scenario.project.updatedAt,
+  );
   const requested = Date.parse(scenario.reentryQuery?.requestedAt);
-  if (!Number.isFinite(updated) || !Number.isFinite(requested)) {
+  if (!Number.isFinite(reentryFrom) || !Number.isFinite(requested)) {
     return "Elapsed time unavailable";
   }
-  const days = Math.max(0, Math.floor((requested - updated) / 86_400_000));
-  return days === 0 ? "Updated today" : `${days} days since last update`;
+  const days = Math.max(
+    0,
+    Math.floor((requested - reentryFrom) / 86_400_000),
+  );
+  return days === 0
+    ? "Active today"
+    : `${days} days since last active session`;
 }
 
 export function buildReentryViewModel(scenario) {
