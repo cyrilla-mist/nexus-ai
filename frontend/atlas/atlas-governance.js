@@ -1,3 +1,8 @@
+import {
+  defaultLocalBridgeUrl,
+  validateLocalBridgeUrl,
+} from "../../experience/continuity/local-bridge-url.mjs";
+
 const AUDIT_KEY = "nexus.atlas.audit.v1";
 const SIGNAL_TARGETS = Object.freeze({
   changes: "event-roadmap-shifted",
@@ -30,6 +35,44 @@ function appendAuditEvent(event) {
 
 function feedbackElement() {
   return document.querySelector("#confirmation-feedback");
+}
+
+function currentSourceConfiguration() {
+  const query = new URLSearchParams(window.location.search);
+  const source = query.get("source") || "fixture";
+  if (source !== "datahub") {
+    return { source: "fixture" };
+  }
+
+  return {
+    source: "datahub",
+    bridge: validateLocalBridgeUrl(
+      query.get("bridge") || defaultLocalBridgeUrl("read"),
+      "read",
+    ),
+    mutationBridge: validateLocalBridgeUrl(
+      query.get("mutationBridge") || defaultLocalBridgeUrl("mutation"),
+      "mutation",
+    ),
+  };
+}
+
+function reentryUrl(hash = "brief") {
+  let config;
+  try {
+    config = currentSourceConfiguration();
+  } catch {
+    config = { source: "fixture" };
+  }
+
+  const query = new URLSearchParams({ source: config.source });
+  if (config.source === "fixture") {
+    query.set("scenario", "verity");
+  } else {
+    query.set("bridge", config.bridge);
+    query.set("mutationBridge", config.mutationBridge);
+  }
+  return `./reentry.html?${query.toString()}#${hash}`;
 }
 
 function renderAuditReceipt(event) {
@@ -84,10 +127,20 @@ function confirmConflict(button) {
 function handleOwnership(button) {
   const feedback = feedbackElement();
   if (feedback) {
-    feedback.innerHTML =
-      'Ownership is not marked repaired in fixture mode. Open the <a href="./reentry.html?source=datahub&amp;bridge=http%3A%2F%2F127.0.0.1%3A8790%2Fapi%2Fcontinuity%2Freentry&amp;mutationBridge=http%3A%2F%2F127.0.0.1%3A8791%2Fapi%2Fcontext%2Frepair%2Fbenchmark-owner#evidence">governed Verity DataHub workspace</a> after ingesting the assets and configuring the owner URN.';
+    const link = document.createElement("a");
+    link.href = reentryUrl("evidence");
+    link.textContent = "Open the governed Verity ownership workspace";
+    feedback.replaceChildren(
+      document.createTextNode(
+        "Ownership is not marked repaired from the Atlas inspector. ",
+      ),
+      link,
+      document.createTextNode(
+        " to review the proposal, confirm the write, and verify the fresh DataHub read.",
+      ),
+    );
   }
-  button.textContent = "Live verification required";
+  button.textContent = "Governed verification required";
 }
 
 document.addEventListener("click", (event) => {
@@ -106,7 +159,7 @@ document.addEventListener("click", (event) => {
   const detailedLink = event.target.closest('.workspace-link[href="./reentry.html"]');
   if (detailedLink) {
     event.preventDefault();
-    window.location.href = "./reentry.html?scenario=verity#brief";
+    window.location.href = reentryUrl("brief");
     return;
   }
 
