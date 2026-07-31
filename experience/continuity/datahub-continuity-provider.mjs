@@ -1,11 +1,17 @@
 import { normalizeContinuityScenario } from "./normalize-continuity-scenario.mjs";
+import {
+  defaultLocalBridgeUrl,
+  validateLocalBridgeUrl,
+} from "./local-bridge-url.mjs";
 
-const DEFAULT_BRIDGE_URL =
-  "http://127.0.0.1:8789/api/continuity/reentry";
+const DEFAULT_BRIDGE_URL = defaultLocalBridgeUrl("read");
 
 export function createDataHubContinuityProvider(options = {}) {
   const fetchImpl = options.fetchImpl || globalThis.fetch;
-  const bridgeUrl = options.bridgeUrl || DEFAULT_BRIDGE_URL;
+  const bridgeUrl = validateLocalBridgeUrl(
+    options.bridgeUrl || DEFAULT_BRIDGE_URL,
+    "read",
+  );
   if (typeof fetchImpl !== "function") {
     throw new Error("A fetch implementation is required for DataHub mode.");
   }
