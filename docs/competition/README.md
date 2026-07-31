@@ -1,11 +1,14 @@
 # Nexus Atlas Competition Pack
 
-This directory organizes the reviewer-facing and submission-facing materials for the DataHub hackathon.
+This directory organizes reviewer-facing and submission-facing materials for the DataHub hackathon.
 
 ## Current documents
 
 - [`Nexus-Atlas-Judge-QA.md`](Nexus-Atlas-Judge-QA.md) — concise and extended answers for likely reviewer questions.
 - [`Nexus-Atlas-Visual-Submission-Plan.md`](Nexus-Atlas-Visual-Submission-Plan.md) — cover, screenshots, thumbnail, capture, privacy, and truthfulness requirements.
+- [`Nexus-Atlas-Video-Production-Pack.md`](Nexus-Atlas-Video-Production-Pack.md) — final scene plan, recording sequence, editing rules, YouTube copy, and evidence checklist.
+- [`Nexus-Atlas-AI-Voiceover.txt`](Nexus-Atlas-AI-Voiceover.txt) — simple English narration for AI voice or personal recording.
+- [`nexus-atlas-demo-en.srt`](nexus-atlas-demo-en.srt) — editable English subtitle timeline for the demo video.
 
 ## Source documents elsewhere in the repository
 
@@ -14,18 +17,26 @@ This directory organizes the reviewer-facing and submission-facing materials for
 - [`../Nexus-DataHub-Verity-Assets.md`](../Nexus-DataHub-Verity-Assets.md) — governed DataHub asset and bridge contract.
 - [`../../examples/README.md`](../../examples/README.md) — deterministic sample and planned-contract evidence boundary.
 
-## Submission materials to finalize
+## Submission materials status
 
-The following content is prepared in draft form outside the runtime code and should be finalized only after local verification:
+Prepared:
 
-- Devpost project description;
-- simplified English voice-over and subtitle script;
-- three-minute recording sequence;
-- YouTube or Vimeo title and description;
+- Devpost project narrative draft;
+- simple English voice-over;
+- English SRT subtitle track;
+- under-three-minute recording sequence;
+- YouTube title, description, chapters, and tags;
+- cover, banner, thumbnail, and screenshot direction;
+- reviewer Q&A;
+- privacy and runtime-evidence checklists.
+
+Still requiring verified runtime work:
+
 - public demo URL;
-- verified runtime screenshots;
+- verified DataHub screenshots;
 - Missing Ownership `1 → 0` evidence;
-- final repository and testing links.
+- final source-code and testing links;
+- final video export and public upload.
 
 ## Evidence classes
 
