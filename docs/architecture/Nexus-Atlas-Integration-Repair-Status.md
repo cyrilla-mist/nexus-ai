@@ -37,9 +37,21 @@ The retained GitHub Actions `static-validation` job currently passes:
 - Verity Continuity contract;
 - Verity DataHub static contracts;
 - Python ingestion compilation and dry-run;
+- local Runtime verification safety-contract tests;
 - clean diff validation.
 
 Automated CI does not constitute a real local DataHub Runtime verification.
+
+## Runtime verification preparation
+
+The branch now includes:
+
+- `npm run verify:runtime:preflight` for Node, Python, MCP launcher, GMS reachability, bridge-port state, and canonical scenario checks;
+- `npm run verify:runtime:read` for live read-bridge health, MCP read-tool restrictions, Verity snapshot identity, and lineage verification;
+- `npm run verify:runtime:proposal` for mutation-bridge health and a fresh ownership proposal without sending any POST request;
+- `docs/runtime/Nexus-Atlas-Local-Runtime-Verification.md` with the ordered PowerShell procedure, browser checks, human-confirmed ownership repair, replay/no-op tests, and sanitized evidence template.
+
+These tools deliberately do not perform the ownership mutation automatically. The real `add_owners` operation remains behind the browser Confirmation Sheet and explicit human confirmation.
 
 ## Remaining blockers
 
@@ -51,7 +63,7 @@ The Draft PR must not be marked Ready or merged until the target computer verifi
 4. Atlas and Re-entry browser state consistency after ownership changes;
 5. Confirmation Sheet focus management, Escape, Cancel, retry, repeated confirmation, and mobile bottom-sheet behavior;
 6. desktop and mobile visual checks;
-7. a tested public or documented local demo path;
+7. the documented local demo path;
 8. sanitized runtime evidence.
 
 ## Product decisions still open
@@ -64,5 +76,5 @@ The Draft PR must not be marked Ready or merged until the target computer verifi
 
 - `main` remains unchanged;
 - the original stacked PR branches remain unchanged;
-- no real DataHub metadata mutation was executed during static repair;
+- no real DataHub metadata mutation was executed during static repair or Runtime preparation;
 - no local Runtime PASS is claimed.
