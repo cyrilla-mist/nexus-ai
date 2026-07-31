@@ -44,7 +44,7 @@ export function createDataHubContinuityProvider(options = {}) {
         sourceInfo: {
           mode: "datahub",
           label: "DataHub MCP",
-          detail: "Live read · governed context",
+          detail: "Live read · read-only governed context",
           live: true,
           readOnly: payload.readOnly === true,
           mutationEnabled: payload.mutationEnabled === true,
