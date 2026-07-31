@@ -4,10 +4,12 @@ const BRIDGE_CONTRACTS = Object.freeze({
   read: Object.freeze({
     port: "8790",
     pathname: "/api/continuity/reentry",
+    legacyPorts: Object.freeze(["8789"]),
   }),
   mutation: Object.freeze({
     port: "8791",
     pathname: "/api/context/repair/benchmark-owner",
+    legacyPorts: Object.freeze([]),
   }),
 });
 
@@ -57,12 +59,6 @@ export function validateLocalBridgeUrl(value, kind = "read") {
       "LOCAL_BRIDGE_HOST_NOT_ALLOWED",
     );
   }
-  if (url.port !== contract.port) {
-    throw new LocalBridgeUrlError(
-      `The ${kind} bridge must use port ${contract.port}.`,
-      "LOCAL_BRIDGE_PORT_NOT_ALLOWED",
-    );
-  }
   if (url.pathname !== contract.pathname) {
     throw new LocalBridgeUrlError(
       `The ${kind} bridge path is not allow-listed.`,
@@ -76,7 +72,17 @@ export function validateLocalBridgeUrl(value, kind = "read") {
     );
   }
 
-  return url.toString();
+  if (url.port === contract.port) return url.toString();
+
+  if (kind === "read" && contract.legacyPorts.includes(url.port)) {
+    url.port = contract.port;
+    return url.toString();
+  }
+
+  throw new LocalBridgeUrlError(
+    `The ${kind} bridge must use port ${contract.port}.`,
+    "LOCAL_BRIDGE_PORT_NOT_ALLOWED",
+  );
 }
 
 export function defaultLocalBridgeUrl(kind = "read", host = "127.0.0.1") {
