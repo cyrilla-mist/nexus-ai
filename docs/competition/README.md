@@ -9,6 +9,7 @@ This directory organizes reviewer-facing and submission-facing materials for the
 - [`Nexus-Atlas-Video-Production-Pack.md`](Nexus-Atlas-Video-Production-Pack.md) — final scene plan, recording sequence, editing rules, YouTube copy, and evidence checklist.
 - [`Nexus-Atlas-AI-Voiceover.txt`](Nexus-Atlas-AI-Voiceover.txt) — simple English narration for AI voice or personal recording.
 - [`nexus-atlas-demo-en.srt`](nexus-atlas-demo-en.srt) — editable English subtitle timeline for the demo video.
+- [`Nexus-Atlas-Codex-Local-Validation-Prompt.md`](Nexus-Atlas-Codex-Local-Validation-Prompt.md) — complete Windows/Codex workflow for branch safety, tests, DataHub, MCP, governed ownership repair, Context Package handoff, evidence capture, and final reporting.
 
 ## Source documents elsewhere in the repository
 
@@ -28,7 +29,8 @@ Prepared:
 - YouTube title, description, chapters, and tags;
 - cover, banner, thumbnail, and screenshot direction;
 - reviewer Q&A;
-- privacy and runtime-evidence checklists.
+- privacy and runtime-evidence checklists;
+- complete Codex local validation and repair instruction.
 
 Still requiring verified runtime work:
 
