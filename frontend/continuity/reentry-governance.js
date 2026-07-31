@@ -1,3 +1,5 @@
+import { validateLocalBridgeUrl } from "../../experience/continuity/local-bridge-url.mjs";
+
 const AUDIT_KEY = "nexus.atlas.audit.v1";
 
 function readEvents() {
@@ -32,9 +34,14 @@ function setFeedback(message) {
 
 function queryConfiguration() {
   const query = new URLSearchParams(window.location.search);
+  const source = query.get("source") || "fixture";
+  const rawMutationBridge = query.get("mutationBridge") || "";
   return {
-    source: query.get("source") || "fixture",
-    mutationBridge: query.get("mutationBridge") || "",
+    source,
+    mutationBridge:
+      source === "datahub" && rawMutationBridge
+        ? validateLocalBridgeUrl(rawMutationBridge, "mutation")
+        : "",
   };
 }
 
@@ -102,7 +109,7 @@ function confirmOwnershipProposal(proposal) {
   proposalText(
     dialog,
     "[data-governance-current]",
-    proposal.existingOwners.length ? proposal.existingOwners.join(", ") : "None",
+    proposal.existingOwners?.length ? proposal.existingOwners.join(", ") : "None",
   );
   proposalText(dialog, "[data-governance-proposed]", proposal.proposedOwner);
   proposalText(dialog, "[data-governance-verification]", proposal.verification);
@@ -115,7 +122,16 @@ function confirmOwnershipProposal(proposal) {
 }
 
 async function requestOwnershipRepair(button) {
-  const config = queryConfiguration();
+  let config;
+  try {
+    config = queryConfiguration();
+  } catch (error) {
+    setFeedback(
+      `Ownership repair is unavailable: ${error instanceof Error ? error.message : String(error)}`,
+    );
+    return;
+  }
+
   if (config.source !== "datahub" || !config.mutationBridge) {
     setFeedback(
       "No repair was claimed. Ownership requires the live DataHub source and the separate governed mutation bridge.",
@@ -151,6 +167,7 @@ async function requestOwnershipRepair(button) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
+        proposalId: proposal.proposalId,
         confirmed: true,
         operation: proposal.operation,
         entityId: proposal.entityId,
