@@ -1,4 +1,11 @@
 const AUDIT_KEY = "nexus.atlas.audit.v1";
+const SIGNAL_TARGETS = Object.freeze({
+  changes: "event-roadmap-shifted",
+  decisions: "decision-benchmark-first",
+  stale: "risk-stale-v046-results",
+  ownership: "risk-benchmark-missing-owner",
+});
+
 let selectedEntityId = "project-verity";
 
 function readAuditEvents() {
@@ -29,13 +36,26 @@ function renderAuditReceipt(event) {
   const panel = document.querySelector("#inspector-content .inspector-panel");
   if (!panel) return;
   panel.querySelector(".audit-receipt")?.remove();
+
   const receipt = document.createElement("section");
   receipt.className = "audit-receipt";
-  receipt.innerHTML = `
-    <span class="inspector-kicker">NEXUS AUDIT EVENT</span>
-    <p><strong>${event.type.replaceAll("_", " ")}</strong></p>
-    <p>${event.summary}</p>
-    <small>${event.recordedAt}</small>`;
+
+  const kicker = document.createElement("span");
+  kicker.className = "inspector-kicker";
+  kicker.textContent = "NEXUS AUDIT EVENT";
+
+  const typeLine = document.createElement("p");
+  const type = document.createElement("strong");
+  type.textContent = String(event.type || "audit_event").replaceAll("_", " ");
+  typeLine.append(type);
+
+  const summary = document.createElement("p");
+  summary.textContent = String(event.summary || "");
+
+  const time = document.createElement("small");
+  time.textContent = String(event.recordedAt || "");
+
+  receipt.append(kicker, typeLine, summary, time);
   panel.append(receipt);
 }
 
@@ -75,6 +95,12 @@ document.addEventListener("click", (event) => {
   if (entityControl) {
     selectedEntityId =
       entityControl.dataset.inspectEntity || entityControl.dataset.mapNode;
+  }
+
+  const signalControl = event.target.closest("[data-open-signal]");
+  if (signalControl) {
+    selectedEntityId =
+      SIGNAL_TARGETS[signalControl.dataset.openSignal] || "project-verity";
   }
 
   const detailedLink = event.target.closest('.workspace-link[href="./reentry.html"]');
