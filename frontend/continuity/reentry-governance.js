@@ -23,12 +23,15 @@ function writeEvent(event) {
   return record;
 }
 
-function signalTitle() {
-  return document.querySelector("#signal-lens-title")?.textContent?.trim() || "";
+function feedbackElement(button) {
+  const scoped = button
+    ?.closest(".signal-lens, .decision-gate, .action-record, .workspace-view")
+    ?.querySelector(".prototype-feedback");
+  return scoped || document.querySelector(".prototype-feedback");
 }
 
-function setFeedback(message) {
-  const feedback = document.querySelector(".prototype-feedback");
+function setFeedback(message, button) {
+  const feedback = feedbackElement(button);
   if (feedback) feedback.textContent = message;
 }
 
@@ -128,6 +131,7 @@ async function requestOwnershipRepair(button) {
   } catch (error) {
     setFeedback(
       `Ownership repair is unavailable: ${error instanceof Error ? error.message : String(error)}`,
+      button,
     );
     return;
   }
@@ -135,6 +139,7 @@ async function requestOwnershipRepair(button) {
   if (config.source !== "datahub" || !config.mutationBridge) {
     setFeedback(
       "No repair was claimed. Ownership requires the live DataHub source and the separate governed mutation bridge.",
+      button,
     );
     return;
   }
@@ -155,11 +160,13 @@ async function requestOwnershipRepair(button) {
     const proposal = proposalPayload.proposal;
     const confirmed = await confirmOwnershipProposal(proposal);
     if (!confirmed) {
-      setFeedback("Ownership repair cancelled. DataHub was not changed.");
+      setFeedback("Ownership repair cancelled. DataHub was not changed.", button);
       return;
     }
 
-    button.textContent = "Writing and verifying…";
+    button.textContent = proposal.alreadyApplied
+      ? "Verifying existing ownership…"
+      : "Writing and verifying…";
     const repairResponse = await fetch(config.mutationBridge, {
       method: "POST",
       headers: {
@@ -186,6 +193,7 @@ async function requestOwnershipRepair(button) {
     button.textContent = "Ownership verified";
     setFeedback(
       `ContextRepairEvent recorded. DataHub returned ${result.proposal.proposedOwner} on the verified re-read; refreshing the live Continuity state.`,
+      button,
     );
     window.setTimeout(() => window.location.reload(), 900);
   } catch (error) {
@@ -193,6 +201,7 @@ async function requestOwnershipRepair(button) {
     button.textContent = originalLabel;
     setFeedback(
       `Ownership remains unresolved: ${error instanceof Error ? error.message : String(error)}`,
+      button,
     );
   } finally {
     if (button.textContent === "Loading proposal…") {
@@ -202,48 +211,83 @@ async function requestOwnershipRepair(button) {
   }
 }
 
-document.addEventListener("click", async (event) => {
-  const button = event.target.closest("[data-prototype-action]");
-  if (!button) return;
+function confirmDecision(button) {
+  const entityId = button.dataset.entityId || "risk-agent-roadmap-conflict";
+  const decisionId = button.dataset.decisionId || "decision-benchmark-first";
+  writeEvent({
+    type: "decision_confirmation",
+    projectId: "project-verity",
+    entityId,
+    decisionId,
+    resolution: "keep-benchmark-first",
+    summary:
+      "Human confirmed Benchmark-first and prevented the superseded feature-expansion memory from being inherited.",
+  });
+  button.disabled = true;
+  button.textContent = "Decision confirmed";
+  setFeedback(
+    "DecisionConfirmationEvent recorded locally. Both agent memories remain traceable; Benchmark-first is inherited.",
+    button,
+  );
+}
 
-  const title = signalTitle().toLowerCase();
-  if (title.includes("roadmap") || title.includes("agent")) {
-    writeEvent({
-      type: "decision_confirmation",
-      projectId: "project-verity",
-      decisionId: "decision-benchmark-first",
-      resolution: "keep-benchmark-first",
-      summary:
-        "Human confirmed Benchmark-first and prevented the superseded feature-expansion memory from being inherited.",
-    });
-    button.disabled = true;
-    button.textContent = "Decision confirmed";
-    setFeedback(
-      "DecisionConfirmationEvent recorded locally. Both agent memories remain traceable; Benchmark-first is inherited.",
-    );
-    return;
-  }
+function createRevalidationTask(button) {
+  const entityId = button.dataset.entityId || "risk-stale-v046-results";
+  writeEvent({
+    type: "revalidation_task_created",
+    projectId: "project-verity",
+    entityId,
+    actionId: "task-rerun-stale-samples",
+    summary: "Created a revalidation task for evidence generated before v0.4.7.",
+  });
+  setFeedback("Revalidation task recorded in the local Nexus audit ledger.", button);
+}
 
-  if (title.includes("owner")) {
-    await requestOwnershipRepair(button);
-    return;
-  }
-
-  if (title.includes("outdated") || title.includes("stale")) {
-    writeEvent({
-      type: "revalidation_task_created",
-      projectId: "project-verity",
-      actionId: "task-rerun-stale-samples",
-      summary: "Created a revalidation task for evidence generated before v0.4.7.",
-    });
-    setFeedback("Revalidation task recorded in the local Nexus audit ledger.");
-    return;
-  }
-
+function confirmInheritance(button) {
   writeEvent({
     type: "context_inheritance_confirmation",
     projectId: "project-verity",
+    entityId: button.dataset.entityId || "",
     summary: "Human confirmed the selected context as safe to inherit.",
   });
-  setFeedback("Context inheritance confirmation recorded locally.");
+  setFeedback("Context inheritance confirmation recorded locally.", button);
+}
+
+function reviewAction(button) {
+  writeEvent({
+    type: "action_reviewed",
+    projectId: "project-verity",
+    entityId: button.dataset.entityId || "",
+    summary: "The user reviewed a recommended action without changing governed state.",
+  });
+  setFeedback("Action review recorded locally. No external write was performed.", button);
+}
+
+document.addEventListener("click", async (event) => {
+  const button = event.target.closest("[data-governance-action]");
+  if (!button) return;
+
+  const action = button.dataset.governanceAction;
+  if (action === "confirm-decision") {
+    confirmDecision(button);
+    return;
+  }
+  if (action === "repair-ownership") {
+    await requestOwnershipRepair(button);
+    return;
+  }
+  if (action === "create-revalidation-task") {
+    createRevalidationTask(button);
+    return;
+  }
+  if (action === "confirm-inheritance") {
+    confirmInheritance(button);
+    return;
+  }
+  if (action === "review-action") {
+    reviewAction(button);
+    return;
+  }
+
+  setFeedback(`Unsupported governance action: ${action || "missing"}.`, button);
 });
