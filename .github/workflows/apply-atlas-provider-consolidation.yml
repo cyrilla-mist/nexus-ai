@@ -1,0 +1,62 @@
+name: Apply Atlas Provider Consolidation
+
+on:
+  push:
+    branches:
+      - repair/nexus-atlas-integration-v1
+    paths:
+      - scripts/apply-atlas-provider-consolidation.mjs
+      - .github/workflows/apply-atlas-provider-consolidation.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply-repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+
+    steps:
+      - name: Check out repair branch
+        uses: actions/checkout@v4
+        with:
+          ref: repair/nexus-atlas-integration-v1
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Consolidate Atlas module and provider
+        run: node scripts/apply-atlas-provider-consolidation.mjs
+
+      - name: Validate consolidated Atlas
+        run: |
+          npm test
+          npm run check
+          npm run verify:atlas
+          npm run verify:security-contracts
+          npm run verify:verity-continuity
+          npm run verify:verity-ingestion
+          git diff --check
+
+      - name: Commit consolidated Atlas entry
+        run: |
+          if git diff --quiet; then
+            echo "No Atlas consolidation changes were required."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add atlas.html \
+            frontend/atlas/atlas-app.js \
+            scripts/verify-atlas-source.mjs \
+            package.json
+          git commit -m "refactor: connect Atlas to the shared Continuity Provider"
+          git push origin HEAD:repair/nexus-atlas-integration-v1
