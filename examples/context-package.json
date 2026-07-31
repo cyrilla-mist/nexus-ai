@@ -1,0 +1,73 @@
+{
+  "exampleType": "planned-workspace-handoff-contract",
+  "implementationStatus": "not-yet-wired-end-to-end",
+  "runtimeVerified": false,
+  "workspace": {
+    "type": "active-project",
+    "territory": "innovation",
+    "projectId": "project-verity",
+    "goal": "Prepare Verity v1.0 through benchmark-first validation."
+  },
+  "identityContext": [
+    {
+      "principle": "Prefer verified product reliability over unvalidated feature expansion.",
+      "authority": "user-confirmed"
+    }
+  ],
+  "knowledgeContext": [
+    {
+      "id": "asset-verity-benchmark-v1",
+      "type": "ExternalAssetRef",
+      "source": "DataHub",
+      "state": "blocked",
+      "reason": "Missing ownership must be resolved before the dependent route is trusted."
+    }
+  ],
+  "memoryContext": [
+    {
+      "event": "Verity v0.4.7 introduced deterministic grade-consistency safeguards."
+    },
+    {
+      "event": "The project was inactive for twenty-one days before re-entry."
+    }
+  ],
+  "decisionContext": [
+    {
+      "decision": "Complete Benchmark v1 before expanding more features.",
+      "state": "confirmed"
+    }
+  ],
+  "actionContext": [
+    {
+      "class": "Repair",
+      "action": "Assign a verified owner to Benchmark v1.",
+      "state": "blocked-until-confirmed"
+    },
+    {
+      "class": "Act",
+      "action": "Build the Benchmark v1 validation set.",
+      "state": "ready-after-repair"
+    },
+    {
+      "class": "Verify",
+      "action": "Re-run samples created before v0.4.7.",
+      "state": "open"
+    },
+    {
+      "class": "Act",
+      "action": "Calibrate v1.0 scoring thresholds.",
+      "state": "open"
+    }
+  ],
+  "policies": [
+    "Rules establish findings before model interpretation.",
+    "Consequential external writes require explicit human confirmation.",
+    "A successful write response is not proof without a verified re-read.",
+    "Source unavailable must not be converted into missing or stale context."
+  ],
+  "requestedCapabilities": [
+    "benchmark-planning",
+    "evaluation-reliability-review"
+  ],
+  "notice": "This file defines the planned Context Package contract. The final workspace handoff is still listed as locally unverified work."
+}

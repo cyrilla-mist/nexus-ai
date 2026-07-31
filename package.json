@@ -3,7 +3,7 @@
   "version": "0.1.1",
   "private": true,
   "type": "module",
-  "description": "Nexus AI Project Atlas multi-turn product experience.",
+  "description": "Nexus Atlas personal intelligence infrastructure and Verity re-entry demonstration.",
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",

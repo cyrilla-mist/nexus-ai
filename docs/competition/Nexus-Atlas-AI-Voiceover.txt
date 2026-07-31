@@ -1,0 +1,57 @@
+NEXUS ATLAS — SIMPLE ENGLISH VOICEOVER
+Target length: about 2 minutes 35 seconds
+Recommended voice: calm, clear, neutral English
+Recommended pace: 105–115 words per minute
+
+[Scene 1 — The problem]
+Returning to a project can be difficult.
+The files are still there, but the context is lost.
+We may forget what changed, why a decision was made, and what to do next.
+
+[Scene 2 — Nexus Atlas]
+This is Nexus Atlas.
+It helps people keep the context of long-term work.
+It connects project history, knowledge, decisions, actions, and trusted data.
+
+[Scene 3 — Atlas Desk]
+Nexus does not start with an empty chat.
+It starts with Atlas Desk.
+Here, Nexus finds Verity, a project that has been inactive for twenty-one days.
+The project now needs re-entry.
+
+[Scene 4 — Atlas Map]
+Atlas Map shows the most important path for the current task.
+For Verity, it connects the evaluation rules, Benchmark v1, scoring calibration, results, and release evidence.
+It only shows the context that matters now.
+
+[Scene 5 — Re-entry Brief]
+Nexus restores four important changes and four valid decisions.
+It also finds two old evidence records, one agent conflict, and one missing owner.
+Nexus shows what can still be trusted, and what must be checked or repaired.
+
+[Scene 6 — Agent Conflict]
+One agent recommends more features.
+Another recommends better evaluation quality.
+Nexus keeps both suggestions.
+The user confirms the Benchmark-first direction.
+
+[Scene 7 — DataHub Repair]
+DataHub shows that Benchmark v1 has no owner.
+Nexus shows the exact asset, the current value, and the proposed owner.
+After the user confirms, Nexus updates DataHub and reads it again.
+The issue is closed only after the new owner is verified.
+
+[Scene 8 — Continue]
+The project can now continue.
+The next steps are to build the test set, run older samples again, and adjust the v1.0 scoring rules.
+Nexus turns project history into a clear path from context, to decision, to action, and memory.
+
+PRONUNCIATION NOTES
+Nexus Atlas: /ˈneksəs ˈætləs/
+Verity: /ˈverəti/
+DataHub: /ˈdeɪtə hʌb/
+Benchmark: /ˈbentʃmɑːrk/
+Calibration: /ˌkælɪˈbreɪʃən/
+
+AI VOICE SAFETY
+Use a neutral synthetic voice. Do not imitate or clone a real person. Keep the final English subtitles visible even when AI voice is used.

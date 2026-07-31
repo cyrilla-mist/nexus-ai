@@ -1,0 +1,45 @@
+{
+  "exampleType": "deterministic-fixture-summary",
+  "runtimeVerified": false,
+  "sourceMode": "fixture",
+  "scenarioId": "verity-reentry",
+  "project": {
+    "id": "project-verity",
+    "name": "Verity",
+    "version": "0.4.7",
+    "targetMilestone": "v1.0 benchmark validation",
+    "inactiveDays": 21
+  },
+  "findings": {
+    "meaningfulChanges": 4,
+    "validDecisions": 4,
+    "staleEvidence": 2,
+    "agentConflicts": 1,
+    "missingOwners": 1
+  },
+  "confirmedDecisions": [
+    "Keep Verity focused on pre-submission quality inspection.",
+    "Return a structured report instead of only a score.",
+    "Maintain deterministic grade-consistency constraints.",
+    "Complete Benchmark v1 before expanding more features."
+  ],
+  "recommendedActions": [
+    {
+      "class": "Repair",
+      "action": "Assign an owner to the Benchmark v1 DataHub asset."
+    },
+    {
+      "class": "Act",
+      "action": "Build the Benchmark v1 validation set."
+    },
+    {
+      "class": "Verify",
+      "action": "Re-run samples generated before v0.4.7."
+    },
+    {
+      "class": "Act",
+      "action": "Calibrate the v1.0 scoring thresholds."
+    }
+  ],
+  "notice": "This file summarizes the deterministic fixture. It is not evidence of a live DataHub read or mutation."
+}
