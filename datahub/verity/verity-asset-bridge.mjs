@@ -7,7 +7,7 @@ import { readVerityAssetSnapshot } from "./verity-asset-reader.mjs";
 
 const DEFAULT_HOST = "127.0.0.1";
 const DEFAULT_PORT = 8790;
-const DEFAULT_TTL_MS = 10_000;
+const DEFAULT_TTL_MS = 0;
 const DEFAULT_ORIGINS = Object.freeze([
   "http://localhost:8000",
   "http://127.0.0.1:8000",
@@ -90,7 +90,10 @@ export function createVerityAssetBridge(options = {}) {
     }
     const value = await readSnapshot();
     cache = { storedAt: current, value };
-    return value;
+    return {
+      ...value,
+      diagnostics: { ...value.diagnostics, cached: false },
+    };
   }
 
   async function health() {
@@ -100,6 +103,7 @@ export function createVerityAssetBridge(options = {}) {
       service: "nexus-verity-datahub-bridge",
       readOnly: true,
       mutationEnabled: false,
+      cacheTtlMs,
       requiredTools: status.requiredTools,
       mutationToolsExposed: status.mutationToolsExposed,
     };
@@ -190,6 +194,7 @@ async function main() {
     console.log(`Listening: http://${bridge.host}:${bridge.port}`);
     console.log("Mode: governed asset read-only");
     console.log("Mutation: disabled");
+    console.log("Default cache: disabled for live consistency");
     const stop = async () => {
       await bridge.close();
       process.exit(0);
