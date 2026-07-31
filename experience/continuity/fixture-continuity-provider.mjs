@@ -2,13 +2,8 @@ import { normalizeContinuityScenario } from "./normalize-continuity-scenario.mjs
 
 const DEFAULT_FIXTURE_URL =
   "./continuity/scenarios/nexus-self-reentry.json";
-
-const VERITY_PART_URLS = [
-  "./continuity/scenarios/verity-reentry/verity-reentry.part-00.json",
-  "./continuity/scenarios/verity-reentry/verity-reentry.part-01.json",
-  "./continuity/scenarios/verity-reentry/verity-reentry.part-02.json",
-  "./continuity/scenarios/verity-reentry/verity-reentry.part-03.json",
-];
+const VERITY_FIXTURE_URL =
+  "./continuity/scenarios/verity-reentry.json";
 
 function requestedScenario() {
   try {
@@ -39,9 +34,10 @@ async function readMultipartJson(fetchImpl, urls) {
 export function createFixtureContinuityProvider(options = {}) {
   const fetchImpl = options.fetchImpl || globalThis.fetch;
   const scenarioKey = options.scenario || requestedScenario() || "nexus";
-  const fixtureUrl = options.fixtureUrl || DEFAULT_FIXTURE_URL;
-  const fixtureParts = options.fixtureParts ||
-    (scenarioKey === "verity" ? VERITY_PART_URLS : null);
+  const fixtureUrl =
+    options.fixtureUrl ||
+    (scenarioKey === "verity" ? VERITY_FIXTURE_URL : DEFAULT_FIXTURE_URL);
+  const fixtureParts = options.fixtureParts || null;
 
   if (typeof fetchImpl !== "function") {
     throw new Error("A fetch implementation is required for fixture mode.");
@@ -62,10 +58,14 @@ export function createFixtureContinuityProvider(options = {}) {
         scenario,
         sourceInfo: {
           mode: "fixture",
-          label: scenarioKey === "verity" ? "Verity scenario fixture" : "Continuity fixture",
-          detail: scenarioKey === "verity"
-            ? "Public Hero Scenario · validated source parts"
-            : "Runtime mapping verified",
+          label:
+            scenarioKey === "verity"
+              ? "Verity scenario fixture"
+              : "Continuity fixture",
+          detail:
+            scenarioKey === "verity"
+              ? "Public Hero Scenario · canonical JSON"
+              : "Runtime mapping verified",
           live: false,
           readOnly: true,
           fetchedAt: scenario.runtime.normalizedAt,

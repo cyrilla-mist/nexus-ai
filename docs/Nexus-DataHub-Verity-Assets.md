@@ -28,7 +28,7 @@ The runtime creates six stable Dataset assets in the `PROD` environment:
 5. `verity_evaluation_results_v047`
 6. `verity_release_readiness_evidence`
 
-The calibration asset has the logical type `calibration-process`. It is represented as a Dataset Context Asset in this hackathon runtime so the integration can use the already verified open-source `DatasetProperties` and dataset lineage path without adding an unstable Data Job SDK dependency.
+The calibration asset has the logical type `calibration-context`. It is represented as a Dataset Context Asset in this hackathon runtime so the integration can use the already verified open-source `DatasetProperties` and dataset lineage path without adding an unstable Data Job SDK dependency.
 
 ## Asset lineage
 

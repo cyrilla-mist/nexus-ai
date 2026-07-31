@@ -1,0 +1,967 @@
+{
+  "schemaVersion": "0.9.2",
+  "scenarioVersion": "0.1.0",
+  "scenarioRole": "public-hackathon-hero-scenario",
+  "project": {
+    "id": "project-verity",
+    "name": "衡准 · Verity",
+    "description": "A pre-submission AI quality inspection and review tool for student competition materials.",
+    "status": "in_progress",
+    "territory": "innovation",
+    "secondaryTerritories": [
+      "evaluation"
+    ],
+    "createdAt": "2026-07-09T00:00:00Z",
+    "updatedAt": "2026-07-30T00:00:00Z",
+    "lastActiveAt": "2026-07-09T00:00:00Z",
+    "currentVersion": "0.4.7",
+    "currentMilestone": "v1.0 benchmark validation"
+  },
+  "entities": [
+    {
+      "id": "owner-verity-product",
+      "type": "owner",
+      "title": "Verity product stewardship",
+      "summary": "Human authority for Verity positioning, benchmark scope, and release decisions.",
+      "status": "confirmed",
+      "createdAt": "2026-07-09T00:00:00Z",
+      "source": {
+        "provider": "nexus",
+        "reference": "verity-project-governance"
+      },
+      "metadata": {
+        "role": "product",
+        "territory": "innovation"
+      }
+    },
+    {
+      "id": "owner-verity-engineering",
+      "type": "owner",
+      "title": "Verity engineering stewardship",
+      "summary": "Implementation authority for the Worker boundary, evaluation pipeline, and release validation.",
+      "status": "confirmed",
+      "createdAt": "2026-07-09T00:00:00Z",
+      "source": {
+        "provider": "nexus",
+        "reference": "verity-project-governance"
+      },
+      "metadata": {
+        "role": "engineering",
+        "territory": "innovation"
+      }
+    },
+    {
+      "id": "source-verity-readme",
+      "type": "source",
+      "title": "Verity product documentation",
+      "summary": "Repository documentation defining Verity as a pre-submission quality inspection tool for student competition materials.",
+      "status": "confirmed",
+      "createdAt": "2026-07-09T00:00:00Z",
+      "source": {
+        "provider": "github",
+        "reference": "cyrilla-mist/verity:README.md"
+      },
+      "metadata": {
+        "documentType": "product-definition"
+      }
+    },
+    {
+      "id": "source-verity-release-notes",
+      "type": "source",
+      "title": "Verity release history",
+      "summary": "Version history covering file upload, understanding summaries, and grade-consistency safeguards through v0.4.7.",
+      "status": "confirmed",
+      "createdAt": "2026-07-09T00:00:00Z",
+      "source": {
+        "provider": "github",
+        "reference": "cyrilla-mist/verity:release-history"
+      },
+      "confidence": 0.95,
+      "metadata": {
+        "documentType": "release-history"
+      }
+    },
+    {
+      "id": "source-benchmark-plan",
+      "type": "source",
+      "title": "Verity Benchmark v1 plan",
+      "summary": "Current plan for a validated benchmark set, scoring calibration, and release-readiness evidence.",
+      "status": "confirmed",
+      "createdAt": "2026-07-27T00:00:00Z",
+      "source": {
+        "provider": "nexus",
+        "reference": "verity-benchmark-v1-plan"
+      },
+      "metadata": {
+        "documentType": "benchmark-plan",
+        "priority": "P0"
+      }
+    },
+    {
+      "id": "source-old-roadmap",
+      "type": "source",
+      "title": "Feature-expansion roadmap",
+      "summary": "Earlier roadmap prioritizing more dimensions and features before benchmark validation.",
+      "status": "stale",
+      "createdAt": "2026-07-22T00:00:00Z",
+      "source": {
+        "provider": "nexus",
+        "reference": "verity-roadmap-pre-benchmark"
+      },
+      "confidence": 0.2,
+      "metadata": {
+        "documentType": "roadmap",
+        "inherit": false
+      },
+      "supersededBy": "decision-benchmark-first"
+    },
+    {
+      "id": "external-asset-rubric",
+      "type": "external_asset",
+      "title": "Verity Evaluation Rubric",
+      "summary": "The governed scoring dimensions, evidence requirements, and interpretation boundaries used by the benchmark.",
+      "status": "confirmed",
+      "createdAt": "2026-07-27T00:00:00Z",
+      "source": {
+        "provider": "datahub",
+        "reference": "urn:li:dataset:(urn:li:dataPlatform:nexus,verity_evaluation_rubric,PROD)"
+      },
+      "ownerId": "owner-verity-product",
+      "confidence": 0.98,
+      "metadata": {
+        "assetType": "dataset",
+        "domain": "Verity Evaluation",
+        "version": "1.0-draft",
+        "freshness": "current",
+        "qualityStatus": "draft-validated",
+        "writePolicy": "governed"
+      }
+    },
+    {
+      "id": "external-asset-test-materials",
+      "type": "external_asset",
+      "title": "Verity Test Materials",
+      "summary": "Representative competition materials used to test evidence extraction, risk findings, and report consistency.",
+      "status": "confirmed",
+      "createdAt": "2026-07-27T00:00:00Z",
+      "source": {
+        "provider": "datahub",
+        "reference": "urn:li:dataset:(urn:li:dataPlatform:nexus,verity_test_materials,PROD)"
+      },
+      "ownerId": "owner-verity-product",
+      "confidence": 0.95,
+      "metadata": {
+        "assetType": "dataset",
+        "domain": "Verity Evaluation",
+        "version": "1.0-draft",
+        "freshness": "current",
+        "qualityStatus": "curated"
+      }
+    },
+    {
+      "id": "external-asset-benchmark",
+      "type": "external_asset",
+      "title": "Verity Benchmark v1",
+      "summary": "The benchmark dataset linking test materials, expected findings, scoring bands, and acceptance criteria.",
+      "status": "unverified",
+      "createdAt": "2026-07-27T00:00:00Z",
+      "source": {
+        "provider": "datahub",
+        "reference": "urn:li:dataset:(urn:li:dataPlatform:nexus,verity_benchmark_v1,PROD)"
+      },
+      "confidence": 0.9,
+      "metadata": {
+        "assetType": "dataset",
+        "domain": "Verity Evaluation",
+        "version": "1.0-draft",
+        "freshness": "current",
+        "qualityStatus": "unverified",
+        "criticalAsset": true,
+        "ownerMissing": true,
+        "writePolicy": "owner-confirmation-required"
+      }
+    },
+    {
+      "id": "external-asset-calibration-job",
+      "type": "external_asset",
+      "title": "Verity Scoring Calibration Context",
+      "summary": "The governed calibration context linking expected findings, generated scores, and report judgments used to evaluate scoring behavior.",
+      "status": "confirmed",
+      "createdAt": "2026-07-27T00:00:00Z",
+      "source": {
+        "provider": "datahub",
+        "reference": "urn:li:dataset:(urn:li:dataPlatform:nexus,verity_scoring_calibration,PROD)"
+      },
+      "ownerId": "owner-verity-engineering",
+      "confidence": 0.95,
+      "metadata": {
+        "assetType": "dataset",
+        "domain": "Verity Evaluation",
+        "version": "0.4.7",
+        "freshness": "current",
+        "qualityStatus": "operational",
+        "logicalType": "calibration-context"
+      }
+    },
+    {
+      "id": "external-asset-results-v047",
+      "type": "external_asset",
+      "title": "Evaluation Results v0.4.7",
+      "summary": "Current evaluation outputs produced after grade-consistency safeguards were introduced.",
+      "status": "confirmed",
+      "createdAt": "2026-07-27T00:00:00Z",
+      "source": {
+        "provider": "datahub",
+        "reference": "urn:li:dataset:(urn:li:dataPlatform:nexus,verity_evaluation_results_v047,PROD)"
+      },
+      "ownerId": "owner-verity-engineering",
+      "confidence": 0.95,
+      "metadata": {
+        "assetType": "dataset",
+        "domain": "Verity Evaluation",
+        "version": "0.4.7",
+        "freshness": "current",
+        "qualityStatus": "partially-validated"
+      }
+    },
+    {
+      "id": "external-asset-release-evidence",
+      "type": "external_asset",
+      "title": "Verity Release Readiness Evidence",
+      "summary": "Evidence package used to decide whether Verity is ready to advance from v0.4.7 toward v1.0.",
+      "status": "blocked",
+      "createdAt": "2026-07-27T00:00:00Z",
+      "source": {
+        "provider": "datahub",
+        "reference": "urn:li:dataset:(urn:li:dataPlatform:nexus,verity_release_readiness_evidence,PROD)"
+      },
+      "ownerId": "owner-verity-product",
+      "confidence": 0.85,
+      "metadata": {
+        "assetType": "dataset",
+        "domain": "Verity Evaluation",
+        "version": "1.0-draft",
+        "freshness": "incomplete",
+        "qualityStatus": "blocked-by-benchmark"
+      }
+    },
+    {
+      "id": "evidence-positioning",
+      "type": "evidence",
+      "title": "Pre-submission QA positioning is documented",
+      "summary": "Product documentation consistently defines Verity as a quality inspection and review assistant, not an automatic writing or competition-management platform.",
+      "status": "confirmed",
+      "createdAt": "2026-07-09T00:00:00Z",
+      "source": {
+        "provider": "github",
+        "reference": "cyrilla-mist/verity:README.md#positioning"
+      },
+      "ownerId": "owner-verity-product",
+      "metadata": {
+        "result": "PASS"
+      },
+      "confirmedBy": "owner-verity-product",
+      "confirmedAt": "2026-07-30T00:00:00Z"
+    },
+    {
+      "id": "evidence-file-understanding",
+      "type": "evidence",
+      "title": "File understanding flow is operational",
+      "summary": "Uploaded materials can be summarized and passed into the quality inspection workflow.",
+      "status": "confirmed",
+      "createdAt": "2026-07-22T00:00:00Z",
+      "source": {
+        "provider": "github",
+        "reference": "cyrilla-mist/verity:v0.4.1"
+      },
+      "ownerId": "owner-verity-engineering",
+      "confidence": 0.95,
+      "metadata": {
+        "result": "PASS",
+        "version": "0.4.1"
+      },
+      "confirmedBy": "owner-verity-engineering",
+      "confirmedAt": "2026-07-30T00:00:00Z"
+    },
+    {
+      "id": "evidence-grade-consistency-v047",
+      "type": "evidence",
+      "title": "Grade consistency safeguard is present in v0.4.7",
+      "summary": "Rule-based constraints reduce contradictions between qualitative judgment, grade, and numerical score.",
+      "status": "confirmed",
+      "createdAt": "2026-07-27T00:00:00Z",
+      "source": {
+        "provider": "github",
+        "reference": "cyrilla-mist/verity:v0.4.7"
+      },
+      "ownerId": "owner-verity-engineering",
+      "confidence": 0.98,
+      "metadata": {
+        "result": "PASS",
+        "version": "0.4.7"
+      },
+      "confirmedBy": "owner-verity-engineering",
+      "confirmedAt": "2026-07-30T00:00:00Z"
+    },
+    {
+      "id": "evidence-worker-boundary",
+      "type": "evidence",
+      "title": "AI credentials remain behind the Worker boundary",
+      "summary": "The browser does not directly expose the AI provider credential.",
+      "status": "confirmed",
+      "createdAt": "2026-07-09T00:00:00Z",
+      "source": {
+        "provider": "github",
+        "reference": "cyrilla-mist/verity:cloudflare-worker-boundary"
+      },
+      "ownerId": "owner-verity-engineering",
+      "confidence": 0.98,
+      "metadata": {
+        "result": "PASS",
+        "securityBoundary": true
+      },
+      "confirmedBy": "owner-verity-engineering",
+      "confirmedAt": "2026-07-30T00:00:00Z"
+    },
+    {
+      "id": "evidence-results-v046",
+      "type": "evidence",
+      "title": "Evaluation outputs from v0.4.6",
+      "summary": "Earlier sample outputs were generated before the v0.4.7 grade-consistency safeguard.",
+      "status": "stale",
+      "createdAt": "2026-07-22T00:00:00Z",
+      "source": {
+        "provider": "nexus",
+        "reference": "verity-evaluation-results-v046"
+      },
+      "ownerId": "owner-verity-engineering",
+      "confidence": 0.15,
+      "metadata": {
+        "version": "0.4.6",
+        "inherit": false,
+        "staleReason": "generated-before-grade-consistency-guardrail"
+      }
+    },
+    {
+      "id": "decision-positioning",
+      "type": "decision",
+      "title": "Keep Verity focused on pre-submission quality inspection",
+      "summary": "Do not expand Verity into a general competition-management or automatic-writing platform.",
+      "status": "confirmed",
+      "createdAt": "2026-07-09T00:00:00Z",
+      "source": {
+        "provider": "user_decision",
+        "reference": "verity-positioning"
+      },
+      "ownerId": "owner-verity-product",
+      "metadata": {
+        "decisionArea": "product-positioning"
+      },
+      "confirmedBy": "owner-verity-product",
+      "confirmedAt": "2026-07-30T00:00:00Z"
+    },
+    {
+      "id": "decision-report-structure",
+      "type": "decision",
+      "title": "Return a structured inspection report, not a score alone",
+      "summary": "The result must explain evidence gaps, risks, reviewer questions, and concrete revision actions.",
+      "status": "confirmed",
+      "createdAt": "2026-07-09T00:00:00Z",
+      "source": {
+        "provider": "user_decision",
+        "reference": "verity-report-contract"
+      },
+      "ownerId": "owner-verity-product",
+      "metadata": {
+        "decisionArea": "output-contract"
+      },
+      "confirmedBy": "owner-verity-product",
+      "confirmedAt": "2026-07-30T00:00:00Z"
+    },
+    {
+      "id": "decision-grade-guardrail",
+      "type": "decision",
+      "title": "Constrain grades with deterministic consistency rules",
+      "summary": "The model may interpret evidence, but final score bands and grade consistency must be bounded by rules.",
+      "status": "confirmed",
+      "createdAt": "2026-07-22T00:00:00Z",
+      "source": {
+        "provider": "user_decision",
+        "reference": "verity-grade-consistency"
+      },
+      "ownerId": "owner-verity-engineering",
+      "metadata": {
+        "decisionArea": "evaluation-reliability"
+      },
+      "confirmedBy": "owner-verity-engineering",
+      "confirmedAt": "2026-07-30T00:00:00Z"
+    },
+    {
+      "id": "decision-benchmark-first",
+      "type": "decision",
+      "title": "Build Benchmark v1 before expanding v1.0 features",
+      "summary": "Prioritize evaluation standards, representative materials, and calibration evidence before adding more dimensions or product features.",
+      "status": "confirmed",
+      "createdAt": "2026-07-27T00:00:00Z",
+      "source": {
+        "provider": "user_decision",
+        "reference": "verity-benchmark-first"
+      },
+      "ownerId": "owner-verity-product",
+      "metadata": {
+        "decisionArea": "roadmap",
+        "priority": "P0"
+      },
+      "supersedes": "source-old-roadmap",
+      "confirmedBy": "owner-verity-product",
+      "confirmedAt": "2026-07-30T00:00:00Z"
+    },
+    {
+      "id": "memory-expand-features",
+      "type": "agent_memory",
+      "title": "Expand evaluation dimensions and product features now",
+      "summary": "An earlier agent recommendation prioritized feature breadth before benchmark validation.",
+      "status": "disputed",
+      "createdAt": "2026-07-22T00:00:00Z",
+      "source": {
+        "provider": "agent",
+        "reference": "verity-roadmap-agent-a"
+      },
+      "confidence": 0.25,
+      "metadata": {
+        "recommendationArea": "roadmap",
+        "inherit": false
+      },
+      "agent": "Product Expansion Agent"
+    },
+    {
+      "id": "memory-benchmark-first",
+      "type": "agent_memory",
+      "title": "Freeze feature growth and validate Benchmark v1",
+      "summary": "A later agent recommendation prioritizes reliability, benchmark coverage, and scoring calibration.",
+      "status": "confirmed",
+      "createdAt": "2026-07-27T00:00:00Z",
+      "source": {
+        "provider": "agent",
+        "reference": "verity-roadmap-agent-b"
+      },
+      "confidence": 0.95,
+      "metadata": {
+        "recommendationArea": "roadmap",
+        "inherit": true
+      },
+      "agent": "Evaluation Reliability Agent",
+      "confirmedBy": "owner-verity-product",
+      "confirmedAt": "2026-07-30T00:00:00Z"
+    },
+    {
+      "id": "event-file-understanding-integrated",
+      "type": "event",
+      "title": "File understanding entered the core workflow",
+      "summary": "Material upload and understanding summaries became part of the inspection path.",
+      "status": "completed",
+      "createdAt": "2026-07-22T00:00:00Z",
+      "source": {
+        "provider": "github",
+        "reference": "cyrilla-mist/verity:v0.4.1"
+      },
+      "ownerId": "owner-verity-engineering",
+      "confidence": 0.95,
+      "metadata": {
+        "meaningfulChange": true,
+        "version": "0.4.1"
+      }
+    },
+    {
+      "id": "event-grade-guardrail-released",
+      "type": "event",
+      "title": "Grade consistency safeguard released",
+      "summary": "v0.4.7 introduced rule constraints between report language, grade, and score.",
+      "status": "completed",
+      "createdAt": "2026-07-27T00:00:00Z",
+      "source": {
+        "provider": "github",
+        "reference": "cyrilla-mist/verity:v0.4.7"
+      },
+      "ownerId": "owner-verity-engineering",
+      "confidence": 0.98,
+      "metadata": {
+        "meaningfulChange": true,
+        "version": "0.4.7"
+      }
+    },
+    {
+      "id": "event-benchmark-promoted",
+      "type": "event",
+      "title": "Benchmark v1 promoted to P0",
+      "summary": "Benchmark coverage and calibration became the highest-priority work before v1.0.",
+      "status": "completed",
+      "createdAt": "2026-07-27T00:00:00Z",
+      "source": {
+        "provider": "user_decision",
+        "reference": "verity-benchmark-first"
+      },
+      "ownerId": "owner-verity-product",
+      "metadata": {
+        "meaningfulChange": true,
+        "priority": "P0"
+      }
+    },
+    {
+      "id": "event-roadmap-shifted",
+      "type": "event",
+      "title": "Roadmap shifted from feature expansion to validation",
+      "summary": "The old feature-expansion route was superseded by the Benchmark-first decision.",
+      "status": "completed",
+      "createdAt": "2026-07-27T00:00:00Z",
+      "source": {
+        "provider": "user_decision",
+        "reference": "verity-roadmap-shift"
+      },
+      "ownerId": "owner-verity-product",
+      "metadata": {
+        "meaningfulChange": true
+      }
+    },
+    {
+      "id": "risk-stale-v046-results",
+      "type": "risk",
+      "title": "Outdated evaluation evidence",
+      "summary": "v0.4.6 sample outputs cannot validate the current v0.4.7 scoring behavior.",
+      "status": "open",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "nexus",
+        "reference": "continuity-rule:SE-01"
+      },
+      "ownerId": "owner-verity-engineering",
+      "metadata": {
+        "riskArea": "evidence",
+        "signal": "stale-evidence"
+      },
+      "priority": "high"
+    },
+    {
+      "id": "risk-stale-roadmap",
+      "type": "risk",
+      "title": "Superseded roadmap remains visible",
+      "summary": "The older feature-expansion roadmap could still mislead a returning user or agent.",
+      "status": "open",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "nexus",
+        "reference": "continuity-rule:SE-02"
+      },
+      "ownerId": "owner-verity-product",
+      "metadata": {
+        "riskArea": "roadmap",
+        "signal": "stale-evidence"
+      },
+      "priority": "medium"
+    },
+    {
+      "id": "risk-agent-roadmap-conflict",
+      "type": "risk",
+      "title": "Agent roadmap conflict",
+      "summary": "Historical agent memories recommend incompatible next-stage priorities.",
+      "status": "open",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "nexus",
+        "reference": "continuity-rule:AC-01"
+      },
+      "ownerId": "owner-verity-product",
+      "confidence": 0.95,
+      "metadata": {
+        "riskArea": "agent-memory",
+        "signal": "agent-conflict"
+      },
+      "priority": "high"
+    },
+    {
+      "id": "risk-benchmark-missing-owner",
+      "type": "risk",
+      "title": "Benchmark v1 has no confirmed owner",
+      "summary": "The critical benchmark asset has no accountable maintainer in DataHub.",
+      "status": "blocked",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "datahub",
+        "reference": "urn:li:dataset:(urn:li:dataPlatform:nexus,verity_benchmark_v1,PROD)"
+      },
+      "metadata": {
+        "riskArea": "ownership",
+        "signal": "missing-ownership",
+        "criticalAsset": true
+      },
+      "priority": "high"
+    },
+    {
+      "id": "task-assign-benchmark-owner",
+      "type": "task",
+      "title": "Assign Benchmark v1 owner",
+      "summary": "Confirm the accountable maintainer and write the governed ownership update to DataHub.",
+      "status": "blocked",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "nexus",
+        "reference": "continuity-action:repair-owner"
+      },
+      "metadata": {
+        "recommended": true,
+        "recommendedAction": "Assign yourself as the Benchmark v1 owner",
+        "actionClass": "repair",
+        "requiresConfirmation": true,
+        "writeTarget": "datahub"
+      },
+      "completionCriteria": "DataHub reports a confirmed owner and Nexus records a ContextRepairEvent.",
+      "priority": "high"
+    },
+    {
+      "id": "task-rebuild-benchmark-set",
+      "type": "task",
+      "title": "Build Benchmark v1 validation set",
+      "summary": "Create representative materials, expected findings, score bands, and acceptance criteria.",
+      "status": "open",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "nexus",
+        "reference": "continuity-action:act-benchmark"
+      },
+      "ownerId": "owner-verity-product",
+      "metadata": {
+        "recommended": true,
+        "recommendedAction": "Build the Benchmark v1 validation set",
+        "actionClass": "act"
+      },
+      "completionCriteria": "Benchmark v1 has representative cases, expected outputs, and explicit acceptance thresholds.",
+      "priority": "high"
+    },
+    {
+      "id": "task-rerun-stale-samples",
+      "type": "task",
+      "title": "Re-run outdated v0.4.6 samples",
+      "summary": "Regenerate the older samples through v0.4.7 and compare score/report consistency.",
+      "status": "open",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "nexus",
+        "reference": "continuity-action:verify-evidence"
+      },
+      "ownerId": "owner-verity-engineering",
+      "metadata": {
+        "recommended": true,
+        "recommendedAction": "Re-run outdated v0.4.6 samples",
+        "actionClass": "verify"
+      },
+      "completionCriteria": "All retained samples are generated by the current evaluation version and linked to results.",
+      "priority": "high"
+    },
+    {
+      "id": "task-calibrate-v1-thresholds",
+      "type": "task",
+      "title": "Calibrate v1.0 scoring thresholds",
+      "summary": "Use Benchmark v1 results to validate grade boundaries and report consistency before feature expansion.",
+      "status": "blocked",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "nexus",
+        "reference": "continuity-action:act-calibration"
+      },
+      "ownerId": "owner-verity-engineering",
+      "confidence": 0.95,
+      "metadata": {
+        "recommended": true,
+        "recommendedAction": "Calibrate v1.0 scoring thresholds",
+        "actionClass": "act",
+        "blockedBy": "task-rebuild-benchmark-set"
+      },
+      "completionCriteria": "Thresholds meet documented benchmark acceptance criteria.",
+      "priority": "high"
+    },
+    {
+      "id": "outcome-verity-reentry-ready",
+      "type": "outcome",
+      "title": "Verity project context restored",
+      "summary": "The returning user can trust current decisions, identify broken context, and continue from a validated action plan.",
+      "status": "in_progress",
+      "createdAt": "2026-07-30T00:00:00Z",
+      "source": {
+        "provider": "nexus",
+        "reference": "verity-reentry-outcome"
+      },
+      "ownerId": "owner-verity-product",
+      "confidence": 0.9,
+      "metadata": {
+        "scope": "innovation-reentry"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "rel-readme-supports-positioning-evidence",
+      "type": "produces",
+      "from": "source-verity-readme",
+      "to": "evidence-positioning"
+    },
+    {
+      "id": "rel-positioning-evidence-supports-decision",
+      "type": "supports",
+      "from": "evidence-positioning",
+      "to": "decision-positioning"
+    },
+    {
+      "id": "rel-readme-supports-report-decision",
+      "type": "supports",
+      "from": "source-verity-readme",
+      "to": "decision-report-structure"
+    },
+    {
+      "id": "rel-release-produces-file-evidence",
+      "type": "produces",
+      "from": "source-verity-release-notes",
+      "to": "evidence-file-understanding"
+    },
+    {
+      "id": "rel-release-produces-grade-evidence",
+      "type": "produces",
+      "from": "source-verity-release-notes",
+      "to": "evidence-grade-consistency-v047"
+    },
+    {
+      "id": "rel-grade-evidence-supports-guardrail",
+      "type": "supports",
+      "from": "evidence-grade-consistency-v047",
+      "to": "decision-grade-guardrail"
+    },
+    {
+      "id": "rel-benchmark-plan-supports-decision",
+      "type": "supports",
+      "from": "source-benchmark-plan",
+      "to": "decision-benchmark-first"
+    },
+    {
+      "id": "rel-benchmark-decision-supersedes-roadmap",
+      "type": "supersedes",
+      "from": "decision-benchmark-first",
+      "to": "source-old-roadmap"
+    },
+    {
+      "id": "rel-rubric-governs-benchmark",
+      "type": "governs",
+      "from": "external-asset-rubric",
+      "to": "external-asset-benchmark"
+    },
+    {
+      "id": "rel-materials-feed-benchmark",
+      "type": "feeds",
+      "from": "external-asset-test-materials",
+      "to": "external-asset-benchmark"
+    },
+    {
+      "id": "rel-benchmark-used-by-calibration",
+      "type": "used_by",
+      "from": "external-asset-benchmark",
+      "to": "external-asset-calibration-job"
+    },
+    {
+      "id": "rel-calibration-produces-results",
+      "type": "produces",
+      "from": "external-asset-calibration-job",
+      "to": "external-asset-results-v047"
+    },
+    {
+      "id": "rel-results-support-release-evidence",
+      "type": "supports",
+      "from": "external-asset-results-v047",
+      "to": "external-asset-release-evidence"
+    },
+    {
+      "id": "rel-benchmark-support-release-evidence",
+      "type": "supports",
+      "from": "external-asset-benchmark",
+      "to": "external-asset-release-evidence"
+    },
+    {
+      "id": "rel-old-results-trigger-stale-risk",
+      "type": "produces",
+      "from": "evidence-results-v046",
+      "to": "risk-stale-v046-results"
+    },
+    {
+      "id": "rel-old-roadmap-trigger-stale-risk",
+      "type": "produces",
+      "from": "source-old-roadmap",
+      "to": "risk-stale-roadmap"
+    },
+    {
+      "id": "rel-feature-memory-contradicts-benchmark-memory",
+      "type": "contradicts",
+      "from": "memory-expand-features",
+      "to": "memory-benchmark-first",
+      "metadata": {
+        "conflictArea": "roadmap"
+      }
+    },
+    {
+      "id": "rel-conflict-memory-produces-risk",
+      "type": "produces",
+      "from": "memory-expand-features",
+      "to": "risk-agent-roadmap-conflict"
+    },
+    {
+      "id": "rel-benchmark-memory-supports-decision",
+      "type": "supports",
+      "from": "memory-benchmark-first",
+      "to": "decision-benchmark-first"
+    },
+    {
+      "id": "rel-benchmark-missing-owner-risk",
+      "type": "produces",
+      "from": "external-asset-benchmark",
+      "to": "risk-benchmark-missing-owner"
+    },
+    {
+      "id": "rel-owner-risk-blocks-owner-task",
+      "type": "blocks",
+      "from": "risk-benchmark-missing-owner",
+      "to": "task-assign-benchmark-owner"
+    },
+    {
+      "id": "rel-stale-risk-drives-rerun",
+      "type": "influences",
+      "from": "risk-stale-v046-results",
+      "to": "task-rerun-stale-samples"
+    },
+    {
+      "id": "rel-benchmark-decision-produces-build-task",
+      "type": "produces",
+      "from": "decision-benchmark-first",
+      "to": "task-rebuild-benchmark-set"
+    },
+    {
+      "id": "rel-benchmark-task-blocks-calibration",
+      "type": "blocks",
+      "from": "task-rebuild-benchmark-set",
+      "to": "task-calibrate-v1-thresholds"
+    },
+    {
+      "id": "rel-owner-task-assigned-product",
+      "type": "assigned_to",
+      "from": "task-assign-benchmark-owner",
+      "to": "owner-verity-product",
+      "metadata": {
+        "pendingConfirmation": true
+      }
+    },
+    {
+      "id": "rel-build-task-assigned-product",
+      "type": "assigned_to",
+      "from": "task-rebuild-benchmark-set",
+      "to": "owner-verity-product"
+    },
+    {
+      "id": "rel-rerun-task-assigned-engineering",
+      "type": "assigned_to",
+      "from": "task-rerun-stale-samples",
+      "to": "owner-verity-engineering"
+    },
+    {
+      "id": "rel-calibration-assigned-engineering",
+      "type": "assigned_to",
+      "from": "task-calibrate-v1-thresholds",
+      "to": "owner-verity-engineering"
+    },
+    {
+      "id": "rel-file-event-recorded-by-release",
+      "type": "recorded_by",
+      "from": "event-file-understanding-integrated",
+      "to": "source-verity-release-notes"
+    },
+    {
+      "id": "rel-grade-event-recorded-by-release",
+      "type": "recorded_by",
+      "from": "event-grade-guardrail-released",
+      "to": "source-verity-release-notes"
+    },
+    {
+      "id": "rel-benchmark-event-recorded-by-decision",
+      "type": "recorded_by",
+      "from": "event-benchmark-promoted",
+      "to": "decision-benchmark-first"
+    },
+    {
+      "id": "rel-roadmap-event-recorded-by-decision",
+      "type": "recorded_by",
+      "from": "event-roadmap-shifted",
+      "to": "decision-benchmark-first"
+    },
+    {
+      "id": "rel-tasks-produce-reentry-outcome",
+      "type": "produces",
+      "from": "task-rebuild-benchmark-set",
+      "to": "outcome-verity-reentry-ready"
+    }
+  ],
+  "reentryQuery": {
+    "question": "What changed in Verity, what decisions are still valid, what context is broken, and what should I do next?",
+    "requestedAt": "2026-07-30T00:00:00Z",
+    "scope": [
+      "meaningful changes",
+      "evidence integrity",
+      "decision trace",
+      "agent memory conflicts",
+      "data asset ownership",
+      "blocked and recommended actions"
+    ]
+  },
+  "expectedFindings": {
+    "meaningfulChanges": 4,
+    "staleRecords": 2,
+    "agentConflicts": 1,
+    "missingOwners": 1,
+    "validDecisions": 4,
+    "recommendedActions": [
+      "Assign yourself as the Benchmark v1 owner",
+      "Build the Benchmark v1 validation set",
+      "Re-run outdated v0.4.6 samples",
+      "Calibrate v1.0 scoring thresholds"
+    ],
+    "actionGroups": {
+      "continue": [
+        "Keep Verity focused on pre-submission quality inspection",
+        "Preserve the structured inspection report contract"
+      ],
+      "verify": [
+        "Re-run outdated v0.4.6 samples through v0.4.7"
+      ],
+      "repair": [
+        "Assign a confirmed owner to Verity Benchmark v1",
+        "Resolve the historical feature-expansion recommendation"
+      ],
+      "act": [
+        "Build Benchmark v1 validation set",
+        "Calibrate v1.0 scoring thresholds"
+      ]
+    }
+  },
+  "mutationPlan": {
+    "defaultMode": "read_only",
+    "allowedWithHumanConfirmation": [
+      {
+        "target": "datahub",
+        "operation": "assign_owner",
+        "entityId": "external-asset-benchmark",
+        "auditEventType": "context_repair",
+        "demoRequired": true
+      },
+      {
+        "target": "nexus",
+        "operation": "confirm_decision",
+        "entityId": "decision-benchmark-first",
+        "auditEventType": "decision_confirmation",
+        "demoRequired": true
+      }
+    ]
+  }
+}

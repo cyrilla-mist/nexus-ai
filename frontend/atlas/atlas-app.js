@@ -14,7 +14,7 @@ const mapLayout = {
   "external-asset-rubric": { x: 175, y: 120, kind: "asset", label: "Evaluation Rubric", type: "DATA ASSET" },
   "external-asset-test-materials": { x: 175, y: 270, kind: "asset", label: "Test Materials", type: "DATA ASSET" },
   "external-asset-benchmark": { x: 425, y: 145, kind: "risk", label: "Benchmark v1", type: "MISSING OWNER" },
-  "external-asset-calibration-job": { x: 680, y: 145, kind: "asset", label: "Calibration Job", type: "DATA JOB" },
+  "external-asset-calibration-job": { x: 680, y: 145, kind: "asset", label: "Calibration Context", type: "CALIBRATION CONTEXT" },
   "external-asset-results-v047": { x: 680, y: 300, kind: "asset", label: "Results v0.4.7", type: "EVIDENCE" },
   "decision-benchmark-first": { x: 425, y: 455, kind: "decision", label: "Benchmark-first", type: "DECISION" },
   "task-rebuild-benchmark-set": { x: 680, y: 470, kind: "action", label: "Build validation set", type: "ACTION" },

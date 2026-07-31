@@ -177,7 +177,7 @@ What should happen next?
 - Asset: Verity Benchmark v1.
 - URN, Domain, version, quality status.
 - Upstream: Evaluation Rubric, Test Materials.
-- Downstream: Calibration Job, Release Readiness Evidence.
+- Downstream: Calibration Context, Release Readiness Evidence.
 - Owner: Unassigned.
 - Rule: `MO-01`.
 - Impact: calibration and release readiness remain blocked.

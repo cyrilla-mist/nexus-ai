@@ -26,7 +26,7 @@ Verity Evaluation Rubric
 Verity Benchmark v1 ◄──── Verity Test Materials
         │ used by
         ▼
-Verity Scoring Calibration Job
+Verity Scoring Calibration Context
         │ produces
         ▼
 Evaluation Results v0.4.7
@@ -42,7 +42,7 @@ Verity Release Readiness Evidence
 | `external-asset-rubric` | Dataset | `urn:li:dataset:(urn:li:dataPlatform:nexus,verity_evaluation_rubric,PROD)` | Product | Draft validated / current | Defines what the benchmark must measure |
 | `external-asset-test-materials` | Dataset | `urn:li:dataset:(urn:li:dataPlatform:nexus,verity_test_materials,PROD)` | Product | Curated / current | Provides representative inputs |
 | `external-asset-benchmark` | Dataset | `urn:li:dataset:(urn:li:dataPlatform:nexus,verity_benchmark_v1,PROD)` | **Missing at re-entry** | Unverified / current | Triggers the Missing Ownership signal |
-| `external-asset-calibration-job` | DataJob | `urn:li:dataJob:(urn:li:dataFlow:(nexus,verity_evaluation,PROD),scoring_calibration)` | Engineering | Operational / current | Connects benchmark to generated results |
+| `external-asset-calibration-job` | DataJob | `urn:li:dataset:(urn:li:dataPlatform:nexus,verity_scoring_calibration,PROD)` | Engineering | Operational / current | Connects benchmark to generated results |
 | `external-asset-results-v047` | Dataset | `urn:li:dataset:(urn:li:dataPlatform:nexus,verity_evaluation_results_v047,PROD)` | Engineering | Partially validated / current | Current evidence after guardrail release |
 | `external-asset-release-evidence` | Dataset | `urn:li:dataset:(urn:li:dataPlatform:nexus,verity_release_readiness_evidence,PROD)` | Product | Blocked / incomplete | Shows downstream impact of incomplete benchmark |
 

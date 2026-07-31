@@ -56,9 +56,9 @@ ASSETS = (
     {
         "id": "external-asset-calibration-job",
         "name": "verity_scoring_calibration",
-        "title": "Verity Scoring Calibration",
-        "description": "Runtime context asset representing the calibration process that compares expected findings with generated results.",
-        "logicalType": "calibration-process",
+        "title": "Verity Scoring Calibration Context",
+        "description": "Governed calibration context linking expected findings, generated scores, and report judgments.",
+        "logicalType": "calibration-context",
         "version": "0.4.7",
         "qualityStatus": "operational",
         "freshness": "current",

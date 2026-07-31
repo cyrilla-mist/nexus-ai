@@ -42,8 +42,8 @@ export const VERITY_ASSETS = Object.freeze([
   Object.freeze({
     entityId: "external-asset-calibration-job",
     name: "verity_scoring_calibration",
-    title: "Verity Scoring Calibration",
-    logicalType: "calibration-process",
+    title: "Verity Scoring Calibration Context",
+    logicalType: "calibration-context",
     urn: datasetUrn("verity_scoring_calibration"),
     version: "0.4.7",
     qualityStatus: "operational",
