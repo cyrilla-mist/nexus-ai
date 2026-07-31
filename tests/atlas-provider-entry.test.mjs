@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import test from "node:test";
 
 const html = await readFile(new URL("../atlas.html", import.meta.url), "utf8");
@@ -17,6 +17,17 @@ test("Atlas loads one normal JavaScript module", () => {
   assert.doesNotMatch(html, /frontend\/atlas\/atlas\.js/);
   assert.doesNotMatch(app, /URL\.createObjectURL|new Blob\(/);
   assert.doesNotMatch(app, /atlas\.part-0[0-2]\.js/);
+});
+
+test("legacy Atlas Blob sources are removed from the repository", async () => {
+  for (const relativePath of [
+    "../frontend/atlas/atlas.js",
+    "../frontend/atlas/source/atlas.part-00.js",
+    "../frontend/atlas/source/atlas.part-01.js",
+    "../frontend/atlas/source/atlas.part-02.js",
+  ]) {
+    await assert.rejects(access(new URL(relativePath, import.meta.url)));
+  }
 });
 
 test("Atlas and Re-entry share the Continuity Provider contract", () => {
