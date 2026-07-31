@@ -3,10 +3,13 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 
 import { createVerityOwnershipClient } from "./ownership-mcp-client.mjs";
+import { createOwnershipProposalRegistry } from "./ownership-proposal-registry.mjs";
+import { readVerityAssetSnapshot } from "./verity-asset-reader.mjs";
 import {
   buildOwnershipProposal,
   repairVerityBenchmarkOwnership,
 } from "./verity-ownership-repair.mjs";
+import { VERITY_BENCHMARK_ASSET } from "./asset-registry.mjs";
 
 const DEFAULT_HOST = "127.0.0.1";
 const DEFAULT_PORT = 8791;
@@ -38,10 +41,17 @@ function publicError(error) {
   const safe = {
     ORIGIN_NOT_ALLOWED: "The request origin is not allowed.",
     METHOD_NOT_ALLOWED: "Only GET, POST, and OPTIONS are allowed.",
+    NOT_FOUND: "The requested bridge route does not exist.",
     OWNER_NOT_CONFIGURED: "The proposed DataHub owner is not configured.",
     INVALID_REQUEST_BODY: "The ownership repair request is invalid.",
     CONFIRMATION_REQUIRED: "Explicit human confirmation is required.",
     MUTATION_TARGET_MISMATCH: "The requested mutation target is not allow-listed.",
+    OWNERSHIP_PROPOSAL_NOT_AVAILABLE:
+      "The ownership proposal is missing, expired, or already used.",
+    OWNERSHIP_PROPOSAL_REPLAYED:
+      "The ownership proposal is already being processed or has been used.",
+    OWNERSHIP_PROPOSAL_MISMATCH:
+      "The ownership proposal no longer matches the confirmed target.",
     ADD_OWNERS_TOOL_MISSING: "The DataHub add_owners tool is unavailable.",
     OWNERSHIP_REPAIR_NOT_VERIFIED: "The DataHub owner write could not be verified.",
     OWNERSHIP_SIGNAL_NOT_CLOSED: "The ownership signal remains open after verification.",
@@ -80,6 +90,21 @@ async function readJsonBody(request) {
   }
 }
 
+function ownerConfigurationError() {
+  const error = new Error("Owner is not configured.");
+  error.code = "OWNER_NOT_CONFIGURED";
+  return error;
+}
+
+function benchmarkOwners(snapshot) {
+  const benchmark = snapshot?.scenario?.entities?.find(
+    (entity) => entity.id === VERITY_BENCHMARK_ASSET.entityId,
+  );
+  return Array.isArray(benchmark?.metadata?.owners)
+    ? benchmark.metadata.owners
+    : [];
+}
+
 export function createVerityOwnershipBridge(options = {}) {
   const host =
     options.host || process.env.NEXUS_VERITY_MUTATION_HOST || DEFAULT_HOST;
@@ -98,6 +123,18 @@ export function createVerityOwnershipBridge(options = {}) {
     options.ownerUrn || process.env.NEXUS_VERITY_OWNER_URN || "";
   const mutationClient =
     options.mutationClient || createVerityOwnershipClient(options.clientOptions);
+  const readSnapshot =
+    options.readSnapshot ||
+    ((readOptions) => readVerityAssetSnapshot(readOptions));
+  const proposalRegistry =
+    options.proposalRegistry ||
+    createOwnershipProposalRegistry({
+      ttlMs:
+        options.proposalTtlMs ||
+        process.env.NEXUS_VERITY_PROPOSAL_TTL_MS,
+      now: options.now,
+      idFactory: options.idFactory,
+    });
   const repairOwnership =
     options.repairOwnership ||
     ((repairOptions) =>
@@ -106,13 +143,45 @@ export function createVerityOwnershipBridge(options = {}) {
         ...repairOptions,
       }));
 
-  function proposal() {
-    if (!ownerUrn) {
-      const error = new Error("Owner is not configured.");
-      error.code = "OWNER_NOT_CONFIGURED";
+  function targetProposal() {
+    if (!ownerUrn) throw ownerConfigurationError();
+    return buildOwnershipProposal(ownerUrn);
+  }
+
+  async function issueProposal() {
+    if (!ownerUrn) throw ownerConfigurationError();
+    const snapshot = await readSnapshot(options.readOptions || {});
+    const baseProposal = buildOwnershipProposal(ownerUrn, {
+      existingOwners: benchmarkOwners(snapshot),
+    });
+    return proposalRegistry.issue(baseProposal);
+  }
+
+  async function applyProposal(body) {
+    const proposal = proposalRegistry.consume({
+      proposalId: body.proposalId,
+      operation: body.operation,
+      entityId: body.entityId,
+      targetUrn: body.targetUrn,
+    });
+
+    try {
+      const result = await repairOwnership({
+        ownerUrn,
+        proposal,
+        confirmed: body.confirmed === true,
+        operation: body.operation,
+        entityId: body.entityId,
+        targetUrn: body.targetUrn,
+        readSnapshot,
+        readOptions: options.readOptions || {},
+      });
+      proposalRegistry.complete(proposal.proposalId);
+      return result;
+    } catch (error) {
+      proposalRegistry.fail(proposal.proposalId);
       throw error;
     }
-    return buildOwnershipProposal(ownerUrn);
   }
 
   async function handler(request, response) {
@@ -140,9 +209,10 @@ export function createVerityOwnershipBridge(options = {}) {
             status: "ok",
             service: "nexus-verity-ownership-bridge",
             mutationEnabled: true,
-            targetAllowList: [proposal().targetUrn],
+            targetAllowList: [targetProposal().targetUrn],
             tool: "add_owners",
             availableTools: status.toolNames,
+            proposalTtlControlled: true,
           },
           origin,
           allowedOrigins,
@@ -166,7 +236,7 @@ export function createVerityOwnershipBridge(options = {}) {
           {
             source: "datahub-mcp",
             mutationEnabled: true,
-            proposal: proposal(),
+            proposal: await issueProposal(),
           },
           origin,
           allowedOrigins,
@@ -184,13 +254,7 @@ export function createVerityOwnershipBridge(options = {}) {
 
     try {
       const body = await readJsonBody(request);
-      const result = await repairOwnership({
-        ownerUrn,
-        confirmed: body.confirmed === true,
-        operation: body.operation,
-        entityId: body.entityId,
-        targetUrn: body.targetUrn,
-      });
+      const result = await applyProposal(body);
       sendJson(response, 200, result, origin, allowedOrigins);
     } catch (error) {
       sendJson(response, 409, publicError(error), origin, allowedOrigins);
@@ -203,7 +267,9 @@ export function createVerityOwnershipBridge(options = {}) {
     port,
     route: ROUTE,
     handler,
-    proposal,
+    proposal: issueProposal,
+    applyProposal,
+    proposalRegistry,
     async start() {
       await new Promise((resolve, reject) => {
         server.once("error", reject);
@@ -232,6 +298,7 @@ async function main() {
     console.log(`Listening: http://${bridge.host}:${bridge.port}${bridge.route}`);
     console.log("Tool allow-list: add_owners");
     console.log("Target allow-list: Verity Benchmark v1");
+    console.log("Proposal contract: fresh, expiring, one-time");
     const stop = async () => {
       await bridge.close();
       process.exit(0);
