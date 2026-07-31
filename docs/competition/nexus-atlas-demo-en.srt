@@ -1,0 +1,126 @@
+1
+00:00:00,000 --> 00:00:04,000
+Returning to a project can be difficult.
+
+2
+00:00:04,000 --> 00:00:09,500
+The files are still there,
+but the context is lost.
+
+3
+00:00:09,500 --> 00:00:16,000
+We may forget what changed,
+why a decision was made, and what to do next.
+
+4
+00:00:16,000 --> 00:00:20,000
+This is Nexus Atlas.
+
+5
+00:00:20,000 --> 00:00:27,000
+It helps people keep the context
+of long-term work.
+
+6
+00:00:27,000 --> 00:00:34,000
+It connects project history, knowledge,
+decisions, actions, and trusted data.
+
+7
+00:00:34,000 --> 00:00:39,000
+Nexus does not start
+with an empty chat.
+
+8
+00:00:39,000 --> 00:00:43,000
+It starts with Atlas Desk.
+
+9
+00:00:43,000 --> 00:00:51,000
+Here, Nexus finds Verity,
+a project inactive for twenty-one days.
+
+10
+00:00:51,000 --> 00:00:55,000
+The project now needs re-entry.
+
+11
+00:00:55,000 --> 00:01:02,000
+Atlas Map shows the most important path
+for the current task.
+
+12
+00:01:02,000 --> 00:01:12,000
+For Verity, it connects the evaluation rules,
+Benchmark v1, calibration, results, and release evidence.
+
+13
+00:01:12,000 --> 00:01:16,500
+It only shows the context
+that matters now.
+
+14
+00:01:16,500 --> 00:01:23,000
+Nexus restores four important changes
+and four valid decisions.
+
+15
+00:01:23,000 --> 00:01:31,500
+It also finds two old evidence records,
+one agent conflict, and one missing owner.
+
+16
+00:01:31,500 --> 00:01:39,000
+Nexus shows what can still be trusted,
+and what must be checked or repaired.
+
+17
+00:01:39,000 --> 00:01:44,000
+One agent recommends more features.
+
+18
+00:01:44,000 --> 00:01:49,000
+Another recommends better evaluation quality.
+
+19
+00:01:49,000 --> 00:01:54,000
+Nexus keeps both suggestions.
+
+20
+00:01:54,000 --> 00:01:59,000
+The user confirms
+the Benchmark-first direction.
+
+21
+00:01:59,000 --> 00:02:05,500
+DataHub shows that Benchmark v1
+has no owner.
+
+22
+00:02:05,500 --> 00:02:13,500
+Nexus shows the exact asset,
+the current value, and the proposed owner.
+
+23
+00:02:13,500 --> 00:02:21,500
+After the user confirms,
+Nexus updates DataHub and reads it again.
+
+24
+00:02:21,500 --> 00:02:28,500
+The issue is closed only after
+the new owner is verified.
+
+25
+00:02:28,500 --> 00:02:32,000
+The project can now continue.
+
+26
+00:02:32,000 --> 00:02:41,000
+The next steps are to build the test set,
+run older samples, and adjust the scoring rules.
+
+27
+00:02:41,000 --> 00:02:50,000
+Nexus turns project history into a clear path
+from context, to decision, to action, and memory.
