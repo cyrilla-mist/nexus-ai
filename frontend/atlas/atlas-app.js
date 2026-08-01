@@ -10,15 +10,22 @@ const TERRITORIES = [
 ];
 
 const mapLayout = {
-  "project-verity": { x: 430, y: 295, kind: "project", label: "衡准 · Verity", type: "PROJECT" },
-  "external-asset-rubric": { x: 175, y: 120, kind: "asset", label: "Evaluation Rubric", type: "DATA ASSET" },
-  "external-asset-test-materials": { x: 175, y: 270, kind: "asset", label: "Test Materials", type: "DATA ASSET" },
-  "external-asset-benchmark": { x: 425, y: 145, kind: "risk", label: "Benchmark v1", type: "MISSING OWNER" },
-  "external-asset-calibration-job": { x: 680, y: 145, kind: "asset", label: "Calibration Context", type: "CALIBRATION CONTEXT" },
-  "external-asset-results-v047": { x: 680, y: 300, kind: "asset", label: "Results v0.4.7", type: "EVIDENCE" },
-  "decision-benchmark-first": { x: 425, y: 455, kind: "decision", label: "Benchmark-first", type: "DECISION" },
-  "task-rebuild-benchmark-set": { x: 680, y: 470, kind: "action", label: "Build validation set", type: "ACTION" },
+  "project-verity": { x: 430, y: 235, kind: "project", label: "衡准 · Verity", type: "PROJECT 01", meta: "Benchmark validation", zone: "governance" },
+  "external-asset-rubric": { x: 145, y: 120, kind: "asset", label: "Evaluation Rubric", type: "DATA ASSET", meta: "Governance rubric", zone: "governance" },
+  "external-asset-test-materials": { x: 145, y: 235, kind: "asset", label: "Test Materials", type: "DATA ASSET", meta: "Evaluation inputs", zone: "governance" },
+  "external-asset-benchmark": { x: 430, y: 105, kind: "risk", label: "Benchmark v1", type: "RISK / MISSING OWNER", meta: "Ownership gap", zone: "governance" },
+  "external-asset-calibration-job": { x: 710, y: 120, kind: "calibration", label: "Calibration Context", type: "CALIBRATION CONTEXT", meta: "Scoring context", zone: "evidence" },
+  "external-asset-results-v047": { x: 710, y: 245, kind: "evidence", label: "Results v0.4.7", type: "EVIDENCE", meta: "Evaluation results", zone: "evidence" },
+  "decision-benchmark-first": { x: 430, y: 430, kind: "decision", label: "Benchmark-first", type: "DECISION", meta: "Confirmed route", zone: "decisions" },
+  "task-rebuild-benchmark-set": { x: 710, y: 430, kind: "action", label: "Build validation set", type: "ACTION", meta: "Next execution", zone: "actions" },
 };
+
+const MAP_ZONES = [
+  { label: "GOVERNANCE", x: 24, y: 34, width: 570, height: 275 },
+  { label: "EVIDENCE", x: 614, y: 34, width: 222, height: 275 },
+  { label: "DECISIONS", x: 24, y: 335, width: 570, height: 235 },
+  { label: "ACTIONS", x: 614, y: 335, width: 222, height: 235 },
+];
 
 const state = {
   route: getRouteFromLocation(),
@@ -26,7 +33,7 @@ const state = {
   sourceInfo: null,
   selectedTerritory: "innovation",
   selectedEntityId: "project-verity",
-  inspectorOpen: true,
+  inspectorOpen: false,
 };
 
 const main = document.querySelector("#atlas-main");
@@ -35,7 +42,23 @@ const sourceSummary = document.querySelector("#atlas-source-summary");
 const activeRouteLabel = document.querySelector("#active-route-label");
 const inspector = document.querySelector("#context-inspector");
 const inspectorContent = document.querySelector("#inspector-content");
+const inspectorTitle = document.querySelector("#inspector-title");
+const trayActions = document.querySelector("#tray-actions");
+const trayCurrentView = document.querySelector("#tray-current-view");
 const announcement = document.querySelector("#atlas-announcement");
+
+const VIEW_LABELS = Object.freeze({
+  desk: "Desk",
+  map: "Map",
+  territory: "Workspace",
+  reentry: "Re-entry",
+});
+
+const VIEW_MODES = Object.freeze({
+  desk: "Overview",
+  map: "Relations",
+  territory: "Decisions",
+});
 
 function getRouteFromLocation() {
   const route = window.location.hash.replace("#", "");
@@ -142,6 +165,20 @@ function renderTerritoryNavigation() {
   ).join("");
 }
 
+function currentTerritoryLabel() {
+  return TERRITORIES.find((territory) => territory.id === state.selectedTerritory)?.label || "Innovation";
+}
+
+function renderContextPath() {
+  return `
+    <nav class="atlas-context-path" aria-label="Current context path">
+      <span>Nexus Atlas</span><b>/</b>
+      <span>${escapeHtml(currentTerritoryLabel())}</span><b>/</b>
+      <span>Verity</span><b>/</b>
+      <strong>${escapeHtml(VIEW_LABELS[state.route])}</strong>
+    </nav>`;
+}
+
 function renderViewHeading(eyebrow, title, description, stamp) {
   return `
     <header class="view-heading">
@@ -150,7 +187,10 @@ function renderViewHeading(eyebrow, title, description, stamp) {
         <h1>${escapeHtml(title)}</h1>
         <p>${escapeHtml(description)}</p>
       </div>
-      <span class="route-stamp">${escapeHtml(stamp)}</span>
+      <div class="view-heading-tools">
+        <button type="button" class="inspector-open-control" data-open-inspector${state.inspectorOpen ? " hidden" : ""}>Open inspector</button>
+        <span class="route-stamp">${escapeHtml(stamp)}</span>
+      </div>
     </header>`;
 }
 
@@ -224,35 +264,72 @@ function relationForMap(from, to) {
   );
 }
 
+function mapSelectionState(id) {
+  if (!state.selectedEntityId) return "";
+  if (id === state.selectedEntityId) return " is-selected";
+  if (state.selectedEntityId === "project-verity") return " is-related";
+  const related = relatedRecords(state.selectedEntityId).some((item) => item.id === id);
+  return related ? " is-related" : " is-dimmed";
+}
+
 function mapEdge(fromId, toId, risk = false) {
-  const from = mapLayout[fromId];
-  const to = mapLayout[toId];
   const relation = relationForMap(fromId, toId);
-  if (!from || !to || !relation) return "";
-  const middleX = (from.x + to.x) / 2;
-  const middleY = (from.y + to.y) / 2;
+  if (!relation) return "";
+  const from = mapLayout[relation.from];
+  const to = mapLayout[relation.to];
+  if (!from || !to) return "";
+  const selected = state.selectedEntityId && (relation.from === state.selectedEntityId || relation.to === state.selectedEntityId);
+  const controlX = (from.x + to.x) / 2 + (to.y - from.y) * 0.14;
+  const controlY = (from.y + to.y) / 2 - (to.x - from.x) * 0.08;
+  const labelX = (from.x + 2 * controlX + to.x) / 4;
+  const labelY = (from.y + 2 * controlY + to.y) / 4 - 8;
+  const dimmed = state.selectedEntityId && state.selectedEntityId !== "project-verity";
   return `
-    <line class="map-route ${risk ? "is-risk" : ""}" x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" />
-    <text class="map-route-label" x="${middleX}" y="${middleY - 7}" text-anchor="middle">${escapeHtml(relation.type)}</text>`;
+    <path class="map-route${risk ? " is-risk" : ""}${selected ? " is-selected" : dimmed ? " is-dimmed" : ""}" d="M ${from.x} ${from.y} Q ${controlX} ${controlY} ${to.x} ${to.y}" marker-end="url(#${risk ? "map-arrow-risk" : selected ? "map-arrow-selected" : "map-arrow"})" />
+    <g class="map-route-label" transform="translate(${labelX} ${labelY})"><rect x="-30" y="-9" width="60" height="16" rx="2" /><text x="0" y="2" text-anchor="middle">${escapeHtml(relation.type)}</text></g>`;
 }
 
 function mapNode(id) {
   const item = mapLayout[id];
   if (!item) return "";
+  const selection = mapSelectionState(id);
   if (item.kind === "project") {
     return `
-      <g class="map-node is-project" role="button" tabindex="0" data-map-node="${id}" aria-label="Inspect ${escapeHtml(item.label)}">
-        <circle cx="${item.x}" cy="${item.y}" r="72" />
-        <text x="${item.x}" y="${item.y - 4}" text-anchor="middle">${escapeHtml(item.label)}</text>
-        <text class="map-node-type" x="${item.x}" y="${item.y + 16}" text-anchor="middle">${item.type}</text>
+      <g class="map-node is-project map-project-landmark${selection}" role="button" tabindex="0" data-map-node="${id}" aria-label="Inspect project ${escapeHtml(item.label)}">
+        <rect class="map-landmark-frame" x="${item.x - 112}" y="${item.y - 48}" width="224" height="96" rx="2" />
+        <text class="map-landmark-kicker" x="${item.x - 92}" y="${item.y - 26}">${item.type}</text>
+        <text class="map-landmark-title" x="${item.x - 92}" y="${item.y + 2}">${escapeHtml(item.label)}</text>
+        <text class="map-landmark-meta" x="${item.x - 92}" y="${item.y + 25}">${escapeHtml(item.meta)}</text>
       </g>`;
   }
   return `
-    <g class="map-node ${item.kind === "risk" ? "is-risk" : ""}" role="button" tabindex="0" data-map-node="${id}" aria-label="Inspect ${escapeHtml(item.label)}">
-      <rect x="${item.x - 76}" y="${item.y - 31}" width="152" height="62" rx="2" />
-      <text x="${item.x}" y="${item.y - 3}" text-anchor="middle">${escapeHtml(item.label)}</text>
-      <text class="map-node-type" x="${item.x}" y="${item.y + 15}" text-anchor="middle">${item.type}</text>
+    <g class="map-node is-${item.kind}${selection}" role="button" tabindex="0" data-map-node="${id}" aria-label="Inspect ${escapeHtml(item.type)} ${escapeHtml(item.label)}">
+      <rect class="map-node-frame" x="${item.x - 78}" y="${item.y - 34}" width="156" height="68" rx="2" />
+      <text class="map-node-type" x="${item.x - 64}" y="${item.y - 15}">${item.type}</text>
+      <text class="map-node-title" x="${item.x - 64}" y="${item.y + 7}">${escapeHtml(item.label)}</text>
+      <text class="map-node-meta" x="${item.x - 64}" y="${item.y + 23}">${escapeHtml(item.meta)}</text>
     </g>`;
+}
+
+function renderMapZone(zone) {
+  return `<g class="map-zone"><rect x="${zone.x}" y="${zone.y}" width="${zone.width}" height="${zone.height}" rx="3" /><text x="${zone.x + 14}" y="${zone.y + 20}">${zone.label}</text></g>`;
+}
+
+function renderMapLegend() {
+  return `
+    <div class="map-tools">
+      <div class="map-legend" aria-label="Map legend">
+        <span><i class="legend-mark legend-project"></i>Project</span>
+        <span><i class="legend-mark legend-asset"></i>Asset / Evidence</span>
+        <span><i class="legend-mark legend-decision"></i>Decision</span>
+        <span><i class="legend-mark legend-action"></i>Action</span>
+        <span><i class="legend-mark legend-risk"></i>Risk</span>
+      </div>
+      <div class="map-controls">
+        <button type="button" data-map-action="fit">Fit map</button>
+        <button type="button" data-map-action="reset">Reset selection</button>
+      </div>
+    </div>`;
 }
 
 function renderMap() {
@@ -263,10 +340,17 @@ function renderMap() {
       "A context route built from stored relations. Every line below corresponds to a real relationship in the Verity scenario.",
       "MAP / PROJECT-VERITY",
     )}
+    ${renderMapLegend()}
     <section class="map-stage" aria-label="Verity project context map">
       <svg viewBox="0 0 860 600" role="img" aria-labelledby="map-title map-description">
         <title id="map-title">Verity context map</title>
         <desc id="map-description">Project, data assets, decisions, evidence, and actions connected through stored relationships.</desc>
+        <defs>
+          <marker id="map-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" /></marker>
+          <marker id="map-arrow-selected" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" /></marker>
+          <marker id="map-arrow-risk" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" /></marker>
+        </defs>
+        ${MAP_ZONES.map(renderMapZone).join("")}
         ${mapEdge("external-asset-rubric", "external-asset-benchmark")}
         ${mapEdge("external-asset-test-materials", "external-asset-benchmark")}
         ${mapEdge("external-asset-benchmark", "external-asset-calibration-job", true)}
@@ -281,7 +365,7 @@ function renderRouteList() {
   return meaningfulChanges()
     .map(
       (event) => `
-        <li>
+        <li tabindex="0" role="button" data-inspect-entity="${escapeHtml(event.id)}" aria-label="Inspect ${escapeHtml(event.title)}">
           <time>${formatDate(event.createdAt)}</time>
           <strong>${escapeHtml(event.title)}</strong>
           <em>${escapeHtml(event.metadata?.version || event.metadata?.priority || "ROUTE")}</em>
@@ -430,22 +514,38 @@ function renderReentry() {
     </div>`;
 }
 
-function renderInspector(entityId) {
+function renderInspector(entityId, open = true) {
   state.selectedEntityId = entityId;
+  state.inspectorOpen = open;
   const entity = entityById(entityId);
   const relations = relatedRecords(entityId);
+  const visibleRelations = state.route === "map" ? relations.slice(0, 6) : relations;
   const source = entity?.source;
-  state.inspectorOpen = true;
-  inspector.classList.remove("is-closed");
+  if (state.inspectorOpen) inspector.classList.remove("is-closed");
+  else inspector.classList.add("is-closed");
+  const openControl = main.querySelector("[data-open-inspector]");
+  if (openControl) openControl.hidden = state.inspectorOpen;
+  inspectorTitle.textContent = state.route === "map" ? "SELECTED CONTEXT" : "CONTEXT INSPECTOR";
 
   if (!entity) {
-    inspectorContent.innerHTML = `<p class="inspector-empty">The selected context record is unavailable.</p>`;
+    inspectorContent.innerHTML = `<p class="inspector-empty">${state.route === "map" ? "Select a node to inspect its context and relations" : "Select a project, decision, signal, or mapped asset to inspect its provenance."}</p>`;
     return;
   }
 
+  const typeLabels = {
+    project: "PROJECT",
+    external_asset: "DATA ASSET",
+    decision: "DECISION",
+    action: "ACTION",
+    task: "ACTION",
+    risk: "RISK",
+    event: "EVENT",
+  };
+  const entityType = typeLabels[entity.type] || String(entity.type || "context").replaceAll("_", " ").toUpperCase();
+
   inspectorContent.innerHTML = `
     <section class="inspector-panel">
-      <span class="inspector-kicker">${escapeHtml(entity.type || "project")}</span>
+      <span class="inspector-kicker">${escapeHtml(entityType)}</span>
       <h2>${escapeHtml(entity.title || entity.name)}</h2>
       <span class="inspector-status">${escapeHtml(formatStatus(entity.status))}</span>
       <p>${escapeHtml(entity.summary || entity.description)}</p>
@@ -458,7 +558,7 @@ function renderInspector(entityId) {
       ${relations.length ? `
         <span class="inspector-kicker">RELATIONSHIPS</span>
         <ul class="inspector-relations">
-          ${relations.map((item) => `<li><strong>${escapeHtml(item.relation)}</strong> · ${escapeHtml(item.title)}</li>`).join("")}
+          ${visibleRelations.map((item) => `<li><strong>${escapeHtml(item.relation)}</strong> · ${escapeHtml(item.title)}</li>`).join("")}
         </ul>` : ""}
       ${entity.metadata?.requiresConfirmation || entity.metadata?.signal === "missing-ownership" ? `
         <button class="confirm-action" type="button" data-prototype-confirm>Request human confirmation</button>
@@ -466,7 +566,40 @@ function renderInspector(entityId) {
     </section>`;
 }
 
+function renderActionTray() {
+  const selected = Boolean(entityById(state.selectedEntityId));
+  const selectionLabel = selected ? "" : " title=\"Select a context item first\" aria-disabled=\"true\" disabled";
+  const actions = {
+    desk: [
+      `<button type="button" data-atlas-route="territory">Resume Verity</button>`,
+      `<button type="button" data-open-signal="ownership">Review attention</button>`,
+      `<button type="button" data-atlas-route="map" class="tray-primary">Open map</button>`,
+    ],
+    map: [
+      `<button type="button" data-open-inspector${selectionLabel}>Inspect selected</button>`,
+      `<button type="button" data-inspect-entity="${escapeHtml(state.selectedEntityId || "project-verity")}"${selectionLabel}>View lineage</button>`,
+      `<button type="button" data-atlas-route="territory" class="tray-primary">Open workspace</button>`,
+    ],
+    territory: [
+      `<button type="button" data-atlas-route="reentry">Continue</button>`,
+      `<button type="button" data-open-signal="stale">Verify</button>`,
+      `<button type="button" data-open-signal="ownership">Repair</button>`,
+      `<button type="button" data-atlas-route="reentry" class="tray-primary">Act</button>`,
+    ],
+    reentry: [
+      `<button type="button" data-atlas-route="territory">Continue</button>`,
+      `<button type="button" data-open-signal="stale">Verify</button>`,
+      `<button type="button" data-open-signal="ownership">Repair</button>`,
+      `<button type="button" data-atlas-route="territory" class="tray-primary">Act</button>`,
+    ],
+  };
+  trayActions.innerHTML = actions[state.route].join("");
+  trayCurrentView.textContent = VIEW_LABELS[state.route].toUpperCase();
+}
+
 function renderRoute() {
+  document.body.className = `atlas-route route-${state.route}`;
+  state.inspectorOpen = state.route === "map";
   document.querySelectorAll("[data-atlas-route]").forEach((control) => {
     const current = control.dataset.atlasRoute === state.route;
     if (control.closest(".atlas-primary-nav")) {
@@ -475,21 +608,23 @@ function renderRoute() {
   });
 
   const labels = {
-    desk: "Atlas Desk",
-    map: "Atlas Map / Verity",
-    territory: "Innovation / Verity",
-    reentry: "Innovation Re-entry",
+    desk: "Desk",
+    map: "Map",
+    territory: "Workspace",
+    reentry: "Re-entry",
   };
-  activeRouteLabel.textContent = labels[state.route];
+  activeRouteLabel.innerHTML = `<span>${escapeHtml(currentTerritoryLabel())}</span><span>Verity</span><span>${escapeHtml(labels[state.route])}</span>`;
 
-  if (state.route === "map") main.innerHTML = renderMap();
-  else if (state.route === "territory") main.innerHTML = renderTerritory();
-  else if (state.route === "reentry") main.innerHTML = renderReentry();
-  else main.innerHTML = renderDesk();
+  if (state.route === "map") main.innerHTML = `${renderContextPath()}${renderMap()}`;
+  else if (state.route === "territory") main.innerHTML = `${renderContextPath()}${renderTerritory()}`;
+  else if (state.route === "reentry") main.innerHTML = `${renderContextPath()}${renderReentry()}`;
+  else main.innerHTML = `${renderContextPath()}${renderDesk()}`;
 
+  main.dataset.inspectorOpen = String(state.inspectorOpen);
   main.focus({ preventScroll: true });
   announcement.textContent = `${labels[state.route]} opened.`;
-  renderInspector(state.selectedEntityId);
+  renderInspector(state.selectedEntityId, state.inspectorOpen);
+  renderActionTray();
 }
 
 function navigate(route) {
@@ -507,6 +642,13 @@ function inspectSignal(signal) {
     ownership: "risk-benchmark-missing-owner",
   };
   renderInspector(targets[signal] || "project-verity");
+}
+
+function selectEntity(entityId) {
+  state.selectedEntityId = entityId;
+  state.inspectorOpen = true;
+  if (state.route === "map") renderRoute();
+  else renderInspector(entityId, true);
 }
 
 document.addEventListener("click", (event) => {
@@ -535,15 +677,41 @@ document.addEventListener("click", (event) => {
     return;
   }
 
+  if (event.target.closest("[data-open-inspector]")) {
+    main.dataset.inspectorOpen = "true";
+    inspector.classList.remove("is-closed");
+    renderInspector(state.selectedEntityId, true);
+    return;
+  }
+
   const entityControl = event.target.closest("[data-inspect-entity], [data-map-node]");
   if (entityControl) {
-    renderInspector(entityControl.dataset.inspectEntity || entityControl.dataset.mapNode);
+    selectEntity(entityControl.dataset.inspectEntity || entityControl.dataset.mapNode);
+    return;
+  }
+
+  const mapAction = event.target.closest("[data-map-action]");
+  if (mapAction) {
+    if (mapAction.dataset.mapAction === "reset") {
+      state.selectedEntityId = null;
+      state.inspectorOpen = true;
+      renderRoute();
+    } else {
+      const mapStage = document.querySelector(".map-stage");
+      if (mapStage) {
+        mapStage.scrollLeft = 0;
+        mapStage.scrollTop = 0;
+      }
+    }
     return;
   }
 
   if (event.target.closest("[data-close-inspector]")) {
     state.inspectorOpen = false;
     inspector.classList.add("is-closed");
+    main.dataset.inspectorOpen = "false";
+    const openControl = main.querySelector("[data-open-inspector]");
+    if (openControl) openControl.hidden = false;
     return;
   }
 
@@ -556,10 +724,22 @@ document.addEventListener("click", (event) => {
 });
 
 document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && state.route === "map" && state.selectedEntityId) {
+    event.preventDefault();
+    state.selectedEntityId = null;
+    state.inspectorOpen = true;
+    renderRoute();
+    return;
+  }
   const mapNodeControl = event.target.closest?.("[data-map-node]");
   if (mapNodeControl && ["Enter", " "].includes(event.key)) {
     event.preventDefault();
-    renderInspector(mapNodeControl.dataset.mapNode);
+    selectEntity(mapNodeControl.dataset.mapNode);
+  }
+  const inspectControl = event.target.closest?.("[data-inspect-entity]");
+  if (inspectControl && ["Enter", " "].includes(event.key)) {
+    event.preventDefault();
+    selectEntity(inspectControl.dataset.inspectEntity);
   }
 });
 
@@ -572,12 +752,12 @@ try {
   state.scenario = await loadScenario();
   const sourceLabel = state.sourceInfo?.label || "Context source";
   const sourceMode = state.sourceInfo?.live ? "live" : "fixture";
-  sourceSummary.textContent = `${sourceLabel} · ${sourceMode} · ${projectSources().length} sources · scenario v${state.scenario.scenarioVersion}`;
+  sourceSummary.innerHTML = `<span class="source-primary"><span class="source-name">${escapeHtml(sourceLabel)}</span><span class="source-state">${escapeHtml(sourceMode.toUpperCase())}</span></span><span class="source-detail">${projectSources().length} sources · scenario v${escapeHtml(state.scenario.scenarioVersion)}</span>`;
   renderTerritoryNavigation();
   renderRoute();
 } catch (error) {
   console.error(error);
-  sourceSummary.textContent = "Context unavailable";
+  sourceSummary.innerHTML = `<span class="source-primary"><span class="source-name">Context source</span><span class="source-state">UNAVAILABLE</span></span><span class="source-detail">Context unavailable</span>`;
   main.innerHTML = `
     ${renderViewHeading(
       "SOURCE ERROR",

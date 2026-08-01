@@ -21,33 +21,43 @@
 
     <header class="atlas-masthead">
       <a class="atlas-wordmark" href="#desk" data-atlas-route="desk" aria-label="Open Atlas Desk">
-        <span class="atlas-mark" aria-hidden="true">N</span>
-        <span><strong>NEXUS</strong><small>ATLAS</small></span>
+        <span class="atlas-wordmark-rule" aria-hidden="true"></span>
+        <span class="atlas-wordmark-type"><strong>NEXUS</strong><small>ATLAS</small></span>
       </a>
 
       <nav class="atlas-primary-nav" aria-label="Nexus Atlas">
-        <button type="button" data-atlas-route="desk" aria-current="page">Desk</button>
-        <button type="button" data-atlas-route="map">Map</button>
-        <button type="button" data-atlas-route="territory">Workspace</button>
+        <button type="button" data-atlas-route="desk" aria-current="page">
+          <span>Desk</span><small>Overview</small>
+        </button>
+        <button type="button" data-atlas-route="map">
+          <span>Map</span><small>Relations</small>
+        </button>
+        <button type="button" data-atlas-route="territory">
+          <span>Workspace</span><small>Decisions</small>
+        </button>
       </nav>
 
       <div class="atlas-source-health" aria-label="Context source health">
-        <span class="source-pulse" aria-hidden="true"></span>
-        <div><small>CONTEXT SOURCES</small><strong id="atlas-source-summary">Loading…</strong></div>
+        <div>
+          <small>CONTEXT SOURCES</small>
+          <strong id="atlas-source-summary">
+            <span class="source-primary"><span class="source-name">Opening source…</span><span class="source-state">LOADING</span></span>
+            <span class="source-detail">Waiting for source</span>
+          </strong>
+        </div>
       </div>
     </header>
 
     <div class="atlas-shell">
       <aside class="territory-index" aria-label="Territory index">
         <header>
-          <p>ATLAS INDEX</p>
-          <span>05 territories</span>
+          <div><p>TERRITORIES</p><span>Five views of one Context Graph</span></div>
+          <span>05</span>
         </header>
         <nav id="territory-navigation"></nav>
         <section class="index-note">
-          <span>ACTIVE ROUTE</span>
-          <strong id="active-route-label">Atlas Desk</strong>
-          <p>One Context Graph, viewed through different working territories.</p>
+          <span>YOU ARE HERE</span>
+          <strong id="active-route-label">Innovation / Verity / Desk</strong>
         </section>
       </aside>
 
@@ -57,7 +67,7 @@
 
       <aside id="context-inspector" class="context-inspector" aria-label="Context Inspector">
         <header>
-          <p>CONTEXT INSPECTOR</p>
+          <p id="inspector-title">CONTEXT INSPECTOR</p>
           <button type="button" data-close-inspector aria-label="Close inspector">×</button>
         </header>
         <div id="inspector-content">
@@ -67,13 +77,8 @@
     </div>
 
     <footer id="atlas-action-tray" class="atlas-action-tray" aria-label="Action tray">
-      <span class="tray-label">CURRENT ROUTE</span>
-      <div id="tray-actions" class="tray-actions">
-        <button type="button" data-atlas-route="territory">Continue</button>
-        <button type="button" data-open-signal="stale">Verify</button>
-        <button type="button" data-open-signal="ownership">Repair</button>
-        <button type="button" data-atlas-route="reentry" class="tray-primary">Act</button>
-      </div>
+      <span class="tray-label">NEXT ACTIONS · <strong id="tray-current-view">DESK</strong></span>
+      <div id="tray-actions" class="tray-actions"></div>
     </footer>
 
     <p id="atlas-announcement" class="visually-hidden" aria-live="polite"></p>
