@@ -400,7 +400,7 @@ function renderTerritory() {
         <p>Version ${escapeHtml(project.currentVersion)} · Re-entry required</p>
         <small>Review what changed before continuing.</small>
         <div class="inline-actions">
-          <button type="button" data-atlas-route="reentry">Restore context</button>
+          <button type="button" data-atlas-route="reentry">Open Re-entry brief</button>
         </div>
       </div>
     </section>
