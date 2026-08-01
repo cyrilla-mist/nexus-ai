@@ -1,72 +1,238 @@
 <!doctype html>
-<html lang="zh-CN" data-theme="light">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Nexus AI 静态产品 Demo：从项目理解到 Context Map 与 Star Map。"
+      content="Nexus Atlas — personal intelligence infrastructure for restoring context, tracing decisions, and continuing complex work."
     />
-    <title>Nexus AI · Demo Experience</title>
-    <link rel="stylesheet" href="./frontend/style.css" />
-    <link rel="stylesheet" href="./demo.css" />
+    <title>Nexus Atlas · Personal Intelligence Infrastructure</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        color: #26372f;
+        background: #ebe5d9;
+        font-family: "IBM Plex Sans", sans-serif;
+        font-synthesis: none;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        background: #ebe5d9;
+      }
+
+      body::before {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        opacity: 0.28;
+        background-image: linear-gradient(rgba(38, 55, 47, 0.035) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(38, 55, 47, 0.025) 1px, transparent 1px);
+        background-size: 38px 38px;
+        content: "";
+      }
+
+      a { color: inherit; }
+
+      .landing-shell {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        min-height: 100vh;
+        flex-direction: column;
+        width: min(1240px, calc(100% - 64px));
+        margin: 0 auto;
+      }
+
+      .landing-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 92px;
+        border-bottom: 1px solid rgba(38, 55, 47, 0.22);
+      }
+
+      .wordmark {
+        display: inline-flex;
+        align-items: stretch;
+        gap: 12px;
+        color: #26372f;
+        text-decoration: none;
+      }
+
+      .wordmark-rule { width: 3px; background: #51465d; }
+
+      .wordmark-type { display: grid; line-height: 0.88; }
+
+      .wordmark-type strong {
+        font: 500 1.45rem "Newsreader", serif;
+        letter-spacing: 0.04em;
+      }
+
+      .wordmark-type small {
+        margin-top: 7px;
+        font: 500 0.58rem "IBM Plex Mono", monospace;
+        letter-spacing: 0.34em;
+      }
+
+      .header-meta {
+        color: #65736a;
+        font: 500 0.67rem "IBM Plex Mono", monospace;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .landing-main {
+        display: grid;
+        flex: 1;
+        grid-template-columns: minmax(0, 1.25fr) minmax(240px, 0.75fr);
+        gap: clamp(48px, 10vw, 148px);
+        align-items: center;
+        padding: clamp(76px, 13vh, 150px) 0;
+      }
+
+      .eyebrow {
+        margin: 0 0 24px;
+        color: #51465d;
+        font: 500 0.7rem "IBM Plex Mono", monospace;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        max-width: 760px;
+        margin: 0;
+        font: 500 clamp(4.2rem, 10vw, 9rem)/0.82 "Newsreader", serif;
+        letter-spacing: -0.06em;
+      }
+
+      .landing-subtitle {
+        max-width: 540px;
+        margin: 34px 0 0;
+        color: #526158;
+        font: 400 clamp(1.25rem, 2.2vw, 1.8rem)/1.25 "IBM Plex Sans", sans-serif;
+      }
+
+      .landing-tagline {
+        max-width: 480px;
+        margin: 20px 0 0;
+        color: #68756c;
+        font: 400 1rem/1.7 "Newsreader", serif;
+      }
+
+      .enter-atlas {
+        display: inline-flex;
+        min-height: 48px;
+        align-items: center;
+        margin-top: 42px;
+        padding: 0 22px;
+        border: 1px solid #2f4839;
+        background: #2f4839;
+        color: #f7f4ec;
+        font: 500 0.76rem "IBM Plex Mono", monospace;
+        letter-spacing: 0.08em;
+        text-decoration: none;
+        text-transform: uppercase;
+      }
+
+      .enter-atlas:hover { background: #51465d; border-color: #51465d; }
+
+      .enter-atlas:focus-visible,
+      .wordmark:focus-visible {
+        outline: 2px solid #51465d;
+        outline-offset: 5px;
+      }
+
+      .landing-note {
+        max-width: 270px;
+        padding: 22px 0 22px 22px;
+        border-left: 1px solid rgba(81, 70, 93, 0.65);
+      }
+
+      .landing-note span {
+        display: block;
+        color: #51465d;
+        font: 500 0.65rem "IBM Plex Mono", monospace;
+        letter-spacing: 0.14em;
+      }
+
+      .landing-note p {
+        margin: 18px 0 0;
+        color: #526158;
+        font: 400 1.2rem/1.45 "Newsreader", serif;
+      }
+
+      .landing-footer {
+        display: flex;
+        justify-content: space-between;
+        padding: 22px 0 30px;
+        border-top: 1px solid rgba(38, 55, 47, 0.22);
+        color: #68756c;
+        font: 400 0.68rem "IBM Plex Mono", monospace;
+        letter-spacing: 0.05em;
+      }
+
+      @media (max-width: 700px) {
+        .landing-shell { width: min(100% - 32px, 1240px); }
+        .landing-header { min-height: 76px; }
+        .header-meta { max-width: 130px; text-align: right; }
+        .landing-main {
+          display: block;
+          padding: 78px 0 88px;
+        }
+        h1 { font-size: clamp(4rem, 19vw, 6.2rem); }
+        .landing-subtitle { margin-top: 30px; font-size: 1.3rem; }
+        .landing-note { max-width: none; margin-top: 76px; }
+        .landing-footer { flex-direction: column; gap: 10px; }
+      }
+
+      @media (max-width: 390px) {
+        .landing-shell { width: calc(100% - 28px); }
+        .wordmark-type strong { font-size: 1.2rem; }
+        .header-meta { font-size: 0.58rem; }
+        h1 { font-size: 3.85rem; }
+      }
+    </style>
   </head>
-  <body class="demo-body">
-    <header class="demo-nav" aria-label="Nexus Demo 导航">
-      <a class="demo-brand" href="#top" aria-label="返回 Nexus Demo 顶部">
-        <span class="demo-brand-mark" aria-hidden="true"></span>
-        <span>Nexus AI</span>
-      </a>
-      <div class="demo-nav-actions">
-        <span class="demo-status">Static Demo · No API</span>
-        <button id="demo-theme-toggle" class="theme-toggle" type="button">
-          切换至静谧深空
-        </button>
-      </div>
-    </header>
+  <body>
+    <div class="landing-shell">
+      <header class="landing-header" aria-label="Nexus Atlas header">
+        <a class="wordmark" href="./atlas.html" aria-label="Open Nexus Atlas">
+          <span class="wordmark-rule" aria-hidden="true"></span>
+          <span class="wordmark-type"><strong>NEXUS</strong><small>ATLAS</small></span>
+        </a>
+        <span class="header-meta">Personal intelligence infrastructure</span>
+      </header>
 
-    <main id="top" class="demo-shell">
-      <section class="demo-hero" aria-labelledby="demo-title">
-        <div class="demo-hero-copy">
-          <p class="eyebrow">Nexus AI · Demo Experience v0.1</p>
-          <h1 id="demo-title">Connect ideas,<br /><span>create possibilities.</span></h1>
-          <p>
-            Nexus 不是一次性回答问题的聊天窗口，而是把项目理解、关键决策、推进路径和成长记录连接起来的认知空间。
-          </p>
-          <div class="demo-hero-actions">
-            <a class="demo-primary-action" href="#project-space">探索项目空间</a>
-            <span>校园环保创新项目 · 静态案例</span>
-          </div>
-        </div>
+      <main class="landing-main">
+        <section aria-labelledby="landing-title">
+          <p class="eyebrow">Nexus Atlas · Context Graph</p>
+          <h1 id="landing-title">NEXUS<br />ATLAS</h1>
+          <p class="landing-subtitle">Personal Intelligence Infrastructure</p>
+          <p class="landing-tagline">Connect ideas, create possibilities.</p>
+          <a class="enter-atlas" href="./atlas.html">Enter Atlas <span aria-hidden="true">→</span></a>
+        </section>
 
-        <aside class="demo-orientation" aria-label="Nexus 能力路径">
-          <p class="section-kicker">From Idea to Execution</p>
-          <ol>
-            <li><span>01</span><div><strong>Understand</strong><small>理解问题与目标</small></div></li>
-            <li><span>02</span><div><strong>Connect</strong><small>连接决策与依据</small></div></li>
-            <li><span>03</span><div><strong>Navigate</strong><small>形成阶段与行动</small></div></li>
-          </ol>
+        <aside class="landing-note" aria-label="Atlas orientation">
+          <span>ORIENTATION / 01</span>
+          <p>Restore context. Trace decisions. Continue complex work with the evidence in view.</p>
         </aside>
-      </section>
+      </main>
 
-      <section class="demo-case-note" aria-label="Demo 说明">
-        <div>
-          <span>CASE 01</span>
-          <strong>校园低碳循环计划</strong>
-        </div>
-        <p>本页面使用预设静态数据，仅展示 Nexus 的 Experience 与 Visual Layer，不调用 Worker 或模型 API。</p>
-      </section>
-
-      <section id="project-space" class="demo-project-space" aria-label="校园环保项目空间">
-        <div id="demo-project-space" aria-live="polite"></div>
-      </section>
-    </main>
-
-    <footer class="demo-footer">
-      <p>Nexus AI · Context over Chat · Human Decision First</p>
-      <a href="#top">返回顶部</a>
-    </footer>
-
-    <script type="module" src="./demo.js"></script>
+      <footer class="landing-footer">
+        <span>NEXUS ATLAS</span>
+        <span>Context over chat · Human decision first</span>
+      </footer>
+    </div>
   </body>
 </html>

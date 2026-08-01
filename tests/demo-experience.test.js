@@ -6,13 +6,15 @@ const page = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const script = readFileSync(new URL("../demo.js", import.meta.url), "utf8");
 const styles = readFileSync(new URL("../demo.css", import.meta.url), "utf8");
 
-test("GitHub Pages root renders the complete Nexus demo entry", () => {
-  assert.match(page, /Nexus AI/);
+test("GitHub Pages root promotes the Nexus Atlas landing entry", () => {
+  assert.match(page, /NEXUS[\s\S]*ATLAS/);
+  assert.match(page, /Personal Intelligence Infrastructure/);
   assert.match(page, /Connect ideas,[\s\S]*create possibilities/);
-  assert.match(page, /id="project-space"/);
-  assert.match(page, /校园环保创新项目/);
-  assert.match(page, /src="\.\/demo\.js"/);
-  assert.match(page, /href="\.\/frontend\/style\.css"/);
+  assert.match(page, /href="\.\/atlas\.html"/);
+  assert.match(page, />\s*Enter Atlas/);
+  assert.match(page, /Newsreader/);
+  assert.match(page, /IBM Plex Mono/);
+  assert.doesNotMatch(page, /demo\.js|id="project-space"|校园环保创新项目/);
 });
 
 test("Demo uses static data and never calls the Worker or an API", () => {
@@ -50,12 +52,13 @@ test("Static Context Graph includes every first-version node type", () => {
   }
 });
 
-test("Demo inherits dual themes and provides desktop/mobile layouts", () => {
-  assert.match(page, /id="demo-theme-toggle"/);
+test("Atlas landing provides editorial mobile layout while legacy demo assets remain available", () => {
+  assert.match(page, /@media \(max-width: 700px\)/);
+  assert.match(page, /@media \(max-width: 390px\)/);
+  assert.match(page, /min-height: 100vh/);
+  assert.match(page, /font: 500[\s\S]*Newsreader/);
+  assert.match(page, /font: 500[\s\S]*IBM Plex Mono/);
   assert.match(script, /applyTheme\(document\.documentElement, theme\)/);
   assert.match(styles, /var\(--background-mist\)/);
-  assert.match(styles, /var\(--surface-primary\)/);
   assert.match(styles, /@media \(max-width: 860px\)/);
-  assert.match(styles, /@media \(max-width: 560px\)/);
-  assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/);
 });
