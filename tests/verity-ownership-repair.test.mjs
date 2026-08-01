@@ -137,6 +137,7 @@ test("records repair only after read-after-write verification", async () => {
   assert.deepEqual(writes, [OWNER]);
   assert.equal(result.verified, true);
   assert.equal(result.auditEvent.type, "context_repair");
+  assert.equal(result.auditEvent.operation, "add_owners");
   assert.equal(result.auditEvent.ownerUrn, OWNER);
   assert.equal(result.auditEvent.verifiedAt, "2026-07-30T16:00:00.000Z");
 });

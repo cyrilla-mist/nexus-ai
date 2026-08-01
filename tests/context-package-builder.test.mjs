@@ -76,7 +76,7 @@ test("builds a provider-neutral session-local Context Package", () => {
         type: "context_repair",
         entityId: "external-asset-benchmark",
         targetUrn: "urn:li:dataset:benchmark",
-        operation: "assign_owner",
+        operation: "add_owners",
         ownerUrn: "urn:li:corpuser:cyrilla-mist",
         verifiedAt: "2026-08-01T00:05:00Z",
       },

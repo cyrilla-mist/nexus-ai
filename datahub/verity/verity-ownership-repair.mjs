@@ -27,7 +27,7 @@ export function buildOwnershipProposal(ownerUrn, options = {}) {
     proposalId: String(options.proposalId || ""),
     issuedAt: String(options.issuedAt || ""),
     expiresAt: String(options.expiresAt || ""),
-    operation: "assign_owner",
+    operation: "add_owners",
     projectId: "project-verity",
     entityId: VERITY_BENCHMARK_ASSET.entityId,
     targetUrn: VERITY_BENCHMARK_ASSET.urn,

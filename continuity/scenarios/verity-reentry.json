@@ -950,7 +950,7 @@
     "allowedWithHumanConfirmation": [
       {
         "target": "datahub",
-        "operation": "assign_owner",
+        "operation": "add_owners",
         "entityId": "external-asset-benchmark",
         "auditEventType": "context_repair",
         "demoRequired": true

@@ -5,7 +5,7 @@ import { createOwnershipProposalRegistry } from "../datahub/verity/ownership-pro
 
 function baseProposal() {
   return {
-    operation: "assign_owner",
+    operation: "add_owners",
     projectId: "project-verity",
     entityId: "external-asset-benchmark",
     targetUrn:
@@ -80,6 +80,24 @@ test("rejects a changed proposal target before marking it in-flight", () => {
       targetUrn: proposal.targetUrn,
     }).proposalId,
     "proposal-2",
+  );
+});
+
+test("rejects the legacy assign_owner operation", () => {
+  const registry = createOwnershipProposalRegistry({
+    idFactory: () => "proposal-operation",
+  });
+  const proposal = registry.issue(baseProposal());
+
+  assert.throws(
+    () =>
+      registry.consume({
+        proposalId: proposal.proposalId,
+        operation: "assign_owner",
+        entityId: proposal.entityId,
+        targetUrn: proposal.targetUrn,
+      }),
+    (error) => error?.code === "OWNERSHIP_PROPOSAL_MISMATCH",
   );
 });
 
