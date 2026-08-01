@@ -1,6 +1,9 @@
 import { validateLocalBridgeUrl } from "../../experience/continuity/local-bridge-url.mjs";
 
 const AUDIT_KEY = "nexus.atlas.audit.v1";
+const FIXTURE_PREVIEW_OWNER = "urn:li:corpuser:datahub";
+const FIXTURE_PREVIEW_TARGET =
+  "urn:li:dataset:(urn:li:dataPlatform:nexus,verity_benchmark_v1,PROD)";
 
 function readEvents() {
   try {
@@ -70,7 +73,7 @@ function ensureGovernanceSheet() {
         <button class="governance-sheet__close" type="submit" value="cancel" aria-label="Cancel ownership repair">×</button>
       </header>
       <section class="governance-sheet__body">
-        <p class="governance-sheet__summary">Review the exact DataHub mutation before it is submitted. Nexus will not close the signal until a fresh read verifies the result.</p>
+        <p id="governance-sheet-summary" class="governance-sheet__summary">Review the exact DataHub mutation before it is submitted. Nexus will not close the signal until a fresh read verifies the result.</p>
         <dl class="governance-sheet__data">
           <div><dt>Operation</dt><dd data-governance-operation></dd></div>
           <div><dt>Target</dt><dd data-governance-target></dd></div>
@@ -81,7 +84,7 @@ function ensureGovernanceSheet() {
           <span>VERIFICATION CONTRACT</span>
           <strong data-governance-verification></strong>
         </section>
-        <p class="governance-sheet__warning">This action changes governed DataHub metadata. Cancelling leaves the current ownership state unchanged.</p>
+        <p id="governance-sheet-safety" class="governance-sheet__warning">This action changes governed DataHub metadata. Cancelling leaves the current ownership state unchanged.</p>
       </section>
       <footer class="governance-sheet__footer">
         <button type="submit" value="cancel">Cancel</button>
@@ -103,8 +106,27 @@ function proposalText(dialog, selector, value) {
   if (element) element.textContent = value;
 }
 
-function confirmOwnershipProposal(proposal, triggerButton) {
+function fixtureOwnershipPreview() {
+  return {
+    proposalId: "fixture-preview",
+    issuedAt: "",
+    expiresAt: "",
+    operation: "add_owners",
+    projectId: "project-verity",
+    entityId: "external-asset-benchmark",
+    targetUrn: FIXTURE_PREVIEW_TARGET,
+    existingOwners: [],
+    proposedOwner: FIXTURE_PREVIEW_OWNER,
+    alreadyApplied: false,
+    requiresConfirmation: true,
+    verification: "post-write DataHub MCP re-read",
+  };
+}
+
+function confirmOwnershipProposal(proposal, triggerButton, options = {}) {
+  const preview = options.preview === true;
   if (typeof HTMLDialogElement === "undefined") {
+    if (preview) return Promise.resolve({ confirmed: false, reason: "fixture-preview" });
     return Promise.resolve(
       window.confirm(
         `Confirm ${proposal.operation} for ${proposal.targetUrn}?\nProposed owner: ${proposal.proposedOwner}\nVerification: ${proposal.verification}`,
@@ -113,6 +135,19 @@ function confirmOwnershipProposal(proposal, triggerButton) {
   }
 
   const dialog = ensureGovernanceSheet();
+  dialog.setAttribute("aria-describedby", preview ? "governance-sheet-safety" : "governance-sheet-summary");
+  dialog.querySelector("#governance-sheet-title").textContent = preview
+    ? "Ownership proposal preview"
+    : "Confirm context repair";
+  dialog.querySelector("#governance-sheet-summary").textContent = preview
+    ? "FIXTURE PREVIEW"
+    : "Review the exact DataHub mutation before it is submitted. Nexus will not close the signal until a fresh read verifies the result.";
+  dialog.querySelector("#governance-sheet-safety").textContent = preview
+    ? "No DataHub request or mutation will be performed."
+    : "This action changes governed DataHub metadata. Cancelling leaves the current ownership state unchanged.";
+  dialog.querySelector(".governance-sheet__footer").innerHTML = preview
+    ? '<button type="submit" value="cancel">Close preview</button>'
+    : '<button type="submit" value="cancel">Cancel</button><button class="governance-sheet__confirm" type="submit" value="confirm">Confirm repair proposal</button>';
   proposalText(dialog, "[data-governance-operation]", proposal.operation);
   proposalText(dialog, "[data-governance-target]", proposal.targetUrn);
   proposalText(
@@ -192,9 +227,16 @@ async function requestOwnershipRepair(button) {
     return;
   }
 
+  if (config.source === "fixture") {
+    await confirmOwnershipProposal(fixtureOwnershipPreview(), button, { preview: true });
+    setFeedback("Fixture preview closed. No DataHub request or mutation was performed.", button);
+    if (button.isConnected) button.focus();
+    return;
+  }
+
   if (config.source !== "datahub" || !config.mutationBridge) {
     setFeedback(
-      "No repair was claimed. Ownership requires the live DataHub source and the separate governed mutation bridge.",
+      "Live proposal unavailable. Start the local governed mutation bridge or use the fixture preview.",
       button,
     );
     return;

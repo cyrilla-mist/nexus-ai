@@ -352,6 +352,46 @@ test("ownership repair communicates proposal loading and confirmation intent", (
   assert.match(governanceStyles, /\.text-action\[aria-busy="true"\]/);
 });
 
+test("fixture ownership review opens a zero-request read-only preview", () => {
+  const fixtureStart = governanceScript.indexOf('if (config.source === "fixture")');
+  const liveStart = governanceScript.indexOf('if (config.source !== "datahub" || !config.mutationBridge)');
+  assert.ok(fixtureStart >= 0);
+  assert.ok(liveStart > fixtureStart);
+  const fixtureBranch = governanceScript.slice(fixtureStart, liveStart);
+
+  assert.match(fixtureBranch, /fixtureOwnershipPreview\(\)/);
+  assert.match(fixtureBranch, /preview: true/);
+  assert.doesNotMatch(fixtureBranch, /fetch\(/);
+  assert.doesNotMatch(fixtureBranch, /addBenchmarkOwner|add_owners|mutationClient|DATAHUB/);
+  assert.match(governanceScript, /operation: "add_owners"/);
+  assert.match(governanceScript, /urn:li:dataset:\(urn:li:dataPlatform:nexus,verity_benchmark_v1,PROD\)/);
+  assert.match(governanceScript, /urn:li:corpuser:datahub/);
+  assert.match(governanceScript, /FIXTURE PREVIEW/);
+  assert.match(governanceScript, /No DataHub request or mutation will be performed\./);
+  assert.match(governanceScript, /Ownership proposal preview/);
+  assert.match(governanceScript, /Close preview/);
+  assert.match(governanceScript, /aria-describedby.*governance-sheet-safety/);
+  assert.match(governanceScript, /button\.isConnected\) button\.focus\(\)/);
+});
+
+test("fixture preview cannot expose or execute a mutation confirmation", () => {
+  assert.match(governanceScript, /governance-sheet__footer"\)\.innerHTML = preview[\s\S]*Close preview/);
+  assert.match(governanceScript, /if \(preview\)[\s\S]*Promise\.resolve\(\{ confirmed: false, reason: "fixture-preview" \}\)/);
+  assert.match(governanceScript, /preview\s*\n\s*\? "Ownership proposal preview"/);
+  assert.match(governanceScript, /preview\s*\n\s*\? "FIXTURE PREVIEW"/);
+  assert.match(governanceScript, /preview\s*\n\s*\? "No DataHub request or mutation will be performed\."/);
+});
+
+test("live runtime keeps the governed proposal path and reports missing bridge inline", () => {
+  assert.match(governanceScript, /if \(config\.source !== "datahub" \|\| !config\.mutationBridge\)/);
+  assert.match(governanceScript, /Live proposal unavailable\. Start the local governed mutation bridge or use the fixture preview\./);
+  assert.match(governanceScript, /fetch\(config\.mutationBridge/);
+  assert.match(governanceScript, /method: "POST"/);
+  assert.match(governanceScript, /add_owners/);
+  assert.match(governanceScript, /post-write DataHub MCP re-read/);
+  assert.match(script, /data-governance-action="repair-ownership"[\s\S]*prototype-feedback/);
+});
+
 test("workspace navigation exposes four real hash-backed tabs", () => {
   assert.equal((page.match(/role="tab"/g) ?? []).length, 4);
   for (const key of ["brief", "evidence", "memory", "action"]) {
