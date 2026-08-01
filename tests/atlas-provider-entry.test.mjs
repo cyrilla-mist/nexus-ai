@@ -86,6 +86,16 @@ test("Atlas preserves live DataHub source configuration while adding route orien
   assert.match(app, /Select a node to inspect its context and relations/);
 });
 
+test("Atlas mobile layout moves navigation, inspector, map, and tray into safe layers", () => {
+  assert.match(atlasCss, /body \{ overflow-x: hidden; \}/);
+  assert.match(atlasCss, /\.atlas-primary-nav \{[\s\S]*overflow-x: auto/);
+  assert.match(atlasCss, /\.context-inspector \{[\s\S]*position: fixed[\s\S]*inset: auto 0 0/);
+  assert.match(atlasCss, /\.context-inspector\.is-closed \{[\s\S]*transform: translateY/);
+  assert.match(atlasCss, /#inspector-content \{[\s\S]*overflow-y: auto/);
+  assert.match(atlasCss, /body\.route-map \.map-stage \{[\s\S]*max-width: 100%/);
+  assert.match(atlasCss, /\.atlas-main \{ padding: 26px 18px 92px/);
+});
+
 test("Atlas re-entry preserves validated source configuration", () => {
   assert.match(governance, /currentSourceConfiguration/);
   assert.match(governance, /validateLocalBridgeUrl/);
