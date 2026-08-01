@@ -92,12 +92,18 @@ function ensureGovernanceSheet() {
   return dialog;
 }
 
+function sheetFocusableElements(dialog) {
+  return [...dialog.querySelectorAll(
+    'button:not([disabled]):not([hidden]), [href], input:not([disabled]):not([hidden]), select:not([disabled]):not([hidden]), textarea:not([disabled]):not([hidden]), [tabindex]:not([tabindex="-1"])',
+  )].filter((element) => element.getClientRects().length > 0);
+}
+
 function proposalText(dialog, selector, value) {
   const element = dialog.querySelector(selector);
   if (element) element.textContent = value;
 }
 
-function confirmOwnershipProposal(proposal) {
+function confirmOwnershipProposal(proposal, triggerButton) {
   if (typeof HTMLDialogElement === "undefined") {
     return Promise.resolve(
       window.confirm(
@@ -118,9 +124,59 @@ function confirmOwnershipProposal(proposal) {
   proposalText(dialog, "[data-governance-verification]", proposal.verification);
 
   return new Promise((resolve) => {
-    const onClose = () => resolve(dialog.returnValue === "confirm");
-    dialog.addEventListener("close", onClose, { once: true });
-    dialog.showModal();
+    let settled = false;
+    const cleanup = () => {
+      dialog.removeEventListener("cancel", onCancel);
+      dialog.removeEventListener("keydown", onKeydown);
+      dialog.removeEventListener("close", onClose);
+    };
+    const finish = (reason) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      resolve({
+        confirmed: dialog.returnValue === "confirm",
+        reason,
+      });
+    };
+    const onCancel = (event) => {
+      event.preventDefault();
+      if (dialog.open) dialog.close("cancel");
+    };
+    const onKeydown = (event) => {
+      if (event.key !== "Tab") return;
+      const focusable = sheetFocusableElements(dialog);
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    const onClose = () => {
+      const reason = dialog.returnValue === "confirm" ? "confirm" : dialog.returnValue === "cancel" ? "cancel" : "close";
+      finish(reason);
+    };
+
+    dialog.addEventListener("cancel", onCancel);
+    dialog.addEventListener("keydown", onKeydown);
+    dialog.addEventListener("close", onClose);
+    try {
+      dialog.showModal();
+      window.requestAnimationFrame(() => {
+        if (!dialog.open) return;
+        const cancel = dialog.querySelector('.governance-sheet__footer button[value="cancel"]');
+        const close = dialog.querySelector(".governance-sheet__close");
+        (cancel || close || sheetFocusableElements(dialog)[0])?.focus();
+      });
+    } catch (error) {
+      cleanup();
+      throw error;
+    }
   });
 }
 
@@ -158,8 +214,11 @@ async function requestOwnershipRepair(button) {
       );
     }
     const proposal = proposalPayload.proposal;
-    const confirmed = await confirmOwnershipProposal(proposal);
-    if (!confirmed) {
+    const confirmation = await confirmOwnershipProposal(proposal, button);
+    if (!confirmation.confirmed) {
+      button.disabled = false;
+      button.textContent = originalLabel;
+      if (button.isConnected) button.focus();
       setFeedback("Ownership repair cancelled. DataHub was not changed.", button);
       return;
     }
@@ -199,6 +258,7 @@ async function requestOwnershipRepair(button) {
   } catch (error) {
     button.disabled = false;
     button.textContent = originalLabel;
+    if (button.isConnected) button.focus();
     setFeedback(
       `Ownership remains unresolved: ${error instanceof Error ? error.message : String(error)}`,
       button,

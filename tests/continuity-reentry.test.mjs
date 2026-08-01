@@ -29,6 +29,14 @@ const styles = readFileSync(
   new URL("../frontend/continuity/reentry.css", import.meta.url),
   "utf8",
 );
+const governanceScript = readFileSync(
+  new URL("../frontend/continuity/reentry-governance.js", import.meta.url),
+  "utf8",
+);
+const governanceStyles = readFileSync(
+  new URL("../frontend/continuity/governance.css", import.meta.url),
+  "utf8",
+);
 
 test("fixture-backed view model exposes the Nexus project", () => {
   const view = buildReentryViewModel(fixture);
@@ -313,6 +321,26 @@ test("responsive and accessibility foundations are present", () => {
   assert.match(styles, /@media \(max-width: 820px\)/);
   assert.match(styles, /min-height: 44px/);
   assert.match(styles, /:focus-visible/);
+});
+
+test("Confirmation Sheet handles Escape, focus trapping, and focus return safely", () => {
+  assert.match(governanceScript, /addEventListener\("cancel", onCancel\)/);
+  assert.match(governanceScript, /event\.preventDefault\(\)[\s\S]*dialog\.close\("cancel"\)/);
+  assert.match(governanceScript, /addEventListener\("keydown", onKeydown\)/);
+  assert.match(governanceScript, /event\.key !== "Tab"/);
+  assert.match(governanceScript, /event\.shiftKey[\s\S]*event\.preventDefault\(\)[\s\S]*last\.focus\(\)/);
+  assert.match(governanceScript, /!event\.shiftKey[\s\S]*event\.preventDefault\(\)[\s\S]*first\.focus\(\)/);
+  assert.match(governanceScript, /requestAnimationFrame/);
+  assert.match(governanceScript, /confirmOwnershipProposal\(proposal, button\)/);
+  assert.match(governanceScript, /button\.disabled = false[\s\S]*button\.textContent = originalLabel[\s\S]*button\.focus\(\)/);
+  assert.match(governanceScript, /dialog\.removeEventListener\("cancel", onCancel\)/);
+  assert.match(governanceScript, /dialog\.removeEventListener\("keydown", onKeydown\)/);
+  assert.match(governanceScript, /dialog\.removeEventListener\("close", onClose\)/);
+  assert.match(governanceScript, /confirmed: dialog\.returnValue === "confirm"/);
+  assert.match(governanceScript, /method: "POST"/);
+  assert.match(governanceStyles, /max-height: 88vh/);
+  assert.match(governanceStyles, /::backdrop/);
+  assert.match(governanceStyles, /overflow: auto/);
 });
 
 test("workspace navigation exposes four real hash-backed tabs", () => {
