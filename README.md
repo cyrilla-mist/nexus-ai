@@ -533,7 +533,11 @@ AI coding and documentation tools were used during development. Product directio
 
 ## Submission Links
 
-- **Public demo:** pending final verified deployment
+- **Public demo:** https://cyrilla-mist.github.io/nexus-ai/
+- **Atlas workspace:** https://cyrilla-mist.github.io/nexus-ai/atlas.html
+- **Continuity workspace:** https://cyrilla-mist.github.io/nexus-ai/reentry.html?source=fixture&scenario=verity
+
+The public GitHub Pages demonstration uses the fixture scenario. Live DataHub, MCP, and governed mutation require the local Runtime; the public Pages deployment does not connect to a user's localhost bridge and does not claim to execute real DataHub mutations.
 - **Demo video:** pending final runtime recording
 - **Devpost submission:** pending
 
