@@ -210,7 +210,7 @@ function renderDesk() {
     ${renderViewHeading(
       "PERSONAL INTELLIGENCE INFRASTRUCTURE",
       "Atlas Desk",
-      "A working index of projects, decisions, evidence, and actions that need attention across your territories.",
+      "Start here to see what changed and what needs attention.",
       "INDEX / 30 JUL 2026",
     )}
 
@@ -223,10 +223,10 @@ function renderDesk() {
           <div><dt>LAST ACTIVE</dt><dd>${formatDate(project.lastActiveAt)}</dd></div>
           <div><dt>CURRENT VERSION</dt><dd>${escapeHtml(project.currentVersion)}</dd></div>
           <div><dt>MILESTONE</dt><dd>${escapeHtml(project.currentMilestone)}</dd></div>
-          <div><dt>CONTEXT ATTENTION</dt><dd>${findings.staleRecords + findings.agentConflicts + findings.missingOwners} records</dd></div>
+          <div><dt>RECORDS NEEDING ATTENTION</dt><dd>${findings.staleRecords + findings.agentConflicts + findings.missingOwners} records</dd></div>
         </dl>
         <div class="inline-actions">
-          <button type="button" data-atlas-route="territory">Enter territory</button>
+          <button type="button" data-atlas-route="territory">Open project workspace</button>
           <button type="button" class="secondary" data-atlas-route="map">Inspect map</button>
         </div>
       </section>
@@ -249,10 +249,10 @@ function renderDesk() {
     </div>
 
     <section class="signal-grid" aria-label="Current continuity signals">
-      ${renderSignalButton("changes", "Meaningful changes", findings.meaningfulChanges, "valid", "Events after the last active point")}
-      ${renderSignalButton("decisions", "Valid decisions", findings.validDecisions, "valid", "Confirmed routes that remain usable")}
+      ${renderSignalButton("changes", "Changes since last active session", findings.meaningfulChanges, "valid", "Events after the last active point")}
+      ${renderSignalButton("decisions", "Confirmed decisions still in use", findings.validDecisions, "valid", "Confirmed routes that remain usable")}
       ${renderSignalButton("stale", "Stale evidence", findings.staleRecords, "warning", "Records that cannot support current work")}
-      ${renderSignalButton("ownership", "Broken context", findings.agentConflicts + findings.missingOwners, "attention", "Conflict and ownership repair")}
+      ${renderSignalButton("ownership", "Context risks", findings.agentConflicts + findings.missingOwners, "attention", "Conflicts or missing ownership")}
     </section>`;
 }
 
@@ -326,7 +326,7 @@ function renderMapLegend() {
         <span><i class="legend-mark legend-risk"></i>Risk</span>
       </div>
       <div class="map-controls">
-        <button type="button" data-map-action="fit">Fit map</button>
+        <button type="button" data-map-action="fit">Fit map to view</button>
         <button type="button" data-map-action="reset">Reset selection</button>
       </div>
     </div>`;
@@ -337,7 +337,7 @@ function renderMap() {
     ${renderViewHeading(
       "PROJECT FOCUS / INNOVATION",
       "Atlas Map",
-      "A context route built from stored relations. Every line below corresponds to a real relationship in the Verity scenario.",
+      "See how this project’s evidence, decisions, and actions connect.",
       "MAP / PROJECT-VERITY",
     )}
     ${renderMapLegend()}
@@ -398,6 +398,7 @@ function renderTerritory() {
         <span class="card-kicker">CURRENT MILESTONE</span>
         <strong>${escapeHtml(project.currentMilestone)}</strong>
         <p>Version ${escapeHtml(project.currentVersion)} · Re-entry required</p>
+        <small>Review what changed before continuing.</small>
         <div class="inline-actions">
           <button type="button" data-atlas-route="reentry">Restore context</button>
         </div>
@@ -577,7 +578,7 @@ function renderActionTray() {
     ],
     map: [
       `<button type="button" data-open-inspector${selectionLabel}>Inspect selected</button>`,
-      `<button type="button" data-inspect-entity="${escapeHtml(state.selectedEntityId || "project-verity")}"${selectionLabel}>View lineage</button>`,
+      `<button type="button" data-inspect-entity="${escapeHtml(state.selectedEntityId || "project-verity")}"${selectionLabel}>See supporting sources</button>`,
       `<button type="button" data-atlas-route="territory" class="tray-primary">Open workspace</button>`,
     ],
     territory: [
@@ -750,9 +751,13 @@ window.addEventListener("hashchange", () => {
 
 try {
   state.scenario = await loadScenario();
-  const sourceLabel = state.sourceInfo?.label || "Context source";
-  const sourceMode = state.sourceInfo?.live ? "live" : "fixture";
-  sourceSummary.innerHTML = `<span class="source-primary"><span class="source-name">${escapeHtml(sourceLabel)}</span><span class="source-state">${escapeHtml(sourceMode.toUpperCase())}</span></span><span class="source-detail">${projectSources().length} sources · scenario v${escapeHtml(state.scenario.scenarioVersion)}</span>`;
+  const sourcePrimary = state.sourceInfo?.live
+    ? "LIVE READ · DATAHUB MCP · READ-ONLY"
+    : "DEMO DATA · FIXTURE SCENARIO";
+  const sourceHelper = state.sourceInfo?.live
+    ? "Reading the local governed source. Live read does not permit mutation."
+    : "Prepared Verity data for the public demo. No live DataHub connection.";
+  sourceSummary.innerHTML = `<span class="source-primary"><span class="source-name">${escapeHtml(sourcePrimary)}</span></span><span class="source-detail">${escapeHtml(sourceHelper)}</span><span class="source-count">${projectSources().length} sources · scenario v${escapeHtml(state.scenario.scenarioVersion)}</span>`;
   renderTerritoryNavigation();
   renderRoute();
 } catch (error) {

@@ -53,7 +53,8 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--ochre); outline
 .source-primary { display: flex; align-items: baseline; justify-content: flex-end; gap: 7px; white-space: nowrap; }
 .source-name { color: var(--ink); font: 500 10px/1.2 "IBM Plex Mono", monospace; letter-spacing: .01em; }
 .source-state { color: var(--nexus-accent); font: 600 8px/1.2 "IBM Plex Mono", monospace; letter-spacing: .08em; }
-.source-detail { display: block; margin-top: 4px; color: var(--muted); font: 400 9px/1.2 "IBM Plex Mono", monospace; letter-spacing: .01em; white-space: nowrap; }
+.source-detail, .source-count { display: block; margin-top: 4px; color: var(--muted); font: 400 9px/1.2 "IBM Plex Mono", monospace; letter-spacing: .01em; white-space: nowrap; }
+.source-count { margin-top: 3px; color: var(--ink-soft); }
 
 .atlas-shell { min-height: calc(100vh - 130px); display: grid; grid-template-columns: 238px minmax(0,1fr) 310px; }
 .territory-index { border-right: 1px solid var(--strong); background: rgba(251,250,245,.38); }

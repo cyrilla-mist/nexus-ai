@@ -367,9 +367,12 @@ test("fixture ownership review opens a zero-request read-only preview", () => {
   assert.match(governanceScript, /urn:li:dataset:\(urn:li:dataPlatform:nexus,verity_benchmark_v1,PROD\)/);
   assert.match(governanceScript, /urn:li:corpuser:datahub/);
   assert.match(governanceScript, /FIXTURE PREVIEW/);
-  assert.match(governanceScript, /No DataHub request or mutation will be performed\./);
+  assert.match(governanceScript, /Demo data only — no request will be sent to DataHub\./);
   assert.match(governanceScript, /Ownership proposal preview/);
   assert.match(governanceScript, /Close preview/);
+  assert.match(governanceScript, /How Atlas will verify the change/);
+  assert.match(governanceScript, /preview \? "Add owner"/);
+  assert.match(governanceScript, /data-governance-operation-tech/);
   assert.match(governanceScript, /aria-describedby.*governance-sheet-safety/);
   assert.match(governanceScript, /button\.isConnected\) button\.focus\(\)/);
 });
@@ -379,7 +382,7 @@ test("fixture preview cannot expose or execute a mutation confirmation", () => {
   assert.match(governanceScript, /if \(preview\)[\s\S]*Promise\.resolve\(\{ confirmed: false, reason: "fixture-preview" \}\)/);
   assert.match(governanceScript, /preview\s*\n\s*\? "Ownership proposal preview"/);
   assert.match(governanceScript, /preview\s*\n\s*\? "FIXTURE PREVIEW"/);
-  assert.match(governanceScript, /preview\s*\n\s*\? "No DataHub request or mutation will be performed\."/);
+  assert.match(governanceScript, /preview\s*\n\s*\? "Demo data only — no request will be sent to DataHub\."/);
 });
 
 test("live runtime keeps the governed proposal path and reports missing bridge inline", () => {
@@ -438,7 +441,7 @@ test("workspace switching preserves selected signal and scrolls with reduced-mot
 test("brief is compact and delegates full ledgers to dedicated workspaces", () => {
   assert.match(script, /class="brief-grid"/);
   assert.match(script, /CURRENT FOCUS/);
-  assert.match(script, /NEXT BEST ACTION/);
+  assert.match(script, /SUGGESTED NEXT STEP/);
   assert.match(script, /renderChanges\(view\.meaningfulChanges, 3\)/);
   const briefSource = script.slice(script.indexOf("function renderBrief"), script.indexOf("function renderSignalLens"));
   assert.doesNotMatch(briefSource, /renderBroken|renderMemoryGroup|renderActionWorkspace/);
@@ -514,6 +517,8 @@ test("ownership-risk Recommended Action opens the governed repair entry point", 
   assert.match(actionSource, /action\.ownershipRisk/);
   assert.match(actionSource, /repair-ownership/);
   assert.match(actionSource, /Review proposal/);
+  assert.match(actionSource, /Preview ownership proposal/);
+  assert.match(actionSource, /state\.sourceInfo\?\.live/);
   assert.match(governanceScript, /action === "repair-ownership"/);
 });
 

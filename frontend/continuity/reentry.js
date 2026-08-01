@@ -124,12 +124,13 @@ function renderBrief(view) {
           <small>${escapeHtml(view.reportMeta.elapsedLabel)}. Here is what matters now.</small>
         </div>
         <div class="current-state"><span>CURRENT STATE</span><strong>${escapeHtml(view.status)}</strong>
-          <p>Continuity score <b>${view.continuityScore}/100</b></p></div>
+          <p>Continuity score <b>${view.continuityScore}/100</b></p>
+          <small>A 0–100 signal showing how much verified project context is available for the next step. It is not a prediction or project quality grade.</small></div>
       </section>
       <section class="signal-strip" aria-label="Continuity signals">${view.signals.map((signal) => renderSignal(signal)).join("")}</section>
       <div class="brief-grid">
         <section class="report-section brief-changes" aria-labelledby="changes-title">
-          <header><span>01</span><h2 id="changes-title">WHAT CHANGED</h2><small>${view.meaningfulChanges.length} recent events</small></header>
+          <header><span>01</span><h2 id="changes-title">WHAT CHANGED SINCE LAST SESSION</h2><small>${view.meaningfulChanges.length} recent events</small></header>
           ${renderChanges(view.meaningfulChanges, 3)}
         </section>
         <section class="brief-focus" aria-labelledby="focus-title">
@@ -138,7 +139,7 @@ function renderBrief(view) {
           <p>${escapeHtml(detail.whyItMatters)}</p>
         </section>
         <section class="next-best-action" aria-labelledby="next-action-title">
-          <p>NEXT BEST ACTION</p>
+          <p>SUGGESTED NEXT STEP</p>
           <h2 id="next-action-title">${escapeHtml(action?.label || "Review continuity evidence")}</h2>
           <small>${escapeHtml(action?.completionCriteria || "Inspect the evidence before continuing.")}</small>
           <div class="workspace-actions">
@@ -186,11 +187,12 @@ function renderEvidence(view) {
       <div class="evidence-layout">
         <div class="evidence-main">
           <section class="report-section" aria-labelledby="conflict-title">
-            <header><span>01</span><h2 id="conflict-title">BROKEN / CONFLICTING CONTEXT</h2><small>${view.brokenContext.length} records</small></header>
+            <header><span>01</span><h2 id="conflict-title">CONTEXT RISKS AND CONFLICTS</h2><small>${view.brokenContext.length} records</small></header>
             ${renderBroken(view.brokenContext, detail.selectedId)}
           </section>
           <section class="report-section" id="evidence-chain" aria-labelledby="evidence-title">
             <header><span>02</span><h2 id="evidence-title" tabindex="-1">EVIDENCE CHAIN</h2><small>${detail.evidenceChain.length} links</small></header>
+            <p class="section-helper">Records supporting the current project state and decisions.</p>
             ${renderEvidenceChain(detail.evidenceChain)}
           </section>
           ${detail.affectedDecision ? `<section class="linked-decision" aria-labelledby="linked-decision-title"><p>LINKED DECISION</p><h2 id="linked-decision-title">${escapeHtml(detail.affectedDecision.title)}</h2><span>${escapeHtml(statusLabel(detail.affectedDecision.status))}</span><small>${escapeHtml(detail.affectedDecision.source)}</small></section>` : ""}
@@ -220,14 +222,16 @@ function renderMemory(view) {
   const ledger = view.memoryLedger;
   return `
     <section class="workspace-view memory-workspace" data-view="memory">
-      ${renderWorkspaceHeading(3, "MEMORY", "Memory Ledger", "Review which project memories remain valid, conflict, or have been replaced.", `${ledger.all.length} governed records`)}
+      ${renderWorkspaceHeading(3, "MEMORY", "Memory Ledger", "What the system remembers about this project.", `${ledger.all.length} governed records`)}
+      <p class="section-helper">Review what remains valid, what conflicts, and what has been replaced.</p>
       <div class="ledger-filters" role="group" aria-label="Filter memory records">${[
         ["all", "All"], ["confirmed", "Confirmed"], ["disputed", "Disputed"], ["superseded", "Superseded"],
       ].map(([key, label]) => `<button type="button" data-memory-filter="${key}" aria-pressed="${state.memoryFilter === key}">${label}</button>`).join("")}</div>
       <div class="memory-ledger">
-        ${renderMemoryGroup("Confirmed / Valid", ledger.confirmed, "confirmed")}
+        ${renderMemoryGroup("Confirmed and still usable", ledger.confirmed, "confirmed")}
         ${renderMemoryGroup("Disputed", ledger.disputed, "disputed")}
         ${renderMemoryGroup("Superseded / Stale", ledger.superseded, "superseded")}
+        <p class="section-helper">Replaced by newer context or no longer current.</p>
       </div>
     </section>`;
 }
@@ -248,7 +252,7 @@ function renderAction(action, index) {
   const displayStatus = actionDisplayStatus(action);
   const isGovernanceAction = action.ownershipRisk === true;
   const actionControl = isGovernanceAction
-    ? `<button class="text-action" type="button" data-prototype-action data-governance-action="repair-ownership" data-entity-id="${escapeHtml(action.id)}">Review proposal</button>`
+    ? `<button class="text-action" type="button" data-prototype-action data-governance-action="repair-ownership" data-entity-id="${escapeHtml(action.id)}">${state.sourceInfo?.live ? "Review proposal" : "Preview ownership proposal"}</button>`
     : `<button class="text-action" type="button" data-action-details="${escapeHtml(action.id)}" aria-expanded="false" aria-controls="action-details-${escapeHtml(action.id)}">View details</button>`;
   return `<article class="action-record ${index === 0 ? "is-priority-action" : ""}"><span class="action-number">${String(index + 1).padStart(2, "0")}</span><div><h3>${escapeHtml(action.label)}</h3><p>${escapeHtml(action.summary)}</p><small>${escapeHtml(action.completionCriteria)}</small><dl><div><dt>OWNER</dt><dd class="${action.ownershipRisk ? "is-risk" : ""}">${escapeHtml(action.owner)}</dd></div><div><dt>STATUS</dt><dd>${escapeHtml(displayStatus)}</dd></div><div><dt>RECORDED STATUS</dt><dd>${escapeHtml(statusLabel(action.status))}</dd></div></dl><div id="action-details-${escapeHtml(action.id)}" class="action-detail-panel" hidden><p>This recommendation is informational. Opening its details does not request a governed change.</p></div>${isGovernanceAction ? '<p class="prototype-feedback" aria-live="polite"></p>' : ""}</div>${actionControl}</article>`;
 }
@@ -261,7 +265,7 @@ function renderDecisionGate(ledger) {
   return `<section class="decision-gate" aria-labelledby="decision-gate-title">
     <p>CURRENT DECISION GATE</p>
     <h2 id="decision-gate-title">${escapeHtml(pending.title)}</h2>
-    <span class="decision-gate-status">REQUIRES DECISION</span>
+    <span class="decision-gate-status">NEEDS YOUR DECISION</span>
     <p class="decision-gate-summary">${escapeHtml(pending.summary)}</p>
     <dl>
       <div><dt>WHY A DECISION IS NEEDED</dt><dd>Conflicting project directions cannot both be inherited as current context.</dd></div>
@@ -281,7 +285,7 @@ function renderActionWorkspace(view) {
   const ledger = view.decisionActionLedger;
   return `
     <section class="workspace-view action-workspace" data-view="action">
-      ${renderWorkspaceHeading(4, "ACTION", "Decision & Action", "Separate what is confirmed from what still needs a human decision or owner.", `${ledger.recommendedActions.length} recommended actions`)}
+      ${renderWorkspaceHeading(4, "ACTION", "Decisions and next steps", "Separate what is confirmed from what still needs a human decision or owner.", `${ledger.recommendedActions.length} recommended actions`)}
       <div class="action-layout">
         <section class="ledger-section" aria-labelledby="confirmed-title"><header><h2 id="confirmed-title">CONFIRMED DECISIONS</h2><span>${ledger.confirmedDecisions.length}</span></header>${ledger.confirmedDecisions.map(renderDecision).join("")}</section>
         ${renderDecisionGate(ledger)}

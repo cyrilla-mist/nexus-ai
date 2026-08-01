@@ -75,13 +75,13 @@ function ensureGovernanceSheet() {
       <section class="governance-sheet__body">
         <p id="governance-sheet-summary" class="governance-sheet__summary">Review the exact DataHub mutation before it is submitted. Nexus will not close the signal until a fresh read verifies the result.</p>
         <dl class="governance-sheet__data">
-          <div><dt>Operation</dt><dd data-governance-operation></dd></div>
+          <div><dt>Operation</dt><dd><strong data-governance-operation></strong><small data-governance-operation-tech></small></dd></div>
           <div><dt>Target</dt><dd data-governance-target></dd></div>
           <div><dt>Current owners</dt><dd data-governance-current></dd></div>
           <div><dt>Proposed owner</dt><dd data-governance-proposed></dd></div>
         </dl>
         <section class="governance-sheet__verification">
-          <span>VERIFICATION CONTRACT</span>
+          <span>How Atlas will verify the change</span>
           <strong data-governance-verification></strong>
         </section>
         <p id="governance-sheet-safety" class="governance-sheet__warning">This action changes governed DataHub metadata. Cancelling leaves the current ownership state unchanged.</p>
@@ -143,12 +143,13 @@ function confirmOwnershipProposal(proposal, triggerButton, options = {}) {
     ? "FIXTURE PREVIEW"
     : "Review the exact DataHub mutation before it is submitted. Nexus will not close the signal until a fresh read verifies the result.";
   dialog.querySelector("#governance-sheet-safety").textContent = preview
-    ? "No DataHub request or mutation will be performed."
+    ? "Demo data only — no request will be sent to DataHub."
     : "This action changes governed DataHub metadata. Cancelling leaves the current ownership state unchanged.";
   dialog.querySelector(".governance-sheet__footer").innerHTML = preview
     ? '<button type="submit" value="cancel">Close preview</button>'
     : '<button type="submit" value="cancel">Cancel</button><button class="governance-sheet__confirm" type="submit" value="confirm">Confirm repair proposal</button>';
-  proposalText(dialog, "[data-governance-operation]", proposal.operation);
+  proposalText(dialog, "[data-governance-operation]", preview ? "Add owner" : proposal.operation);
+  proposalText(dialog, "[data-governance-operation-tech]", proposal.operation);
   proposalText(dialog, "[data-governance-target]", proposal.targetUrn);
   proposalText(
     dialog,

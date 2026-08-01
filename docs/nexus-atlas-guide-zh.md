@@ -156,7 +156,7 @@ Workspace 是当前项目的工作区。
 - What changed：发生了什么变化；
 - What remains valid：哪些决定仍然有效；
 - What needs attention：哪些上下文需要处理；
-- Restore context：进入更完整的项目恢复流程。
+- Open Re-entry brief：进入更完整的项目恢复流程。
 
 ---
 
@@ -208,6 +208,10 @@ Nexus Atlas / Innovation / Verity / Desk
 # 10. Context Sources
 
 Context Sources 表示当前页面的数据来自哪里。
+
+公开演示会显示：`DEMO DATA · FIXTURE SCENARIO`。
+
+本地实时读取会显示：`LIVE READ · DATAHUB MCP · READ-ONLY`。
 
 ## Fixture
 
@@ -267,7 +271,7 @@ Re-entry 不是重新登录，而是“重新进入项目状态”。
 
 Milestone 比普通待办事项更大，代表项目当前阶段的核心方向。
 
-## 11.5 Context Attention
+## 11.5 Records needing attention（Context Attention）
 
 需要注意的上下文记录数量。
 
@@ -283,13 +287,13 @@ Milestone 比普通待办事项更大，代表项目当前阶段的核心方向�
 
 # 12. Desk 四类信号
 
-## Meaningful Changes
+## Changes since last active session（Meaningful Changes）
 
 用户上次离开后发生的关键变化。
 
 不是所有日志，而是会影响继续工作的事件。
 
-## Valid Decisions
+## Confirmed decisions still in use（Valid Decisions）
 
 过去已经确认、目前仍然有效的决定。
 
@@ -301,9 +305,9 @@ Milestone 比普通待办事项更大，代表项目当前阶段的核心方向�
 
 例如项目已更新到 v0.4.7，v0.4.6 的测试结果就可能需要重新验证。
 
-## Broken Context
+## Context Risks（Broken Context）
 
-项目上下文链条中的缺口，例如：
+项目上下文链条中的风险，例如：
 
 - 缺少 owner；
 - AI 记忆与人工决策冲突；
@@ -392,7 +396,7 @@ Context Inspector 是右侧档案查看器。
 ## Map
 
 - Inspect selected：检查当前节点；
-- View lineage：查看数据形成链；
+- See supporting sources：查看支持当前判断的来源（技术详情仍称 Lineage）；
 - Open workspace：进入项目工作区。
 
 ## Workspace / Re-entry
@@ -424,6 +428,8 @@ Continuity Workspace 是更深入的项目恢复工具。
 
 ### Continuity Score
 
+它是一个 0–100 的信号，表示当前有多少经过验证的项目上下文可供下一步使用。它不是预测，也不是项目质量评分。
+
 它不是项目质量分，也不是比赛评分。
 
 它表示项目上下文当前的完整程度，可能受到以下因素影响：
@@ -440,12 +446,14 @@ Continuity Workspace 是更深入的项目恢复工具。
 
 主要区域：
 
-- Broken / Conflicting Context；
+- Context Risks and Conflicts；
 - Evidence Chain；
 - Linked Decision；
 - Signal Lens。
 
 ### Evidence Chain
+
+这些记录用于支持当前项目状态和决定。
 
 证据链用于展示：
 
@@ -468,9 +476,9 @@ Memory Ledger 是项目记忆账本，不是聊天记录。
 
 记录被分为：
 
-- Confirmed：仍然有效；
+- Confirmed and still usable：仍然有效；
 - Disputed：存在争议或冲突；
-- Superseded / Stale：已被替代或过时。
+- Superseded / Stale：已被替代或过时。它们可能是被新上下文替代，或已经不再是当前信息。
 
 它防止系统把所有历史信息都当成同样可信。
 
@@ -520,7 +528,7 @@ Memory Ledger 是项目记忆账本，不是聊天记录。
 在公开 fixture 模式中：
 
 ```text
-Review proposal
+Review proposal（Live DataHub） / Preview ownership proposal（公开 Fixture）
 → 打开只读 Ownership proposal preview
 → 查看 operation、target、owner 和 verification contract
 → Close preview
@@ -552,7 +560,7 @@ GET proposal
 
 ## Operation
 
-`add_owners`：准备给数据资产增加负责人。
+用户界面显示 `Add owner`；技术契约仍为 `add_owners`，表示准备给数据资产增加负责人。
 
 ## Target
 
@@ -568,13 +576,13 @@ URN 可以理解为 DataHub 中该资产的唯一身份证号码。
 
 计划添加的 DataHub CorpUser 或 CorpGroup。
 
-## Verification contract
+## How Atlas will verify the change（Verification contract）
 
 真实写入后，系统必须重新读取 DataHub，确认 owner 已经出现。
 
 ## Fixture safety notice
 
-> No DataHub request or mutation will be performed.
+> Demo data only — no request will be sent to DataHub.
 
 表示公共页面只展示流程，不会执行真实修改。
 
@@ -629,10 +637,10 @@ Landing
 → Desk：发现 Verity 需要 Re-entry
 → Map：查看项目、证据、决定和行动关系
 → Workspace：查看变化、有效决定和风险
-→ Restore context
+→ Open Re-entry brief
 → Continuity Workspace
 → Decision & Action
-→ Review proposal
+→ Preview ownership proposal（公开 Fixture）
 → 展示 Fixture Preview
 → Close preview
 ```

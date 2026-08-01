@@ -473,6 +473,7 @@ No unverified runtime capability should be treated as complete until its output 
 
 ## Documentation
 
+- [中文产品讲解手册](docs/nexus-atlas-guide-zh.md)
 - [Nexus Atlas Architecture Review v1.0](docs/Nexus-Atlas-Architecture-Review-v1.0.md)
 - [Implementation Audit — 2026-07-31](docs/Nexus-Atlas-Implementation-Audit-2026-07-31.md)
 - [DataHub Verity Asset Bridge](docs/Nexus-DataHub-Verity-Assets.md)
