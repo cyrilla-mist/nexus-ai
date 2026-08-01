@@ -343,6 +343,15 @@ test("Confirmation Sheet handles Escape, focus trapping, and focus return safely
   assert.match(governanceStyles, /overflow: auto/);
 });
 
+test("ownership repair communicates proposal loading and confirmation intent", () => {
+  assert.match(governanceScript, /button\.setAttribute\("aria-busy", "true"\)/);
+  assert.match(governanceScript, /button\.textContent = "Loading proposal…"/);
+  assert.match(governanceScript, /button\.removeAttribute\("aria-busy"\)/);
+  assert.match(governanceScript, /const restoreButton = \(\) =>/);
+  assert.match(governanceScript, /Confirm repair proposal/);
+  assert.match(governanceStyles, /\.text-action\[aria-busy="true"\]/);
+});
+
 test("workspace navigation exposes four real hash-backed tabs", () => {
   assert.equal((page.match(/role="tab"/g) ?? []).length, 4);
   for (const key of ["brief", "evidence", "memory", "action"]) {
@@ -458,6 +467,14 @@ test("action workspace contains one Decision Gate primary action", () => {
   assert.equal((gateSource.match(/primary-instrument-action/g) ?? []).length, 1);
   assert.doesNotMatch(actionSource, /primary-instrument-action/);
   assert.equal((actionSource.match(/renderAction/g) ?? []).length, 2);
+});
+
+test("ownership-risk Recommended Action opens the governed repair entry point", () => {
+  const actionSource = script.slice(script.indexOf("function renderAction"), script.indexOf("function renderDecisionGate"));
+  assert.match(actionSource, /action\.ownershipRisk/);
+  assert.match(actionSource, /repair-ownership/);
+  assert.match(actionSource, /Review action/);
+  assert.match(governanceScript, /action === "repair-ownership"/);
 });
 
 

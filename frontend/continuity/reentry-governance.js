@@ -85,7 +85,7 @@ function ensureGovernanceSheet() {
       </section>
       <footer class="governance-sheet__footer">
         <button type="submit" value="cancel">Cancel</button>
-        <button class="governance-sheet__confirm" type="submit" value="confirm">Confirm ownership update</button>
+        <button class="governance-sheet__confirm" type="submit" value="confirm">Confirm repair proposal</button>
       </footer>
     </form>`;
   document.body.append(dialog);
@@ -200,8 +200,14 @@ async function requestOwnershipRepair(button) {
     return;
   }
 
-  button.disabled = true;
   const originalLabel = button.textContent;
+  const restoreButton = () => {
+    button.disabled = false;
+    button.removeAttribute("aria-busy");
+    button.textContent = originalLabel;
+  };
+  button.disabled = true;
+  button.setAttribute("aria-busy", "true");
   button.textContent = "Loading proposal…";
   try {
     const proposalResponse = await fetch(config.mutationBridge, {
@@ -214,10 +220,11 @@ async function requestOwnershipRepair(button) {
       );
     }
     const proposal = proposalPayload.proposal;
+    button.removeAttribute("aria-busy");
+    button.textContent = originalLabel;
     const confirmation = await confirmOwnershipProposal(proposal, button);
     if (!confirmation.confirmed) {
-      button.disabled = false;
-      button.textContent = originalLabel;
+      restoreButton();
       if (button.isConnected) button.focus();
       setFeedback("Ownership repair cancelled. DataHub was not changed.", button);
       return;
@@ -256,18 +263,14 @@ async function requestOwnershipRepair(button) {
     );
     window.setTimeout(() => window.location.reload(), 900);
   } catch (error) {
-    button.disabled = false;
-    button.textContent = originalLabel;
+    restoreButton();
     if (button.isConnected) button.focus();
     setFeedback(
       `Ownership remains unresolved: ${error instanceof Error ? error.message : String(error)}`,
       button,
     );
   } finally {
-    if (button.textContent === "Loading proposal…") {
-      button.disabled = false;
-      button.textContent = originalLabel;
-    }
+    if (button.getAttribute("aria-busy") === "true") restoreButton();
   }
 }
 

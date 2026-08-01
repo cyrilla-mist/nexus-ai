@@ -246,7 +246,8 @@ function actionDisplayStatus(action) {
 
 function renderAction(action, index) {
   const displayStatus = actionDisplayStatus(action);
-  return `<article class="action-record ${index === 0 ? "is-priority-action" : ""}"><span class="action-number">${String(index + 1).padStart(2, "0")}</span><div><h3>${escapeHtml(action.label)}</h3><p>${escapeHtml(action.summary)}</p><small>${escapeHtml(action.completionCriteria)}</small><dl><div><dt>OWNER</dt><dd class="${action.ownershipRisk ? "is-risk" : ""}">${escapeHtml(action.owner)}</dd></div><div><dt>STATUS</dt><dd>${escapeHtml(displayStatus)}</dd></div><div><dt>RECORDED STATUS</dt><dd>${escapeHtml(statusLabel(action.status))}</dd></div></dl></div><button class="text-action" type="button" data-prototype-action data-governance-action="review-action" data-entity-id="${escapeHtml(action.id)}">Review action</button></article>`;
+  const governanceAction = action.ownershipRisk ? "repair-ownership" : "review-action";
+  return `<article class="action-record ${index === 0 ? "is-priority-action" : ""}"><span class="action-number">${String(index + 1).padStart(2, "0")}</span><div><h3>${escapeHtml(action.label)}</h3><p>${escapeHtml(action.summary)}</p><small>${escapeHtml(action.completionCriteria)}</small><dl><div><dt>OWNER</dt><dd class="${action.ownershipRisk ? "is-risk" : ""}">${escapeHtml(action.owner)}</dd></div><div><dt>STATUS</dt><dd>${escapeHtml(displayStatus)}</dd></div><div><dt>RECORDED STATUS</dt><dd>${escapeHtml(statusLabel(action.status))}</dd></div></dl></div><button class="text-action" type="button" data-prototype-action data-governance-action="${governanceAction}" data-entity-id="${escapeHtml(action.id)}">Review action</button></article>`;
 }
 
 function renderDecisionGate(ledger) {
