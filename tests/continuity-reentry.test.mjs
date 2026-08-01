@@ -473,8 +473,18 @@ test("ownership-risk Recommended Action opens the governed repair entry point", 
   const actionSource = script.slice(script.indexOf("function renderAction"), script.indexOf("function renderDecisionGate"));
   assert.match(actionSource, /action\.ownershipRisk/);
   assert.match(actionSource, /repair-ownership/);
-  assert.match(actionSource, /Review action/);
+  assert.match(actionSource, /Review proposal/);
   assert.match(governanceScript, /action === "repair-ownership"/);
+});
+
+test("informational Recommended Actions use local details without governance routing", () => {
+  const actionSource = script.slice(script.indexOf("function renderAction"), script.indexOf("function renderDecisionGate"));
+  assert.match(actionSource, /data-action-details/);
+  assert.match(actionSource, /View details/);
+  assert.match(actionSource, /action-details-/);
+  assert.match(script, /querySelectorAll\("\[data-action-details\]"\)/);
+  assert.doesNotMatch(actionSource, /data-governance-action="review-action"/);
+  assert.match(governanceScript, /action === "review-action"/);
 });
 
 

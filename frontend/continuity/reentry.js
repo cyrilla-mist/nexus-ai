@@ -246,8 +246,11 @@ function actionDisplayStatus(action) {
 
 function renderAction(action, index) {
   const displayStatus = actionDisplayStatus(action);
-  const governanceAction = action.ownershipRisk ? "repair-ownership" : "review-action";
-  return `<article class="action-record ${index === 0 ? "is-priority-action" : ""}"><span class="action-number">${String(index + 1).padStart(2, "0")}</span><div><h3>${escapeHtml(action.label)}</h3><p>${escapeHtml(action.summary)}</p><small>${escapeHtml(action.completionCriteria)}</small><dl><div><dt>OWNER</dt><dd class="${action.ownershipRisk ? "is-risk" : ""}">${escapeHtml(action.owner)}</dd></div><div><dt>STATUS</dt><dd>${escapeHtml(displayStatus)}</dd></div><div><dt>RECORDED STATUS</dt><dd>${escapeHtml(statusLabel(action.status))}</dd></div></dl></div><button class="text-action" type="button" data-prototype-action data-governance-action="${governanceAction}" data-entity-id="${escapeHtml(action.id)}">Review action</button></article>`;
+  const isGovernanceAction = action.ownershipRisk === true;
+  const actionControl = isGovernanceAction
+    ? `<button class="text-action" type="button" data-prototype-action data-governance-action="repair-ownership" data-entity-id="${escapeHtml(action.id)}">Review proposal</button>`
+    : `<button class="text-action" type="button" data-action-details="${escapeHtml(action.id)}" aria-expanded="false" aria-controls="action-details-${escapeHtml(action.id)}">View details</button>`;
+  return `<article class="action-record ${index === 0 ? "is-priority-action" : ""}"><span class="action-number">${String(index + 1).padStart(2, "0")}</span><div><h3>${escapeHtml(action.label)}</h3><p>${escapeHtml(action.summary)}</p><small>${escapeHtml(action.completionCriteria)}</small><dl><div><dt>OWNER</dt><dd class="${action.ownershipRisk ? "is-risk" : ""}">${escapeHtml(action.owner)}</dd></div><div><dt>STATUS</dt><dd>${escapeHtml(displayStatus)}</dd></div><div><dt>RECORDED STATUS</dt><dd>${escapeHtml(statusLabel(action.status))}</dd></div></dl><div id="action-details-${escapeHtml(action.id)}" class="action-detail-panel" hidden><p>This recommendation is informational. Opening its details does not request a governed change.</p></div></div>${actionControl}</article>`;
 }
 
 function renderDecisionGate(ledger) {
@@ -357,6 +360,14 @@ function bindPanelInteractions() {
   app.querySelector("[data-review-evidence]")?.addEventListener("click", () => {
     activateWorkspace("evidence");
   });
+  app.querySelectorAll("[data-action-details]").forEach((button) => button.addEventListener("click", () => {
+    const panel = document.getElementById(button.getAttribute("aria-controls"));
+    if (!panel) return;
+    const expanded = button.getAttribute("aria-expanded") === "true";
+    button.setAttribute("aria-expanded", String(!expanded));
+    panel.hidden = expanded;
+    button.textContent = expanded ? "View details" : "Hide details";
+  }));
   app.querySelectorAll("[data-prototype-action]:not([data-governance-action])").forEach((button) => button.addEventListener("click", () => {
     const feedback = app.querySelector(".prototype-feedback");
     if (feedback) feedback.textContent = "Prototype feedback recorded locally. Runtime write-back is not enabled in v0.9.6.";
