@@ -148,6 +148,8 @@ export function buildContextPackageV02(options = {}) {
     ...activeGoals.map((item) => item.id),
     ...confirmedDecisions.map((item) => item.id),
     ...currentEvidence.map((item) => item.id),
+    ...disputedContext.map((item) => item.id),
+    ...staleContext.map((item) => item.id),
     ...openRisks.map((item) => item.id),
     ...nextActions.map((item) => item.id),
   ]);

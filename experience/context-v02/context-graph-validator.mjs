@@ -54,7 +54,7 @@ function requiredPayload(payload, fields, id) {
   });
 }
 
-function validateNode(node, nodeIds, seenNodeIds = nodeIds) {
+function validateNode(node, nodeIds, seenNodeIds = nodeIds, nodesById = new Map()) {
   object(node, "node");
   ["id", "kind", "title", "summary", "scope", "lifecycle", "epistemic", "provenance", "governance", "payload"].forEach((field) => {
     if (!(field in node)) fail(`Node is missing ${field}.`);
@@ -83,14 +83,14 @@ function validateNode(node, nodeIds, seenNodeIds = nodeIds) {
   enumValue(node.governance.inheritance, INHERITANCE, `node ${node.id} governance.inheritance`);
   if (typeof node.governance.requiresConfirmation !== "boolean") fail(`node ${node.id} governance.requiresConfirmation must be boolean.`);
   object(node.payload, `node ${node.id} payload`);
-  if (node.kind === "decision") validateDecision(node, nodeIds);
-  if (node.kind === "action") validateAction(node, nodeIds);
+  if (node.kind === "decision") validateDecision(node, nodeIds, nodesById);
+  if (node.kind === "action") validateAction(node, nodeIds, nodesById);
   if (node.kind === "evidence") requiredPayload(node.payload, ["claim", "sourceRef", "observedAt", "appliesToVersion", "verificationMethod", "result"], node.id);
   if (node.kind === "risk") requiredPayload(node.payload, ["severity", "likelihood", "mitigation"], node.id);
   if (node.kind === "project") validateProject(node);
 }
 
-function validateDecision(node, nodeIds) {
+function validateDecision(node, nodeIds, nodesById) {
   requiredPayload(node.payload, ["question", "choice", "rationale", "alternatives", "constraints", "decidedAt", "decidedBy", "decisionStatus", "supersededBy"], node.id);
   array(node.payload.alternatives, `decision ${node.id} alternatives`);
   array(node.payload.constraints, `decision ${node.id} constraints`);
@@ -102,15 +102,17 @@ function validateDecision(node, nodeIds) {
   if (node.payload.supersededBy !== null) {
     nonEmpty(node.payload.supersededBy, `decision ${node.id} supersededBy`);
     if (!nodeIds.has(node.payload.supersededBy)) fail(`Decision ${node.id} has dangling supersededBy: ${node.payload.supersededBy}`);
+    if (nodesById.get(node.payload.supersededBy)?.kind !== "decision") fail(`Decision ${node.id} supersededBy must reference a decision node: ${node.payload.supersededBy}`);
   }
 }
 
-function validateAction(node, nodeIds) {
+function validateAction(node, nodeIds, nodesById) {
   requiredPayload(node.payload, ["description", "priority", "actionStatus", "completionCriteria", "relatedDecisionRefs", "externalEffect", "requiresConfirmation"], node.id);
   enumValue(node.payload.actionStatus, ACTION_STATUS, `action ${node.id} actionStatus`);
   array(node.payload.relatedDecisionRefs, `action ${node.id} relatedDecisionRefs`);
   node.payload.relatedDecisionRefs.forEach((ref) => {
     if (!nodeIds.has(ref)) fail(`Action ${node.id} has dangling relatedDecisionRef: ${ref}`);
+    if (nodesById.get(ref)?.kind !== "decision") fail(`Action ${node.id} relatedDecisionRef must reference a decision node: ${ref}`);
   });
   if (typeof node.payload.externalEffect !== "boolean" || typeof node.payload.requiresConfirmation !== "boolean") fail(`Action ${node.id} externalEffect and requiresConfirmation must be boolean.`);
   if (node.payload.externalEffect && !node.payload.requiresConfirmation) fail(`External-effect action ${node.id} requires confirmation.`);
@@ -182,8 +184,8 @@ export function validateContextGraph(input) {
     nodeIds.add(node.id);
   });
   const seenNodeIds = new Set();
-  input.nodes.forEach((node) => validateNode(node, nodeIds, seenNodeIds));
   const nodesById = new Map(input.nodes.map((node) => [node.id, node]));
+  input.nodes.forEach((node) => validateNode(node, nodeIds, seenNodeIds, nodesById));
   const milestoneIds = new Set(input.nodes.filter((node) => node.kind === "milestone").map((node) => node.id));
   input.nodes.filter((node) => node.kind === "project").forEach((node) => {
     if (node.payload.currentMilestoneId !== null && !milestoneIds.has(node.payload.currentMilestoneId)) fail(`Project ${node.id} has dangling currentMilestoneId: ${node.payload.currentMilestoneId}`);

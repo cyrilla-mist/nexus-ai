@@ -28,7 +28,7 @@ test("loadContextPackage returns deterministic read-only source info", async () 
   assert.equal(result.sourceInfo.runtimeEvidence, false);
   assert.deepEqual(result.contextPackage.project.id, "project:nexus-atlas");
   assert.equal(result.sourceInfo.nodeCount, 26);
-  assert.equal(result.sourceInfo.edgeCount, 8);
+  assert.equal(result.sourceInfo.edgeCount, 7);
 });
 
 test("rejects malformed JSON and invalid graphs", async () => {

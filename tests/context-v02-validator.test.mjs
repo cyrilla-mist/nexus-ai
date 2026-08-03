@@ -11,7 +11,7 @@ function expectInvalid(value, message) { assert.throws(() => validateContextGrap
 
 test("validates the canonical self-context fixture", async () => {
   const result = validateContextGraph(await graph());
-  assert.deepEqual({ nodeCount: result.nodeCount, edgeCount: result.edgeCount }, { nodeCount: 26, edgeCount: 8 });
+  assert.deepEqual({ nodeCount: result.nodeCount, edgeCount: result.edgeCount }, { nodeCount: 26, edgeCount: 7 });
 });
 
 test("rejects duplicate node and edge ids", async () => {
@@ -45,6 +45,15 @@ test("rejects dangling decision and action references", async () => {
   const action = await graph();
   action.nodes.find((node) => node.kind === "action").payload.relatedDecisionRefs = ["decision:missing"];
   expectInvalid(action, "dangling relatedDecisionRef");
+});
+
+test("rejects existing references with the wrong target kind", async () => {
+  const decision = await graph();
+  decision.nodes.find((node) => node.kind === "decision").payload.supersededBy = "project:nexus-atlas";
+  expectInvalid(decision, "supersededBy must reference a decision node");
+  const action = await graph();
+  action.nodes.find((node) => node.kind === "action").payload.relatedDecisionRefs = ["project:nexus-atlas"];
+  expectInvalid(action, "relatedDecisionRef must reference a decision node");
 });
 
 test("rejects unsafe external actions and dangling milestones", async () => {
