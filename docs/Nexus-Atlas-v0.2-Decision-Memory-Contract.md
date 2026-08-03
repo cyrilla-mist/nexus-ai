@@ -1,7 +1,7 @@
 # Nexus Atlas v0.2 — Decision and Memory Resolution Contract
 
 **Status:** Accepted  
-**Implementation:** Not started  
+**Implementation:** Phase 2B implemented; acceptance pending  
 **Phase:** 2A Contract Design Complete
 
 ## 1. Purpose

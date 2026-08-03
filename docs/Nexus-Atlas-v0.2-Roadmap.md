@@ -1,7 +1,7 @@
 # Nexus Atlas v0.2 — Personal Context Foundation
 
 **Status:** Active
-**Implementation:** Phase 2A contract design complete
+**Implementation:** Phase 2B implementation complete; acceptance pending
 
 ## 1. Executive Summary
 
@@ -105,7 +105,7 @@ next action、owner、priority、completion criteria、related decision、extern
 - Deterministic Ledger contract
 - Phase 2B test matrix
 
-#### Phase 2B — Resolver and Ledger — Planned
+#### Phase 2B — Resolver and Ledger — In progress
 
 - canonical graph extraction
 - deterministic supersession analysis
@@ -113,6 +113,17 @@ next action、owner、priority、completion criteria、related decision、extern
 - memory inheritance projection
 - Decision / Memory Ledger
 - automated tests
+
+#### Phase 2B Implementation Note
+
+- structural Phase 2 validation
+- deterministic Decision resolution
+- deterministic Memory inheritance
+- Decision / Memory Ledger
+- 31-case automated contract suite
+- no Self-Context integration
+- no ContextPackage integration
+- no UI or live source
 
 #### Phase 2C — Self-Context Integration — Planned
 
