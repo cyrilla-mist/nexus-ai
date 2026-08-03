@@ -17,11 +17,26 @@ test("Phase 2B catalog has 31 unique cases and all execute", () => {
       assert.throws(() => buildDecisionMemoryLedger({ graph, ...options }), (error) => error instanceof DecisionMemoryValidationError && error.code === item.expected.errorCode, item.id);
       continue;
     }
-    const ledger = buildDecisionMemoryLedger({ graph, ...options });
     if (item.category === "ledger-determinism") {
-      assert.equal(typeof ledger.ledgerVersion, "string", `${item.id} ledger`);
+      if (item.id === "DM-L01") {
+        assert.deepEqual(buildDecisionMemoryLedger({ graph, ...options }), buildDecisionMemoryLedger({ graph, ...options }));
+      } else if (item.id === "DM-L02") {
+        const ledger = buildDecisionMemoryLedger({ graph, ...options }); assert.equal(Object.isFrozen(ledger), true); assert.ok(Object.values(ledger).every((value) => value === null || typeof value !== "object" || Object.isFrozen(value))); assert.equal(Object.isFrozen(ledger.diagnostics), true); assert.equal(Object.isFrozen(ledger.sourceSummary), true);
+      } else if (item.id === "DM-L03") {
+        const before = structuredClone(graph); buildDecisionMemoryLedger({ graph, ...options }); assert.deepEqual(graph, before);
+      } else if (item.id === "DM-L04") {
+        const shuffled = structuredClone(graph); shuffled.nodes.reverse(); shuffled.edges.reverse(); assert.deepEqual(buildDecisionMemoryLedger({ graph, ...options }), buildDecisionMemoryLedger({ graph: shuffled, ...options }));
+      } else if (item.id === "DM-L05") {
+        const ledger = buildDecisionMemoryLedger({ graph, ...options }); const providerTotal = Object.values(ledger.sourceSummary.providers).reduce((sum, count) => sum + count, 0); assert.equal(ledger.sourceSummary.totalIncludedRecords, providerTotal); assert.equal(ledger.sourceSummary.totalIncludedRecords, 1);
+      } else if (item.id === "DM-L06") {
+        const ledger = buildDecisionMemoryLedger({ graph, ...options }); assert.equal(ledger.omittedRecords.some((record) => record.rule === "restricted"), true); assert.equal(ledger.effectiveDecisions.length + ledger.proposedDecisions.length + ledger.inheritedMemories.length + ledger.inferredMemories.length + ledger.disputedMemories.length + ledger.historicalMemories.length, 0); assert.equal(JSON.stringify(ledger).includes("Statement for memory:restricted"), false);
+      } else if (item.id === "DM-L07") {
+        const originalFetch = globalThis.fetch; const originalNow = Date.now; const originalRandom = Math.random; const modules = ["decision-memory-validator.mjs", "decision-memory-resolver.mjs", "decision-memory-ledger.mjs"].map((name) => fs.readFileSync(new URL(`../experience/context-v02/${name}`, import.meta.url), "utf8")).join("\n"); assert.equal(modules.includes("process.env"), false);
+        try { globalThis.fetch = () => { throw new Error("fetch called"); }; Date.now = () => { throw new Error("Date.now called"); }; Math.random = () => { throw new Error("Math.random called"); }; assert.doesNotThrow(() => buildDecisionMemoryLedger({ graph, ...options })); } finally { globalThis.fetch = originalFetch; Date.now = originalNow; Math.random = originalRandom; }
+      }
       continue;
     }
+    const ledger = buildDecisionMemoryLedger({ graph, ...options });
     const ids = (values) => values.map((value) => value.id).sort();
     assert.deepEqual(ids(ledger.effectiveDecisions), [...item.expected.effectiveDecisionIds].sort(), `${item.id} effective`);
     assert.deepEqual(ids(ledger.proposedDecisions), [...item.expected.proposedDecisionIds].sort(), `${item.id} proposed`);

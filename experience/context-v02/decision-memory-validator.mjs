@@ -89,12 +89,17 @@ function detectCycle(ids, successors, label) {
 
 export function validateDecisionMemoryGraph({ graph, projectId, scopeKey } = {}) {
   if (!graph || typeof graph !== "object") fail("CONTEXT_GRAPH_INVALID", "graph must be an object.");
+  for (const edge of Array.isArray(graph.edges) ? graph.edges : []) {
+    if (edge?.type === "supersedes" && edge.from === edge.to) fail("SUPERSESSION_SELF_LOOP", `Supersession edge ${edge.id || "<unknown>"} is a self-loop.`, { edgeId: edge.id, nodeId: edge.from });
+  }
   try { validateContextGraph(graph); } catch (error) {
     const [code, message] = mapContextError(error); fail(code, message, { cause: error?.name });
   }
   nonEmpty(projectId, "projectId", "MISSING_SCOPE_KEY");
   nonEmpty(scopeKey, "scopeKey", "MISSING_SCOPE_KEY");
   const nodesById = new Map(graph.nodes.map((node) => [node.id, node]));
+  if (!nodesById.has(projectId)) fail("DANGLING_REFERENCE", `Target project does not exist: ${projectId}`, { projectId });
+  if (nodesById.get(projectId)?.kind !== "project") fail("WRONG_REFERENCE_KIND", `Target project is not a project node: ${projectId}`, { projectId, kind: nodesById.get(projectId)?.kind });
   const nodeIds = new Set(nodesById.keys());
   const decisions = graph.nodes.filter((node) => node.kind === "decision");
   const memories = graph.nodes.filter((node) => node.kind === "memory");

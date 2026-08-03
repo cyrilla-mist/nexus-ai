@@ -2,7 +2,7 @@
 
 **Status:** Accepted
 **Target:** Phase 2B
-**Execution:** Automated in Phase 2B
+**Execution:** 31-case automated suite accepted
 
 Each case is a synthetic contract case. Expected sections are Ledger sections; `—` means empty or not applicable. No case authorizes automatic resolution of user content.
 

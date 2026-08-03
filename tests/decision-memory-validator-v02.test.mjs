@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { buildDecisionMemoryCase } from "./helpers/decision-memory-case-fixtures.mjs";
 import { validateDecisionMemoryGraph, DecisionMemoryValidationError } from "../experience/context-v02/decision-memory-validator.mjs";
 
-const expectCode = (graph, code) => assert.throws(() => validateDecisionMemoryGraph({ graph, projectId: "project:test", scopeKey: "project:test" }), (error) => error instanceof DecisionMemoryValidationError && error.code === code);
+const expectCode = (graph, code, projectId = "project:test") => assert.throws(() => validateDecisionMemoryGraph({ graph, projectId, scopeKey: "project:test" }), (error) => error instanceof DecisionMemoryValidationError && error.code === code);
 
 test("valid Decision and Memory graph passes Phase 2 validation", () => assert.equal(validateDecisionMemoryGraph({ graph: buildDecisionMemoryCase("DM-D03").graph, projectId: "project:test", scopeKey: "project:test" }).valid, true));
 test("Phase 2 validator rejects required field and authority failures", () => {
@@ -22,6 +22,13 @@ test("branching is legal while cross-kind and mismatched subjects are errors", (
   const cross = buildDecisionMemoryCase("DM-D01").graph; cross.nodes.push({ ...buildDecisionMemoryCase("DM-M01").graph.nodes.find((node) => node.id === "memory:confirmed"), id: "memory:cross" }); cross.edges.push({ ...buildDecisionMemoryCase("DM-D03").graph.edges[0], id: "edge:cross", from: "decision:current", to: "memory:cross" }); expectCode(cross, "WRONG_REFERENCE_KIND");
   const mismatch = buildDecisionMemoryCase("DM-D03").graph; mismatch.nodes.find((node) => node.id === "decision:new").payload.subjectKey = "other"; expectCode(mismatch, "DECISION_SUBJECT_MISMATCH");
 });
-test("revoked supersession edge remains historical and input is unchanged", () => {
-  const { graph } = buildDecisionMemoryCase("DM-D03"); const before = JSON.stringify(graph); graph.edges[0].lifecycle.state = "revoked"; graph.nodes.find((node) => node.id === "decision:old").payload.supersededBy = null; assert.doesNotThrow(() => validateDecisionMemoryGraph({ graph, projectId: "project:test", scopeKey: "project:test" })); assert.equal(JSON.stringify(graph), JSON.stringify(graph)); assert.notEqual(before, JSON.stringify(graph));
+test("supersession self-loop has its dedicated error before base validation", () => {
+  const { graph } = buildDecisionMemoryCase("DM-D01"); const node = graph.nodes.find((item) => item.kind === "decision"); graph.edges.push({ ...buildDecisionMemoryCase("DM-D03").graph.edges[0], id: "edge:self", from: node.id, to: node.id }); expectCode(graph, "SUPERSESSION_SELF_LOOP");
+});
+test("target project must exist and be a project node", () => {
+  const { graph } = buildDecisionMemoryCase("DM-D01"); expectCode(graph, "DANGLING_REFERENCE", "project:missing");
+  const wrongKind = buildDecisionMemoryCase("DM-D01").graph; expectCode(wrongKind, "WRONG_REFERENCE_KIND", "evidence:case");
+});
+test("revoked supersession edge remains historical and validator preserves input", () => {
+  const { graph } = buildDecisionMemoryCase("DM-D03"); graph.edges[0].lifecycle.state = "revoked"; graph.nodes.find((node) => node.id === "decision:old").payload.supersededBy = null; const beforeValidation = structuredClone(graph); assert.doesNotThrow(() => validateDecisionMemoryGraph({ graph, projectId: "project:test", scopeKey: "project:test" })); assert.deepEqual(graph, beforeValidation);
 });

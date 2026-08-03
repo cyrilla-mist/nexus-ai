@@ -1,6 +1,12 @@
 import { validateDecisionMemoryGraph } from "./decision-memory-validator.mjs";
 
 const clone = (value) => value === undefined ? undefined : JSON.parse(JSON.stringify(value));
+function deepFreeze(value) {
+  if (!value || typeof value !== "object" || Object.isFrozen(value)) return value;
+  Object.freeze(value);
+  Object.values(value).forEach(deepFreeze);
+  return value;
+}
 const byId = (a, b) => String(a.id).localeCompare(String(b.id));
 const bySubject = (a, b) => String(a.payload.subjectKey).localeCompare(String(b.payload.subjectKey)) || String(a.payload.scopeKey).localeCompare(String(b.payload.scopeKey)) || byId(a, b);
 const groupKey = (node) => `${node.payload.scopeKey}::${node.payload.subjectKey}`;
@@ -109,16 +115,24 @@ export function resolveDecisionMemory({ graph, projectId, scopeKey, consentedRec
     proposedDecisionNodes.push(...group.filter((node) => node.payload.decisionStatus === "proposed" || node.epistemic.verification === "inferred"));
   }
   const memorySuccessors = buildSuccessors(graph, "memory");
-  const memoryConflicts = new Set();
-  for (const node of includedMemories) {
-    const refs = [...(node.payload.conflictsWith || [])];
-    for (const edge of graph.edges.filter((item) => item.type === "contradicts" && item.lifecycle.state === "active" && item.from === node.id)) refs.push(edge.to);
-    for (const ref of refs) {
-      const other = includedMemories.find((item) => item.id === ref);
-      if (other && node.epistemic.verification === "confirmed" && other.epistemic.verification === "confirmed" && node.epistemic.freshness === "current" && other.epistemic.freshness === "current" && isScopeMatch(node, projectId, scopeKey) && isScopeMatch(other, projectId, scopeKey)) { memoryConflicts.add(node.id); memoryConflicts.add(other.id); }
-    }
+  const currentMemoryCandidates = includedMemories.filter((node) => node.lifecycle.state === "active" && node.epistemic.verification === "confirmed" && node.epistemic.freshness === "current" && ["recorded", "inherited"].includes(node.payload.memoryStatus) && isScopeMatch(node, projectId, scopeKey) && !isRestricted(node));
+  const candidateById = new Map(currentMemoryCandidates.map((node) => [node.id, node]));
+  const memoryAdjacency = new Map(currentMemoryCandidates.map((node) => [node.id, new Set()]));
+  const connect = (leftId, rightId) => {
+    const left = candidateById.get(leftId); const right = candidateById.get(rightId);
+    if (!left || !right || left.payload.subjectKey !== right.payload.subjectKey || left.payload.scopeKey !== right.payload.scopeKey || left.scope.projectId !== right.scope.projectId) return;
+    memoryAdjacency.get(leftId).add(rightId); memoryAdjacency.get(rightId).add(leftId);
+  };
+  for (const node of currentMemoryCandidates) for (const ref of node.payload.conflictsWith || []) connect(node.id, ref);
+  for (const edge of graph.edges.filter((item) => item.type === "contradicts" && item.lifecycle.state === "active")) connect(edge.from, edge.to);
+  const memoryConflicts = new Set(); const visitedMemoryIds = new Set();
+  for (const node of [...currentMemoryCandidates].sort(byId)) {
+    if (visitedMemoryIds.has(node.id) || !memoryAdjacency.get(node.id).size) continue;
+    const component = []; const queue = [node.id]; visitedMemoryIds.add(node.id);
+    while (queue.length) { const id = queue.shift(); component.push(id); for (const next of [...memoryAdjacency.get(id)].sort()) if (!visitedMemoryIds.has(next)) { visitedMemoryIds.add(next); queue.push(next); } }
+    component.sort(); component.forEach((id) => memoryConflicts.add(id));
+    conflicts.push(makeConflict("memory_statement_conflict", node.payload.subjectKey, node.payload.scopeKey, component, "Confirmed current Memories have an explicit conflict component."));
   }
-  if (memoryConflicts.size) { const sample = includedMemories.find((node) => memoryConflicts.has(node.id)); conflicts.push(makeConflict("memory_statement_conflict", sample.payload.subjectKey, sample.payload.scopeKey, [...memoryConflicts], "Confirmed current Memories have an explicit conflict.")); }
   const inheritedMemoryNodes = []; const inferredMemoryNodes = []; const disputedMemoryNodes = []; const historicalMemoryNodes = [];
   for (const node of includedMemories) {
     if (memoryConflicts.has(node.id)) continue;
@@ -131,10 +145,11 @@ export function resolveDecisionMemory({ graph, projectId, scopeKey, consentedRec
   const sortNodes = (nodes) => [...nodes].sort((a, b) => String(a.payload.subjectKey).localeCompare(String(b.payload.subjectKey)) || String(a.lifecycle.updatedAt).localeCompare(String(b.lifecycle.updatedAt)) || byId(a, b));
   const uniqueConflicts = [...new Map(conflicts.map((item) => [item.conflictId, item])).values()].sort((a, b) => a.type.localeCompare(b.type) || a.subjectKey.localeCompare(b.subjectKey) || a.conflictId.localeCompare(b.conflictId));
   const allReferencedDecisionIds = decisionChains.flatMap((chain) => chain.orderedDecisionIds);
-  return {
+  const result = {
     projectId, scopeKey, effectiveDecisionNodes: sortNodes(effectiveDecisionNodes), proposedDecisionNodes: sortNodes(proposedDecisionNodes), decisionChains: decisionChains.sort((a, b) => a.subjectKey.localeCompare(b.subjectKey) || a.scopeKey.localeCompare(b.scopeKey)), conflicts: uniqueConflicts,
     inheritedMemoryNodes: sortNodes(inheritedMemoryNodes), inferredMemoryNodes: sortNodes(inferredMemoryNodes), disputedMemoryNodes: sortNodes(disputedMemoryNodes), historicalMemoryNodes: sortNodes(historicalMemoryNodes), omittedRecords: omittedRecords.sort((a, b) => a.rule.localeCompare(b.rule) || a.id.localeCompare(b.id)),
     diagnostics: { decisionCount: decisions.length, memoryCount: memories.length, effectiveDecisionCount: effectiveDecisionNodes.length, proposedDecisionCount: proposedDecisionNodes.length, conflictCount: uniqueConflicts.length, inheritedMemoryCount: inheritedMemoryNodes.length, inferredMemoryCount: inferredMemoryNodes.length, disputedMemoryCount: disputedMemoryNodes.length, historicalMemoryCount: historicalMemoryNodes.length, omittedCount: omittedRecords.length, chainCount: decisionChains.length },
     sourceRecordIds: sortedUnique([...effectiveDecisionNodes, ...proposedDecisionNodes, ...inheritedMemoryNodes, ...inferredMemoryNodes, ...disputedMemoryNodes, ...historicalMemoryNodes].map((node) => node.id).concat(allReferencedDecisionIds, uniqueConflicts.flatMap((item) => item.recordIds)))
   };
+  return deepFreeze(clone(result));
 }

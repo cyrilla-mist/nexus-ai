@@ -20,11 +20,13 @@ export function buildDecisionMemoryLedger({ graph, projectId, scopeKey, generate
   if (!validGeneratedAt(generatedAt)) throw new DecisionMemoryValidationError("INVALID_GENERATED_AT", "generatedAt must be supplied as a valid ISO 8601 timestamp.", { field: "generatedAt" });
   const resolved = resolveDecisionMemory({ graph, projectId, scopeKey, consentedRecordIds });
   const includedNodes = new Map(graph.nodes.map((node) => [node.id, node]));
-  const referenced = new Set(resolved.sourceRecordIds);
-  const providers = new Map();
-  for (const id of referenced) {
+  const includedRecords = new Map();
+  for (const id of resolved.sourceRecordIds) {
     const node = includedNodes.get(id);
-    if (!node || node.governance.sensitivity === "restricted") continue;
+    if (node && node.governance.sensitivity !== "restricted") includedRecords.set(node.id, node);
+  }
+  const providers = new Map();
+  for (const node of includedRecords.values()) {
     providers.set(node.provenance.provider, (providers.get(node.provenance.provider) || 0) + 1);
   }
   const ledger = {
@@ -41,7 +43,7 @@ export function buildDecisionMemoryLedger({ graph, projectId, scopeKey, generate
     historicalMemories: resolved.historicalMemoryNodes.map(memoryProjection),
     omittedRecords: clone(resolved.omittedRecords),
     diagnostics: clone(resolved.diagnostics),
-    sourceSummary: { totalIncludedRecords: referenced.size, providers: Object.fromEntries([...providers.entries()].sort(([a], [b]) => a.localeCompare(b))) }
+    sourceSummary: { totalIncludedRecords: includedRecords.size, providers: Object.fromEntries([...providers.entries()].sort(([a], [b]) => a.localeCompare(b))) }
   };
   return deepFreeze(ledger);
 }

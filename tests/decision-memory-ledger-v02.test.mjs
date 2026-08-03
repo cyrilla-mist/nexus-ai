@@ -15,3 +15,11 @@ test("Ledger is deterministic, input-safe, and keeps kinds separated", () => {
   const fixture = buildDecisionMemoryCase("DM-M01"); const before = JSON.stringify(fixture.graph); const a = buildDecisionMemoryLedger({ graph: fixture.graph, ...fixture.options }); const shuffled = JSON.parse(JSON.stringify(fixture.graph)); shuffled.nodes.reverse(); const b = buildDecisionMemoryLedger({ graph: shuffled, ...fixture.options }); assert.deepEqual(a, b); assert.equal(JSON.stringify(fixture.graph), before); assert.equal(a.effectiveDecisions.length, 0); assert.equal(a.inheritedMemories.length, 1);
 });
 test("Ledger omits restricted records without leaking payload", () => { const ledger = make("DM-M06"); assert.equal(ledger.omittedRecords[0].rule, "restricted"); assert.equal(JSON.stringify(ledger).includes("Statement for memory:restricted"), false); });
+test("Ledger source summary counts unique legal records only", () => {
+  const ledger = make("DM-D04"); const providerTotal = Object.values(ledger.sourceSummary.providers).reduce((sum, count) => sum + count, 0); assert.equal(ledger.sourceSummary.totalIncludedRecords, providerTotal); assert.equal(ledger.sourceSummary.totalIncludedRecords, 3);
+  const restricted = make("DM-L06"); assert.equal(restricted.sourceSummary.totalIncludedRecords, 0); assert.deepEqual(restricted.sourceSummary.providers, {});
+});
+test("Ledger accepts frozen Resolver output and preserves restricted provenance safety", () => {
+  const { graph, options } = buildDecisionMemoryCase("DM-M06"); const ledger = buildDecisionMemoryLedger({ graph, ...options }); assert.equal(Object.isFrozen(ledger), true); assert.equal(JSON.stringify(ledger).includes("synthetic:memory:restricted"), false);
+  const shuffled = structuredClone(graph); shuffled.nodes.reverse(); shuffled.edges.reverse(); assert.deepEqual(ledger, buildDecisionMemoryLedger({ graph: shuffled, ...options }));
+});
