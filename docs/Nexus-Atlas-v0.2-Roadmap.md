@@ -1,7 +1,7 @@
 # Nexus Atlas v0.2 — Personal Context Foundation
 
-**Status:** Proposed  
-**Implementation:** Not started
+**Status:** Active
+**Implementation:** Phase 1 in progress
 
 ## 1. Executive Summary
 
@@ -80,27 +80,31 @@ next action、owner、priority、completion criteria、related decision、extern
 
 ## 6. Delivery Phases
 
-### Phase 0 — Model and Governance
+### Phase 0 — Model and Governance — Complete
 
 建立 canonical Context model，分离 lifecycle、verification、freshness；定义 provenance contract、authority rules、privacy and inheritance rules，并提供 Nexus self-context example。
 
-### Phase 1 — Self-Context Provider
+### Phase 1 — Self-Context Provider — In progress
 
 实现 deterministic Nexus Atlas self-context provider 和 Context Package projection，补充可复用测试，不重设计 UI。
 
-### Phase 2 — Generalized Decision and Memory
+#### Phase 1 Implementation Note
+
+本阶段实现 canonical graph validation、deterministic package projection 和 self-context fixture provider；不接入 UI，不接入 live source，不执行 external mutation。现有 v0.1 Continuity Builder 与 Fixture Provider 保持不变。
+
+### Phase 2 — Generalized Decision and Memory — Planned
 
 推广 Decision Record、Memory Record、冲突和 supersession 行为，以及可复用的 ledger projection。
 
-### Phase 3 — Context Package
+### Phase 3 — Context Package — Planned
 
 生成包含 identity snapshot、project state、valid decisions、current evidence、disputed context、stale context、risks、next actions 和 omitted context 的 deterministic Context Package。
 
-### Phase 4 — First Source Adapter
+### Phase 4 — First Source Adapter — Planned
 
 优先评估 GitHub Adapter，仅读取 repository metadata、commits、issues and pull request references、release and version context。GitHub 只对其可验证的仓库状态具有权威，不是用户身份、偏好和全部决策的权威来源。
 
-### Phase 5 — Product Surface
+### Phase 5 — Product Surface — Planned
 
 待底层模型稳定后再决定 Identity view、generalized project selector、personal Context Inspector、source controls 和 capture/confirmation flow。
 
