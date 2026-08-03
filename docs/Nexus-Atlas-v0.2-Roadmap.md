@@ -135,9 +135,20 @@ next action、owner、priority、completion criteria、related decision、extern
 - Acceptance tests cover migration, classification, immutability, and determinism.
 - No UI redesign, live source, or external mutation is included.
 
-### Phase 3 — Context Package — Planned
+### Phase 3 — Generalized Context Package — Planned
 
-生成包含 identity snapshot、project state、valid decisions、current evidence、disputed context、stale context、risks、next actions 和 omitted context 的 deterministic Context Package。
+Phase 3 将定义通用 Context Package contract，包括：
+
+- generalized Context Package schema
+- inherited Memory section design
+- inferred and disputed Memory inclusion rules
+- Decision chain inclusion rules
+- unresolved conflict representation
+- multiple-project package selection
+- package-level omission and source-summary rules
+- backward compatibility with the Phase 1 package shape
+
+Phase 3 尚未实现。Phase 2C 没有扩展 Context Package 顶层 schema，只通过 Provider 单独返回 Ledger；Phase 3 保持 Planned，不是 In progress。
 
 ### Phase 4 — First Source Adapter — Planned
 

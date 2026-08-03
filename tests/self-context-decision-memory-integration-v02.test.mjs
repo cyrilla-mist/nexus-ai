@@ -38,7 +38,16 @@ test("integrates the canonical graph, Ledger, and Context Package deterministica
   assert.equal(ledger.unresolvedConflicts.length, 0);
   assert.deepEqual(ids(pkg.confirmedDecisions), ids(ledger.effectiveDecisions));
   assert.deepEqual(ids(pkg.nextActions), ["action:define-phase3-context-package-contract"]);
-  assert.equal(pkg.sourceSummary.totalIncludedNodes, 17);
+  assert.equal(pkg.sourceSummary.totalIncludedNodes, 19);
+  assert.deepEqual(ids(pkg.currentEvidence), ["evidence:architecture-review", "evidence:readme-baseline", "evidence:repository-reference", "evidence:v02-context-model", "evidence:v02-roadmap"]);
+  for (const id of ["evidence:v02-roadmap", "evidence:v02-context-model"]) {
+    const evidence = graph.nodes.find((node) => node.id === id);
+    assert.equal(evidence.epistemic.verification, "confirmed");
+    assert.equal(evidence.epistemic.freshness, "current");
+    const text = JSON.stringify(evidence).toLowerCase();
+    assert.equal(text.includes("implementation has not started"), false);
+    assert.equal(text.includes('result":"proposed'), false);
+  }
   assert.equal(Object.values(ledger.sourceSummary.providers).reduce((sum, count) => sum + count, 0), ledger.sourceSummary.totalIncludedRecords);
   assert.deepEqual(first, second);
   assert.deepEqual(first.graph, second.graph);

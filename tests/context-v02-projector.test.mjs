@@ -20,7 +20,7 @@ test("projects the expected canonical sections", async () => {
     identitySnapshot: [],
     activeGoals: [],
     confirmedDecisions: ["decision:context-foundation-first", "decision:long-term-repository", "decision:no-broad-ingestion-first", "decision:no-single-external-store", "decision:self-context-first", "decision:separate-context-states"],
-    currentEvidence: ["evidence:architecture-review", "evidence:readme-baseline", "evidence:repository-reference"],
+    currentEvidence: ["evidence:architecture-review", "evidence:readme-baseline", "evidence:repository-reference", "evidence:v02-context-model", "evidence:v02-roadmap"],
     disputedContext: [],
     staleContext: ["memory:connectors-first-superseded"],
     openRisks: ["risk:broad-ingestion-too-early", "risk:identity-inference-promotion", "risk:single-status-collapse", "risk:ui-defines-model", "risk:unprovenanced-model-facts"],
@@ -146,4 +146,16 @@ test("preserves Ledger omissions as safe explicit package metadata", async () =>
   const omission = result.omittedContext.find((item) => item.id === "decision:connectors-first");
   assert.deepEqual(omission, { id: "decision:connectors-first", reason: "Decision / Memory governance excluded this record.", rule: "superseded" });
   assert.equal(JSON.stringify(result.omittedContext).includes("choice"), false);
+});
+
+test("deduplicates omissions by id and rule while preserving first occurrence", async () => {
+  const input = await graph();
+  input.contextPackage.omittedContext.unshift(
+    { id: "memory:model-governance-first", rule: "test-rule", reason: "first" },
+    { id: "memory:model-governance-first", rule: "test-rule", reason: "second" },
+  );
+  const ledger = buildDecisionMemoryLedger({ graph: input, projectId: "project:nexus-atlas", scopeKey: "project:nexus-atlas", generatedAt: input.metadata.generatedAt });
+  const result = buildContextPackageV02({ graph: input, generatedAt: input.metadata.generatedAt, decisionMemoryLedger: { ...ledger, omittedRecords: [{ id: "memory:model-governance-first", kind: "memory", rule: "test-rule" }] } });
+  assert.deepEqual(result.omittedContext.filter((item) => item.id === "memory:model-governance-first"), [{ id: "memory:model-governance-first", rule: "test-rule", reason: "first" }]);
+  assert.equal(JSON.stringify(result.omittedContext).includes("statement"), false);
 });

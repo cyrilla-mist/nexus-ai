@@ -125,6 +125,17 @@ function computedOmissions(nodes) {
   });
 }
 
+function dedupeOmissions(items) {
+  const seen = new Set();
+  return items.filter((item) => {
+    if (typeof item?.id !== "string" || typeof item?.rule !== "string") return true;
+    const key = `${item.id}\u0000${item.rule}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 const LEDGER_ARRAY_FIELDS = ["effectiveDecisions", "decisionChains", "proposedDecisions", "unresolvedConflicts", "inheritedMemories", "inferredMemories", "disputedMemories", "historicalMemories", "omittedRecords"];
 
 function validateDecisionMemoryLedger(ledger, graph, generatedAt) {
@@ -206,10 +217,10 @@ export function buildContextPackageV02(options = {}) {
     staleContext,
     openRisks,
     nextActions,
-    omittedContext: [...explicitOmissions(graph), ...(decisionMemoryLedger ? [
+    omittedContext: dedupeOmissions([...explicitOmissions(graph), ...(decisionMemoryLedger ? [
       ...computedOmissions(nodes.filter((node) => !decisionMemoryIds.has(node.id))),
       ...decisionMemoryLedger.omittedRecords.map((item) => ({ id: item.id, reason: "Decision / Memory governance excluded this record.", rule: item.rule }))
-    ] : computedOmissions(nodes))],
+    ] : computedOmissions(nodes))]),
     sourceSummary: { totalIncludedNodes: includedNodes.length, providers },
   };
   return deepFreeze(clone(result));

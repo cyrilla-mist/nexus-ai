@@ -141,26 +141,26 @@
     {
       "id": "evidence:v02-roadmap",
       "kind": "evidence",
-      "title": "v0.2 roadmap proposal",
-      "summary": "The roadmap proposes Personal Context Foundation as the v0.2 direction; it is not runtime evidence.",
+      "title": "v0.2 roadmap status",
+      "summary": "The roadmap records Phase 2 as complete and Phase 3 as planned.",
       "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
-      "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T00:00:00+08:00" },
-      "epistemic": { "verification": "unverified", "confidence": 0.8, "freshness": "current" },
-      "provenance": { "provider": "repository", "reference": "docs/Nexus-Atlas-v0.2-Roadmap.md", "capturedAt": "2026-08-03T00:00:00+08:00", "retrievalMode": "proposed-document-review", "authority": "proposed-document" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T23:30:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "repository", "reference": "docs/Nexus-Atlas-v0.2-Roadmap.md", "capturedAt": "2026-08-03T23:30:00+08:00", "retrievalMode": "repository-document-review", "authority": "repository-document" },
       "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
-      "payload": { "claim": "The Personal Context Foundation roadmap is proposed and implementation has not started.", "sourceRef": "docs/Nexus-Atlas-v0.2-Roadmap.md", "observedAt": "2026-08-03T00:00:00+08:00", "appliesToVersion": "feature/personal-context-foundation", "verificationMethod": "proposed repository reference", "result": "proposed" }
+      "payload": { "claim": "The Nexus Atlas v0.2 roadmap records Phase 2 as complete and Phase 3 as planned.", "sourceRef": "docs/Nexus-Atlas-v0.2-Roadmap.md", "observedAt": "2026-08-03T23:30:00+08:00", "appliesToVersion": "v0.2-phase2-complete", "verificationMethod": "repository document review", "result": "confirmed" }
     },
     {
       "id": "evidence:v02-context-model",
       "kind": "evidence",
-      "title": "v0.2 canonical model proposal",
-      "summary": "The Context Model proposes separated lifecycle, verification, freshness, provenance, and governance.",
+      "title": "v0.2 canonical model",
+      "summary": "The canonical Context Model documents the accepted Phase 2 Decision and Memory extensions and the Self-Context integration boundary.",
       "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
-      "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T00:00:00+08:00" },
-      "epistemic": { "verification": "unverified", "confidence": 0.8, "freshness": "current" },
-      "provenance": { "provider": "repository", "reference": "docs/Nexus-Atlas-v0.2-Context-Model.md", "capturedAt": "2026-08-03T00:00:00+08:00", "retrievalMode": "proposed-model-review", "authority": "proposed-document" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T23:30:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "repository", "reference": "docs/Nexus-Atlas-v0.2-Context-Model.md", "capturedAt": "2026-08-03T23:30:00+08:00", "retrievalMode": "repository-document-review", "authority": "repository-document" },
       "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
-      "payload": { "claim": "The canonical v0.2 Context Model separates lifecycle, verification, freshness, provenance, and governance.", "sourceRef": "docs/Nexus-Atlas-v0.2-Context-Model.md", "observedAt": "2026-08-03T00:00:00+08:00", "appliesToVersion": "feature/personal-context-foundation", "verificationMethod": "proposed repository reference", "result": "proposed" }
+      "payload": { "claim": "The canonical v0.2 Context Model includes the accepted Phase 2 Decision and Memory extensions and Self-Context integration boundary.", "sourceRef": "docs/Nexus-Atlas-v0.2-Context-Model.md", "observedAt": "2026-08-03T23:30:00+08:00", "appliesToVersion": "v0.2-phase2-complete", "verificationMethod": "repository document review", "result": "confirmed" }
     },
     {
       "id": "memory:v02-development-started",
@@ -373,7 +373,7 @@
     "identitySnapshot": [],
     "activeGoals": [],
     "confirmedDecisions": ["decision:context-foundation-first", "decision:long-term-repository", "decision:no-broad-ingestion-first", "decision:no-single-external-store", "decision:self-context-first", "decision:separate-context-states"],
-    "currentEvidence": ["evidence:architecture-review", "evidence:readme-baseline", "evidence:repository-reference"],
+    "currentEvidence": ["evidence:architecture-review", "evidence:readme-baseline", "evidence:repository-reference", "evidence:v02-context-model", "evidence:v02-roadmap"],
     "disputedContext": [],
     "staleContext": ["memory:connectors-first-superseded"],
     "openRisks": ["risk:broad-ingestion-too-early", "risk:identity-inference-promotion", "risk:single-status-collapse", "risk:ui-defines-model", "risk:unprovenanced-model-facts"],
@@ -384,6 +384,6 @@
       { "item": "unrestricted chat history", "reason": "No automatic full-chat import is in v0.2 scope." },
       { "item": "unverified inferred preferences", "reason": "Inferred context cannot be silently promoted to confirmed user fact." }
     ],
-    "sourceSummary": { "totalIncludedNodes": 17, "providers": { "architecture-baseline": 1, "context-model": 1, "governance-design": 5, "human-decision": 4, "human-instruction": 1, "repository": 4, "roadmap": 1 } }
+    "sourceSummary": { "totalIncludedNodes": 19, "providers": { "architecture-baseline": 1, "context-model": 1, "governance-design": 5, "human-decision": 4, "human-instruction": 1, "repository": 6, "roadmap": 1 } }
   }
 }

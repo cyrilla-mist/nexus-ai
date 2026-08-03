@@ -75,3 +75,18 @@ test("loadContextPackage returns Ledger and a deeply frozen wrapper", async () =
   assert.deepEqual(consentedRecordIds, []);
   assert.deepEqual(result.contextPackage.confirmedDecisions.map((item) => item.id).sort(), result.decisionMemoryLedger.effectiveDecisions.map((item) => item.id).sort());
 });
+
+test("rejects invalid consentedRecordIds before copying", () => {
+  for (const value of ["memory:id", new Set(["memory:id"]), {}, 1, ["memory:id", 1]]) {
+    assert.throws(() => createSelfContextProvider({ consentedRecordIds: value }), { name: "TypeError", message: "consentedRecordIds must be an array of strings." });
+  }
+});
+
+test("copies a valid consent array and isolates later caller mutation", async () => {
+  const consentedRecordIds = ["memory:github-adapter-proposed"];
+  const provider = createSelfContextProvider({ readFileImpl: fixtureText, consentedRecordIds });
+  consentedRecordIds.push("memory:unexpected");
+  const ledger = await provider.loadDecisionMemoryLedger();
+  assert.equal(ledger.inferredMemories.some((item) => item.id === "memory:github-adapter-proposed"), true);
+  assert.equal(ledger.omittedRecords.some((item) => item.id === "memory:unexpected"), false);
+});

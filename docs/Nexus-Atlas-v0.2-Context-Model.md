@@ -143,6 +143,8 @@ restricted 默认不得进入 ContextPackage；explicit_only 必须由用户明�
 
 ## 16. Migration from v0.1
 
+渐进兼容映射为：`project` → project ContextNode；`decisions` → decision；`risks` → risk；`evidence` → evidence；`tasks / actions` → action；relationships → ContextEdge。expected findings 是 derived projection，不是 canonical truth。本轮不重写现有运行时，只定义后续迁移策略。
+
 ## 17. Phase 2 Decision Extension
 
 Decision nodes retain the v0.2 lifecycle, epistemic, provenance, and governance fields and add stable `payload.subjectKey`, `payload.scopeKey`, and `payload.evidenceRefs`. An active `supersedes` edge has a fixed old-record-to-new-record direction: the predecessor is `from` and the successor is `to`. Decision history is represented by deterministic `decisionChains`; historical Decisions are never placed in `historicalMemories` or treated as current decisions.
@@ -154,5 +156,3 @@ Memory nodes use the same separated lifecycle, verification, and freshness model
 ## 19. Self-Context Integration Boundary
 
 The Self-Context Provider validates the canonical graph, generates a deterministic Decision / Memory Ledger, and supplies that Ledger to the Context Package projector. The Ledger is derived governance output and is not written back to the canonical graph. The projector uses Ledger effective Decisions and Memory classifications while preserving the existing ContextPackage shape; it does not add a Ledger section. Phase 3 may generalize package sections, but that work is not implemented here.
-
-渐进兼容映射为：`project` → project ContextNode；`decisions` → decision；`risks` → risk；`evidence` → evidence；`tasks / actions` → action；relationships → ContextEdge。expected findings 是 derived projection，不是 canonical truth。本轮不重写现有运行时，只定义后续迁移策略。

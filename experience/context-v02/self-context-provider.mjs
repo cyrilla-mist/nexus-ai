@@ -28,7 +28,11 @@ export function createSelfContextProvider(options = {}) {
   const configuredGeneratedAt = options.generatedAt;
   const projectId = options.projectId || "project:nexus-atlas";
   const scopeKey = options.scopeKey || "project:nexus-atlas";
-  const consentedRecordIds = [...(options.consentedRecordIds || [])];
+  const providedConsentedRecordIds = options.consentedRecordIds;
+  if (providedConsentedRecordIds !== undefined && (!Array.isArray(providedConsentedRecordIds) || providedConsentedRecordIds.some((id) => typeof id !== "string"))) {
+    throw new TypeError("consentedRecordIds must be an array of strings.");
+  }
+  const consentedRecordIds = [...(providedConsentedRecordIds || [])];
   let graphPromise;
   let ledgerPromise;
 
