@@ -1,7 +1,7 @@
 # Nexus Atlas v0.2 — Personal Context Foundation
 
 **Status:** Active
-**Implementation:** Phase 1 complete
+**Implementation:** Phase 2A contract design complete
 
 ## 1. Executive Summary
 
@@ -92,9 +92,34 @@ next action、owner、priority、completion criteria、related decision、extern
 
 本阶段实现 canonical graph validation、deterministic package projection 和 self-context fixture provider；不接入 UI，不接入 live source，不执行 external mutation。现有 v0.1 Continuity Builder 与 Fixture Provider 保持不变。
 
-### Phase 2 — Generalized Decision and Memory — Planned
+### Phase 2 — Generalized Decision and Memory — In progress
 
 推广 Decision Record、Memory Record、冲突和 supersession 行为，以及可复用的 ledger projection。
+
+#### Phase 2A — Contract Design — Complete
+
+- Decision resolution contract
+- Supersession chain rules
+- Conflict classification
+- Memory inheritance rules
+- Deterministic Ledger contract
+- Phase 2B test matrix
+
+#### Phase 2B — Resolver and Ledger — Planned
+
+- canonical graph extraction
+- deterministic supersession analysis
+- conflict detection
+- memory inheritance projection
+- Decision / Memory Ledger
+- automated tests
+
+#### Phase 2C — Self-Context Integration — Planned
+
+- integrate Resolver with Nexus self-context
+- update Context Package input boundary
+- acceptance testing
+- no UI redesign
 
 ### Phase 3 — Context Package — Planned
 
