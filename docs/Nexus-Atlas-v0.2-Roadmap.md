@@ -1,7 +1,7 @@
 # Nexus Atlas v0.2 — Personal Context Foundation
 
 **Status:** Active
-**Implementation:** Phase 2B complete
+**Implementation:** Phase 2 complete
 
 ## 1. Executive Summary
 
@@ -92,7 +92,7 @@ next action、owner、priority、completion criteria、related decision、extern
 
 本阶段实现 canonical graph validation、deterministic package projection 和 self-context fixture provider；不接入 UI，不接入 live source，不执行 external mutation。现有 v0.1 Continuity Builder 与 Fixture Provider 保持不变。
 
-### Phase 2 — Generalized Decision and Memory — In progress
+### Phase 2 — Generalized Decision and Memory — Complete
 
 推广 Decision Record、Memory Record、冲突和 supersession 行为，以及可复用的 ledger projection。
 
@@ -125,12 +125,15 @@ next action、owner、priority、completion criteria、related decision、extern
 - no ContextPackage integration
 - no UI or live source
 
-#### Phase 2C — Self-Context Integration — Planned
+#### Phase 2C — Self-Context Integration — Complete
 
-- integrate Resolver with Nexus self-context
-- update Context Package input boundary
-- acceptance testing
-- no UI redesign
+- Self-Context uses the canonical Decision / Memory Ledger.
+- Same-kind Decision and Memory supersession is enforced.
+- Context Package effective Decisions are governed by the Ledger.
+- Historical Decisions remain in `decisionChains`; historical Memories enter `staleContext`.
+- The Provider returns the Ledger and Context Package through a deterministic, read-only boundary.
+- Acceptance tests cover migration, classification, immutability, and determinism.
+- No UI redesign, live source, or external mutation is included.
 
 ### Phase 3 — Context Package — Planned
 

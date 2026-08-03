@@ -11,7 +11,7 @@ function expectInvalid(value, message) { assert.throws(() => validateContextGrap
 
 test("validates the canonical self-context fixture", async () => {
   const result = validateContextGraph(await graph());
-  assert.deepEqual({ nodeCount: result.nodeCount, edgeCount: result.edgeCount }, { nodeCount: 26, edgeCount: 7 });
+  assert.deepEqual({ nodeCount: result.nodeCount, edgeCount: result.edgeCount }, { nodeCount: 29, edgeCount: 9 });
 });
 
 test("rejects duplicate node and edge ids", async () => {

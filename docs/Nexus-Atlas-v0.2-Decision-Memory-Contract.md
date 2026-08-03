@@ -1,8 +1,8 @@
 # Nexus Atlas v0.2 — Decision and Memory Resolution Contract
 
 **Status:** Accepted  
-**Implementation:** Phase 2B complete  
-**Phase:** Phase 2B Resolver and Ledger Complete
+**Implementation:** Phase 2 complete
+**Phase:** Phase 2C Self-Context Integration Complete
 
 ## 1. Purpose
 
@@ -205,13 +205,13 @@ Decisions sort by `subjectKey`, `decidedAt`, then `id`; conflicts by `type`, `su
 
 ## 15. Relationship with ContextPackage
 
-The intended flow is:
+The implemented flow is:
 
 ```text
 Canonical Graph → Decision / Memory Resolver → Ledger → Context Package Projector
 ```
 
-The Ledger does not replace ContextPackage; it is a governance input. A future package may obtain effective decisions, inherited memories, disputed memories, and historical memories from the Ledger. Phase 2A does not modify the current Projector.
+The Ledger does not replace ContextPackage; it is a governance input. Phase 2C supplies effective Decisions and Memory classifications from the Ledger to the existing projector without adding a Ledger section to the package. Decision history remains in `decisionChains`; historical Memory records enter `staleContext`; restricted and unauthorized records remain omitted. The Provider returns the graph, Ledger, and package as deeply frozen deterministic output. No canonical graph mutation or external write occurs.
 
 ## 16. Error vs Conflict
 

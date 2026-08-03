@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import { buildContextPackageV02 } from "../experience/context-v02/context-package-projector.mjs";
+import { buildDecisionMemoryLedger } from "../experience/context-v02/decision-memory-ledger.mjs";
 
 const fixtureUrl = new URL("../examples/nexus-atlas-self-context-v0.2.json", import.meta.url);
 async function graph() { return JSON.parse(await readFile(fixtureUrl, "utf8")); }
@@ -23,7 +24,7 @@ test("projects the expected canonical sections", async () => {
     disputedContext: [],
     staleContext: ["memory:connectors-first-superseded"],
     openRisks: ["risk:broad-ingestion-too-early", "risk:identity-inference-promotion", "risk:single-status-collapse", "risk:ui-defines-model", "risk:unprovenanced-model-facts"],
-    nextActions: ["action:finalize-roadmap", "action:implement-self-context-provider", "action:validate-context-model", "action:define-context-package-tests"],
+    nextActions: ["action:define-phase3-context-package-contract"],
   });
   const expected = refs(input.contextPackage);
   assert.deepEqual(refs(result), expected);
@@ -31,7 +32,7 @@ test("projects the expected canonical sections", async () => {
 
 test("excludes inferred, stale, disputed, restricted, and completed records from trusted sections", async () => {
   const input = await graph();
-  const identity = clone(input.nodes[1]); identity.id = "identity:inferred"; identity.kind = "identity"; identity.epistemic.verification = "inferred"; input.nodes.push(identity);
+  const identity = clone(input.nodes.find((node) => node.kind === "project")); identity.id = "identity:inferred"; identity.kind = "identity"; identity.epistemic.verification = "inferred"; input.nodes.push(identity);
   const disputed = clone(input.nodes.find((node) => node.kind === "memory")); disputed.id = "memory:disputed"; disputed.epistemic.verification = "disputed"; input.nodes.push(disputed);
   const staleEvidence = clone(input.nodes.find((node) => node.kind === "evidence")); staleEvidence.id = "evidence:stale"; staleEvidence.epistemic.freshness = "stale"; input.nodes.push(staleEvidence);
   const restricted = clone(input.nodes.find((node) => node.kind === "risk")); restricted.id = "risk:restricted"; restricted.governance.sensitivity = "restricted"; restricted.payload.summary = "must not leak"; input.nodes.push(restricted);
@@ -117,4 +118,32 @@ test("requires deterministic generatedAt", async () => {
   const input = await graph();
   delete input.metadata.generatedAt;
   assert.throws(() => buildContextPackageV02({ graph: input }), /deterministic generatedAt/i);
+});
+
+test("integrates Ledger decisions and historical memories without changing package shape", async () => {
+  const input = await graph();
+  const ledger = buildDecisionMemoryLedger({ graph: input, projectId: "project:nexus-atlas", scopeKey: "project:nexus-atlas", generatedAt: input.metadata.generatedAt });
+  const result = buildContextPackageV02({ graph: input, generatedAt: input.metadata.generatedAt, decisionMemoryLedger: ledger });
+  assert.deepEqual(result.confirmedDecisions.map((item) => item.id).sort(), ledger.effectiveDecisions.map((item) => item.id).sort());
+  assert.equal(result.confirmedDecisions.some((item) => item.id === "decision:connectors-first"), false);
+  assert.deepEqual(result.staleContext.map((item) => item.id), ["memory:connectors-first-superseded"]);
+  assert.equal("decisionMemoryLedger" in result, false);
+});
+
+test("rejects Ledger identity, timestamp, and reference violations", async () => {
+  const input = await graph();
+  const ledger = buildDecisionMemoryLedger({ graph: input, projectId: "project:nexus-atlas", scopeKey: "project:nexus-atlas", generatedAt: input.metadata.generatedAt });
+  assert.throws(() => buildContextPackageV02({ graph: input, generatedAt: input.metadata.generatedAt, decisionMemoryLedger: { ...ledger, projectId: "project:other" } }), /projectId/i);
+  assert.throws(() => buildContextPackageV02({ graph: input, generatedAt: input.metadata.generatedAt, decisionMemoryLedger: { ...ledger, generatedAt: "2026-08-04T00:00:00+08:00" } }), /generatedAt/i);
+  assert.throws(() => buildContextPackageV02({ graph: input, generatedAt: input.metadata.generatedAt, decisionMemoryLedger: { ...ledger, effectiveDecisions: [{ id: "memory:model-governance-first" }] } }), /wrong kind/i);
+  assert.throws(() => buildContextPackageV02({ graph: input, generatedAt: input.metadata.generatedAt, decisionMemoryLedger: { ...ledger, historicalMemories: [{ id: "decision:context-foundation-first" }] } }), /wrong kind/i);
+});
+
+test("preserves Ledger omissions as safe explicit package metadata", async () => {
+  const input = await graph();
+  const ledger = buildDecisionMemoryLedger({ graph: input, projectId: "project:nexus-atlas", scopeKey: "project:nexus-atlas", generatedAt: input.metadata.generatedAt });
+  const result = buildContextPackageV02({ graph: input, generatedAt: input.metadata.generatedAt, decisionMemoryLedger: { ...ledger, omittedRecords: [{ id: "decision:connectors-first", kind: "decision", rule: "superseded" }] } });
+  const omission = result.omittedContext.find((item) => item.id === "decision:connectors-first");
+  assert.deepEqual(omission, { id: "decision:connectors-first", reason: "Decision / Memory governance excluded this record.", rule: "superseded" });
+  assert.equal(JSON.stringify(result.omittedContext).includes("choice"), false);
 });
