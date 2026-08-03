@@ -42,10 +42,24 @@
 ## 6. ContextEdge
 
 ```js
-{ id, from, to, type, status, provenance, metadata }
+{
+  id,
+  from,
+  to,
+  type,
+  lifecycle: {
+    state,
+    createdAt,
+    updatedAt
+  },
+  provenance,
+  metadata
+}
 ```
 
-最小关系：`belongs_to`、`supports`、`contradicts`、`supersedes`、`depends_on`、`produces`、`motivates`、`implements`、`blocks`、`assigned_to`、`derived_from`。Edge 也必须保留来源；关系状态不能取代节点自身的 lifecycle 或 epistemic 状态。
+Edge lifecycle state 的最小枚举为 `active`、`superseded`、`revoked`。它只描述关系本身是否仍有效，不替代节点的 verification 或 freshness。一条 `supports` 关系可以被撤销，但相关节点仍然存在。
+
+最小关系：`belongs_to`、`supports`、`contradicts`、`supersedes`、`depends_on`、`produces`、`motivates`、`implements`、`blocks`、`assigned_to`、`derived_from`。Edge 也必须保留来源。
 
 ## 7. Identity Record
 
@@ -56,9 +70,18 @@ Identity 不是一个不可追踪的大型 Profile JSON。每项信息都是独�
 ## 8. Project Record
 
 ```js
-{ purpose, currentPhase, currentVersion, currentMilestoneId,
-  territoryIds, lastActiveAt, repositoryRefs, status }
+{
+  purpose,
+  currentPhase,
+  currentVersion,
+  currentMilestoneId,
+  territoryIds,
+  lastActiveAt,
+  repositoryRefs
+}
 ```
+
+Project 当前状态由顶层 `lifecycle.state`、`epistemic.verification` 和 `epistemic.freshness` 共同表达，Project payload 不再使用笼统的 `status`。
 
 ## 9. Decision Record
 
@@ -95,6 +118,8 @@ Memory 不是聊天全文，而是经过来源、状态、适用范围和治理�
 ```
 
 `actionStatus` 为 `proposed`、`ready`、`blocked`、`in_progress`、`completed`、`cancelled`。有 external effect 的 action 必须明确 `requiresConfirmation`。
+
+通用状态与领域状态必须分离：`lifecycle.state` 描述记录是否 active、completed、archived、superseded 或 revoked；`epistemic.verification` 描述知识是否 confirmed、inferred、unverified 或 disputed；`epistemic.freshness` 描述信息是否 current、stale、expired 或 unknown。`decisionStatus` 和 `actionStatus` 是 payload 内的领域状态，不得替代 ContextNode 的 lifecycle、verification 或 freshness。
 
 ## 13. ContextPackage
 

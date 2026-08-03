@@ -5,60 +5,335 @@
     "runtimeEvidence": false,
     "generatedAt": "2026-08-03T00:00:00+08:00"
   },
-  "project": {
-    "id": "project-nexus-atlas",
-    "name": "Nexus Atlas",
-    "repository": "cyrilla-mist/nexus-ai",
-    "versionDirection": "v0.2 Personal Context Foundation",
-    "currentPhase": "context model design",
-    "verification": "confirmed",
-    "freshness": "current",
-    "provenance": { "provider": "repository", "reference": "cyrilla-mist/nexus-ai", "capturedAt": "2026-08-03T00:00:00+08:00", "authority": "repository-scope" }
-  },
-  "confirmedDecisions": [
-    { "question": "Where does long-term development happen?", "choice": "Only in cyrilla-mist/nexus-ai.", "rationale": "Keep the long-term product line in one canonical repository.", "status": "confirmed", "provenance": { "provider": "human-instruction", "reference": "long-term-development-scope", "authority": "human-confirmation" }, "decidedAt": "2026-08-03T00:00:00+08:00" },
-    { "question": "What is the v0.2 priority?", "choice": "Establish Personal Context Foundation first.", "rationale": "A trustworthy model, provenance, authority, and governance boundary precede more integrations.", "status": "confirmed", "provenance": { "provider": "human-decision", "reference": "v0.2-roadmap", "authority": "human-confirmation" }, "decidedAt": "2026-08-03T00:00:00+08:00" },
-    { "question": "Should v0.2 begin with many external data sources?", "choice": "No; define the foundation before broad ingestion.", "rationale": "More data without a trustworthy model would increase ambiguity and governance risk.", "status": "confirmed", "provenance": { "provider": "human-decision", "reference": "v0.2-roadmap", "authority": "human-confirmation" }, "decidedAt": "2026-08-03T00:00:00+08:00" },
-    { "question": "Can one external system be the complete private Context Graph?", "choice": "No.", "rationale": "External systems are authoritative only for the state they can verify.", "status": "confirmed", "provenance": { "provider": "architecture-baseline", "reference": "docs/Nexus-Atlas-Architecture-Review-v1.0.md", "authority": "architecture-review" }, "decidedAt": "2026-08-03T00:00:00+08:00" },
-    { "question": "What is the first real long-term scenario?", "choice": "Nexus Atlas manages its own development context.", "rationale": "The product should validate its context foundation on its own ongoing work.", "status": "confirmed", "provenance": { "provider": "human-decision", "reference": "first-real-scenario", "authority": "human-confirmation" }, "decidedAt": "2026-08-03T00:00:00+08:00" },
-    { "question": "How should record state be represented?", "choice": "Separate lifecycle, verification, and freshness.", "rationale": "A record can be confirmed but stale, or inferred but current; one status cannot express those distinctions.", "status": "confirmed", "provenance": { "provider": "context-model", "reference": "docs/Nexus-Atlas-v0.2-Context-Model.md", "authority": "proposed-model" }, "decidedAt": "2026-08-03T00:00:00+08:00" }
+  "nodes": [
+    {
+      "id": "project:nexus-atlas",
+      "kind": "project",
+      "title": "Nexus Atlas",
+      "summary": "Nexus Atlas manages its own development context as the first v0.2 real scenario.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T00:00:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "repository", "reference": "cyrilla-mist/nexus-ai", "capturedAt": "2026-08-03T00:00:00+08:00", "retrievalMode": "repository-boundary-inspection", "authority": "repository-scope" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": { "purpose": "Maintain continuity across identity, project, memory, decision, evidence, and action.", "currentPhase": "context model design", "currentVersion": "v0.2 Personal Context Foundation", "currentMilestoneId": "milestone:context-foundation", "territoryIds": ["territory:innovation"], "lastActiveAt": "2026-08-03T00:00:00+08:00", "repositoryRefs": ["cyrilla-mist/nexus-ai"] }
+    },
+    {
+      "id": "decision:long-term-repository",
+      "kind": "decision",
+      "title": "Use the long-term Nexus repository",
+      "summary": "Long-term development remains in cyrilla-mist/nexus-ai.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T00:00:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "human-instruction", "reference": "long-term-development-scope", "capturedAt": "2026-08-03T00:00:00+08:00", "retrievalMode": "explicit-instruction", "authority": "human-confirmation" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": { "question": "Where does long-term development happen?", "choice": "Only in cyrilla-mist/nexus-ai.", "rationale": "Keep the long-term product line in one canonical repository.", "alternatives": [], "constraints": ["Do not operate other repositories."], "decidedAt": "2026-08-03T00:00:00+08:00", "decidedBy": "user:self", "decisionStatus": "confirmed", "supersededBy": null }
+    },
+    {
+      "id": "decision:context-foundation-first",
+      "kind": "decision",
+      "title": "Establish Personal Context Foundation first",
+      "summary": "v0.2 begins with a trustworthy model, provenance, authority, and governance boundary.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T00:00:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "human-decision", "reference": "docs/Nexus-Atlas-v0.2-Roadmap.md", "capturedAt": "2026-08-03T00:00:00+08:00", "retrievalMode": "proposed-document-review", "authority": "human-confirmation" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": { "question": "What is the v0.2 priority?", "choice": "Establish Personal Context Foundation first.", "rationale": "A trustworthy foundation precedes more integrations.", "alternatives": ["Begin with broad external ingestion."], "constraints": ["Do not make data volume the first milestone."], "decidedAt": "2026-08-03T00:00:00+08:00", "decidedBy": "user:self", "decisionStatus": "confirmed", "supersededBy": null }
+    },
+    {
+      "id": "decision:no-broad-ingestion-first",
+      "kind": "decision",
+      "title": "Do not begin with broad ingestion",
+      "summary": "v0.2 does not begin by connecting many external data sources.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T00:00:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "human-decision", "reference": "docs/Nexus-Atlas-v0.2-Roadmap.md", "capturedAt": "2026-08-03T00:00:00+08:00", "retrievalMode": "proposed-document-review", "authority": "human-confirmation" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": { "question": "Should v0.2 begin with many external data sources?", "choice": "No; define the foundation before broad ingestion.", "rationale": "More data without a trustworthy model increases ambiguity and governance risk.", "alternatives": ["Add many connectors before defining governance."], "constraints": ["Source adapters remain bounded and later phase work."], "decidedAt": "2026-08-03T00:00:00+08:00", "decidedBy": "user:self", "decisionStatus": "confirmed", "supersededBy": null }
+    },
+    {
+      "id": "decision:no-single-external-store",
+      "kind": "decision",
+      "title": "Do not use one external system as the complete private graph",
+      "summary": "External systems are authoritative only for the states they can verify.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T00:00:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "architecture-baseline", "reference": "docs/Nexus-Atlas-Architecture-Review-v1.0.md", "capturedAt": "2026-08-03T00:00:00+08:00", "retrievalMode": "repository-document-review", "authority": "architecture-review" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": { "question": "Can one external system be the complete private Context Graph?", "choice": "No.", "rationale": "The personal Context Fabric must preserve human decisions and cross-source provenance.", "alternatives": ["Use a single external system as canonical storage."], "constraints": ["Source adapters have bounded authority."], "decidedAt": "2026-08-03T00:00:00+08:00", "decidedBy": "user:self", "decisionStatus": "confirmed", "supersededBy": null }
+    },
+    {
+      "id": "decision:self-context-first",
+      "kind": "decision",
+      "title": "Use Nexus Atlas as the first real scenario",
+      "summary": "Nexus Atlas manages its own development context.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T00:00:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "human-decision", "reference": "first-real-scenario", "capturedAt": "2026-08-03T00:00:00+08:00", "retrievalMode": "explicit-scope-review", "authority": "human-confirmation" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": { "question": "What is the first real long-term scenario?", "choice": "Nexus Atlas manages its own development context.", "rationale": "The product validates its foundation on its own ongoing work.", "alternatives": ["Start with an unrelated external project."], "constraints": ["Do not change the existing v0.1 runtime in this design phase."], "decidedAt": "2026-08-03T00:00:00+08:00", "decidedBy": "user:self", "decisionStatus": "confirmed", "supersededBy": null }
+    },
+    {
+      "id": "decision:separate-context-states",
+      "kind": "decision",
+      "title": "Separate lifecycle, verification, and freshness",
+      "summary": "Context state dimensions remain independently interpretable.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T00:00:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "context-model", "reference": "docs/Nexus-Atlas-v0.2-Context-Model.md", "capturedAt": "2026-08-03T00:00:00+08:00", "retrievalMode": "proposed-model-review", "authority": "proposed-model" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": { "question": "How should record state be represented?", "choice": "Separate lifecycle, verification, and freshness.", "rationale": "A record can be confirmed but stale, or inferred but current.", "alternatives": ["Use one status field."], "constraints": ["Domain statuses remain inside payloads."], "decidedAt": "2026-08-03T00:00:00+08:00", "decidedBy": "user:self", "decisionStatus": "confirmed", "supersededBy": null }
+    },
+    {
+      "id": "evidence:repository-reference",
+      "kind": "evidence",
+      "title": "Long-term repository reference",
+      "summary": "The canonical long-term repository is cyrilla-mist/nexus-ai.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T00:00:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "repository", "reference": "cyrilla-mist/nexus-ai", "capturedAt": "2026-08-03T00:00:00+08:00", "retrievalMode": "repository-boundary-inspection", "authority": "repository-scope" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": { "claim": "The long-term repository is cyrilla-mist/nexus-ai.", "sourceRef": "cyrilla-mist/nexus-ai", "observedAt": "2026-08-03T00:00:00+08:00", "appliesToVersion": "main@8f612783cdb4862d3f970448fa326b03b923dfc3", "verificationMethod": "repository boundary inspection", "result": "confirmed" }
+    },
+    {
+      "id": "evidence:readme-baseline",
+      "kind": "evidence",
+      "title": "README v0.1 baseline",
+      "summary": "The README describes Nexus as personal intelligence infrastructure with continuity and provenance.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T00:00:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "repository", "reference": "README.md", "capturedAt": "2026-08-03T00:00:00+08:00", "retrievalMode": "repository-document-review", "authority": "repository-document" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": { "claim": "Nexus Atlas is a personal intelligence infrastructure with continuity, provenance, human authority, and one Context Fabric.", "sourceRef": "README.md", "observedAt": "2026-08-03T00:00:00+08:00", "appliesToVersion": "main@8f612783cdb4862d3f970448fa326b03b923dfc3", "verificationMethod": "repository document review", "result": "confirmed" }
+    },
+    {
+      "id": "evidence:architecture-review",
+      "kind": "evidence",
+      "title": "Architecture review baseline",
+      "summary": "The frozen v1.0 review defines continuity, traceability, human authority, and one Context Fabric.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T00:00:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "repository", "reference": "docs/Nexus-Atlas-Architecture-Review-v1.0.md", "capturedAt": "2026-08-03T00:00:00+08:00", "retrievalMode": "repository-document-review", "authority": "architecture-review" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": { "claim": "The v1.0 architecture baseline prioritizes continuity, traceability, actionability, human authority, and one Context Fabric.", "sourceRef": "docs/Nexus-Atlas-Architecture-Review-v1.0.md", "observedAt": "2026-08-03T00:00:00+08:00", "appliesToVersion": "main@8f612783cdb4862d3f970448fa326b03b923dfc3", "verificationMethod": "repository document review", "result": "confirmed" }
+    },
+    {
+      "id": "evidence:v02-roadmap",
+      "kind": "evidence",
+      "title": "v0.2 roadmap proposal",
+      "summary": "The roadmap proposes Personal Context Foundation as the v0.2 direction; it is not runtime evidence.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T00:00:00+08:00" },
+      "epistemic": { "verification": "unverified", "confidence": 0.8, "freshness": "current" },
+      "provenance": { "provider": "repository", "reference": "docs/Nexus-Atlas-v0.2-Roadmap.md", "capturedAt": "2026-08-03T00:00:00+08:00", "retrievalMode": "proposed-document-review", "authority": "proposed-document" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": { "claim": "The Personal Context Foundation roadmap is proposed and implementation has not started.", "sourceRef": "docs/Nexus-Atlas-v0.2-Roadmap.md", "observedAt": "2026-08-03T00:00:00+08:00", "appliesToVersion": "feature/personal-context-foundation", "verificationMethod": "proposed repository reference", "result": "proposed" }
+    },
+    {
+      "id": "evidence:v02-context-model",
+      "kind": "evidence",
+      "title": "v0.2 canonical model proposal",
+      "summary": "The Context Model proposes separated lifecycle, verification, freshness, provenance, and governance.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T00:00:00+08:00" },
+      "epistemic": { "verification": "unverified", "confidence": 0.8, "freshness": "current" },
+      "provenance": { "provider": "repository", "reference": "docs/Nexus-Atlas-v0.2-Context-Model.md", "capturedAt": "2026-08-03T00:00:00+08:00", "retrievalMode": "proposed-model-review", "authority": "proposed-document" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": { "claim": "The canonical v0.2 Context Model separates lifecycle, verification, freshness, provenance, and governance.", "sourceRef": "docs/Nexus-Atlas-v0.2-Context-Model.md", "observedAt": "2026-08-03T00:00:00+08:00", "appliesToVersion": "feature/personal-context-foundation", "verificationMethod": "proposed repository reference", "result": "proposed" }
+    },
+    {
+      "id": "memory:v02-development-started",
+      "kind": "memory",
+      "title": "v0.2 development has started",
+      "summary": "Nexus Atlas is entering long-term v0.2 development.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T00:00:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "human-decision", "reference": "docs/Nexus-Atlas-v0.2-Roadmap.md", "capturedAt": "2026-08-03T00:00:00+08:00", "retrievalMode": "proposed-document-review", "authority": "human-confirmation" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": { "statement": "Nexus Atlas is entering long-term v0.2 development.", "basis": "v0.2 roadmap scope", "relatedEntityRefs": ["project:nexus-atlas"], "verification": "confirmed", "confidence": 1, "freshness": "current", "conflictsWith": [], "supersededBy": null }
+    },
+    {
+      "id": "memory:model-governance-first",
+      "kind": "memory",
+      "title": "Model and governance come first",
+      "summary": "The current phase starts with model and governance design.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T00:00:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "human-decision", "reference": "docs/Nexus-Atlas-v0.2-Roadmap.md", "capturedAt": "2026-08-03T00:00:00+08:00", "retrievalMode": "proposed-document-review", "authority": "human-confirmation" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": { "statement": "The current phase begins with model and governance design.", "basis": "Phase 0 scope", "relatedEntityRefs": ["project:nexus-atlas", "decision:context-foundation-first"], "verification": "confirmed", "confidence": 1, "freshness": "current", "conflictsWith": [], "supersededBy": null }
+    },
+    {
+      "id": "memory:connectors-first-superseded",
+      "kind": "memory",
+      "title": "Connectors-first route is superseded",
+      "summary": "Defining v0.2 by first adding many connectors is no longer the current route.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "superseded", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T00:00:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "stale" },
+      "provenance": { "provider": "human-decision", "reference": "v0.2-scope-decision", "capturedAt": "2026-08-03T00:00:00+08:00", "retrievalMode": "decision-history-review", "authority": "human-confirmation" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": { "statement": "Define v0.2 by first adding many connectors.", "basis": "superseded route", "relatedEntityRefs": ["decision:no-broad-ingestion-first"], "verification": "confirmed", "confidence": 1, "freshness": "stale", "conflictsWith": ["decision:no-broad-ingestion-first"], "supersededBy": "decision:context-foundation-first" }
+    },
+    {
+      "id": "memory:github-adapter-proposed",
+      "kind": "memory",
+      "title": "GitHub may be the first Source Adapter",
+      "summary": "GitHub is a possible first adapter, not a confirmed commitment.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T00:00:00+08:00" },
+      "epistemic": { "verification": "inferred", "confidence": 0.5, "freshness": "current" },
+      "provenance": { "provider": "roadmap-proposal", "reference": "docs/Nexus-Atlas-v0.2-Roadmap.md", "capturedAt": "2026-08-03T00:00:00+08:00", "retrievalMode": "proposed-document-review", "authority": "proposed-document" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": true },
+      "payload": { "statement": "GitHub may become the first Source Adapter.", "basis": "Phase 4 direction", "relatedEntityRefs": ["project:nexus-atlas"], "verification": "inferred", "confidence": 0.5, "freshness": "current", "status": "proposed", "conflictsWith": [], "supersededBy": null }
+    },
+    {
+      "id": "risk:identity-inference-promotion",
+      "kind": "risk",
+      "title": "Inferred Identity becomes confirmed",
+      "summary": "An inferred Identity record could be treated as a confirmed user fact.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T00:00:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "governance-design", "reference": "docs/Nexus-Atlas-v0.2-Context-Model.md", "capturedAt": "2026-08-03T00:00:00+08:00", "retrievalMode": "proposed-model-review", "authority": "proposed-model" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": { "severity": "high", "likelihood": "medium", "mitigation": "Keep inferred records explicit and require human confirmation before promotion." }
+    },
+    {
+      "id": "risk:broad-ingestion-too-early",
+      "kind": "risk",
+      "title": "Broad ingestion happens too early",
+      "summary": "Many external sources could be connected before the model and governance rules are stable.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T00:00:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "governance-design", "reference": "docs/Nexus-Atlas-v0.2-Roadmap.md", "capturedAt": "2026-08-03T00:00:00+08:00", "retrievalMode": "proposed-document-review", "authority": "proposed-model" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": { "severity": "high", "likelihood": "medium", "mitigation": "Complete Phase 0 model and governance before source adapters." }
+    },
+    {
+      "id": "risk:single-status-collapse",
+      "kind": "risk",
+      "title": "One status collapses distinct states",
+      "summary": "Lifecycle, verification, freshness, and domain workflow states could be conflated.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T00:00:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "governance-design", "reference": "docs/Nexus-Atlas-v0.2-Context-Model.md", "capturedAt": "2026-08-03T00:00:00+08:00", "retrievalMode": "proposed-model-review", "authority": "proposed-model" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": { "severity": "high", "likelihood": "medium", "mitigation": "Use lifecycle, epistemic, and payload domain fields separately." }
+    },
+    {
+      "id": "risk:ui-defines-model",
+      "kind": "risk",
+      "title": "UI structure defines the canonical model",
+      "summary": "Page components could dictate node types instead of reusable context semantics.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T00:00:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "governance-design", "reference": "docs/Nexus-Atlas-v0.2-Context-Model.md", "capturedAt": "2026-08-03T00:00:00+08:00", "retrievalMode": "proposed-model-review", "authority": "proposed-model" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": { "severity": "medium", "likelihood": "medium", "mitigation": "Keep node kinds semantic and independent of page components." }
+    },
+    {
+      "id": "risk:unprovenanced-model-facts",
+      "kind": "risk",
+      "title": "Model generates unprovenanced facts",
+      "summary": "A model could freely generate facts without source, authority, and governance.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T00:00:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "governance-design", "reference": "docs/Nexus-Atlas-v0.2-Context-Model.md", "capturedAt": "2026-08-03T00:00:00+08:00", "retrievalMode": "proposed-model-review", "authority": "proposed-model" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": { "severity": "high", "likelihood": "medium", "mitigation": "Generate ContextPackage through deterministic rules and preserve provenance." }
+    },
+    {
+      "id": "action:finalize-roadmap",
+      "kind": "action",
+      "title": "Finalize v0.2 roadmap",
+      "summary": "Review scope, phases, non-goals, and acceptance criteria.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T00:00:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "roadmap", "reference": "docs/Nexus-Atlas-v0.2-Roadmap.md", "capturedAt": "2026-08-03T00:00:00+08:00", "retrievalMode": "proposed-document-review", "authority": "proposed-plan" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": { "description": "Finalize v0.2 roadmap", "owner": "user:self", "priority": "high", "actionStatus": "proposed", "completionCriteria": "Roadmap review confirms scope, phases, non-goals, and acceptance criteria.", "relatedDecisionRefs": ["decision:context-foundation-first"], "externalEffect": false, "requiresConfirmation": false }
+    },
+    {
+      "id": "action:validate-context-model",
+      "kind": "action",
+      "title": "Validate canonical Context model",
+      "summary": "Review ContextNode, ContextEdge, authority, privacy, and migration rules.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T00:00:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "context-model", "reference": "docs/Nexus-Atlas-v0.2-Context-Model.md", "capturedAt": "2026-08-03T00:00:00+08:00", "retrievalMode": "proposed-model-review", "authority": "proposed-plan" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": { "description": "Validate canonical Context model", "owner": "user:self", "priority": "high", "actionStatus": "proposed", "completionCriteria": "ContextNode, ContextEdge, authority, privacy, and migration rules are reviewed.", "relatedDecisionRefs": ["decision:separate-context-states"], "externalEffect": false, "requiresConfirmation": false }
+    },
+    {
+      "id": "action:implement-self-context-provider",
+      "kind": "action",
+      "title": "Implement deterministic self-context provider",
+      "summary": "Build the next-phase provider without inventing user facts.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T00:00:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "roadmap", "reference": "docs/Nexus-Atlas-v0.2-Roadmap.md", "capturedAt": "2026-08-03T00:00:00+08:00", "retrievalMode": "proposed-document-review", "authority": "proposed-plan" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": { "description": "Implement deterministic self-context provider", "owner": "user:self", "priority": "high", "actionStatus": "proposed", "completionCriteria": "A provider emits a stable ContextPackage without inventing user facts.", "relatedDecisionRefs": ["decision:self-context-first", "decision:separate-context-states"], "externalEffect": false, "requiresConfirmation": false }
+    },
+    {
+      "id": "action:define-context-package-tests",
+      "kind": "action",
+      "title": "Define Context Package tests",
+      "summary": "Test inheritance, provenance, conflicts, stale evidence, and omissions.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T00:00:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "roadmap", "reference": "docs/Nexus-Atlas-v0.2-Roadmap.md", "capturedAt": "2026-08-03T00:00:00+08:00", "retrievalMode": "proposed-document-review", "authority": "proposed-plan" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": { "description": "Define Context Package tests", "owner": "user:self", "priority": "medium", "actionStatus": "proposed", "completionCriteria": "Tests cover inheritance, provenance, conflicts, stale evidence, and omissions.", "relatedDecisionRefs": ["decision:separate-context-states"], "externalEffect": false, "requiresConfirmation": false }
+    }
   ],
-  "evidence": [
-    { "claim": "The long-term repository is cyrilla-mist/nexus-ai.", "sourceRef": "cyrilla-mist/nexus-ai", "observedAt": "2026-08-03T00:00:00+08:00", "appliesToVersion": "main@8f612783cdb4862d3f970448fa326b03b923dfc3", "verificationMethod": "repository boundary inspection", "result": "confirmed", "freshness": "current" },
-    { "claim": "Nexus Atlas v0.1 is a personal intelligence infrastructure with continuity, provenance, human authority, and one Context Fabric.", "sourceRef": "README.md", "observedAt": "2026-08-03T00:00:00+08:00", "appliesToVersion": "main@8f612783cdb4862d3f970448fa326b03b923dfc3", "verificationMethod": "repository document review", "result": "confirmed", "freshness": "current" },
-    { "claim": "The v1.0 architecture baseline defines continuity, traceability, actionability, human authority, and one Context Fabric.", "sourceRef": "docs/Nexus-Atlas-Architecture-Review-v1.0.md", "observedAt": "2026-08-03T00:00:00+08:00", "appliesToVersion": "main@8f612783cdb4862d3f970448fa326b03b923dfc3", "verificationMethod": "repository document review", "result": "confirmed", "freshness": "current" },
-    { "claim": "The Personal Context Foundation roadmap is proposed and implementation has not started.", "sourceRef": "docs/Nexus-Atlas-v0.2-Roadmap.md", "observedAt": "2026-08-03T00:00:00+08:00", "appliesToVersion": "feature/personal-context-foundation", "verificationMethod": "proposed repository reference", "result": "proposed", "freshness": "current" },
-    { "claim": "The canonical v0.2 Context Model separates lifecycle, verification, freshness, provenance, and governance.", "sourceRef": "docs/Nexus-Atlas-v0.2-Context-Model.md", "observedAt": "2026-08-03T00:00:00+08:00", "appliesToVersion": "feature/personal-context-foundation", "verificationMethod": "proposed repository reference", "result": "proposed", "freshness": "current" }
+  "edges": [
+    { "id": "edge:project-belongs-to-innovation", "from": "project:nexus-atlas", "to": "decision:context-foundation-first", "type": "belongs_to", "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T00:00:00+08:00" }, "provenance": { "provider": "self-context-example", "reference": "project-scope", "capturedAt": "2026-08-03T00:00:00+08:00", "authority": "proposed-model" }, "metadata": {} },
+    { "id": "edge:foundation-motivates-provider", "from": "decision:context-foundation-first", "to": "action:implement-self-context-provider", "type": "motivates", "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T00:00:00+08:00" }, "provenance": { "provider": "self-context-example", "reference": "v0.2-phase-1", "capturedAt": "2026-08-03T00:00:00+08:00", "authority": "proposed-model" }, "metadata": {} },
+    { "id": "edge:states-motivate-model-validation", "from": "decision:separate-context-states", "to": "action:validate-context-model", "type": "motivates", "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T00:00:00+08:00" }, "provenance": { "provider": "self-context-example", "reference": "v0.2-phase-0", "capturedAt": "2026-08-03T00:00:00+08:00", "authority": "proposed-model" }, "metadata": {} },
+    { "id": "edge:roadmap-supports-foundation", "from": "evidence:v02-roadmap", "to": "decision:context-foundation-first", "type": "supports", "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T00:00:00+08:00" }, "provenance": { "provider": "self-context-example", "reference": "docs/Nexus-Atlas-v0.2-Roadmap.md", "capturedAt": "2026-08-03T00:00:00+08:00", "authority": "proposed-document" }, "metadata": {} },
+    { "id": "edge:model-supports-state-separation", "from": "evidence:v02-context-model", "to": "decision:separate-context-states", "type": "supports", "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T00:00:00+08:00" }, "provenance": { "provider": "self-context-example", "reference": "docs/Nexus-Atlas-v0.2-Context-Model.md", "capturedAt": "2026-08-03T00:00:00+08:00", "authority": "proposed-document" }, "metadata": {} },
+    { "id": "edge:connectors-memory-superseded", "from": "memory:connectors-first-superseded", "to": "decision:context-foundation-first", "type": "supersedes", "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T00:00:00+08:00" }, "provenance": { "provider": "self-context-example", "reference": "v0.2-scope-decision", "capturedAt": "2026-08-03T00:00:00+08:00", "authority": "human-confirmation" }, "metadata": { "note": "The edge records the supersession relation; the memory payload also names its real superseding node." } },
+    { "id": "edge:provider-implements-self-context", "from": "action:implement-self-context-provider", "to": "project:nexus-atlas", "type": "implements", "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T00:00:00+08:00" }, "provenance": { "provider": "self-context-example", "reference": "v0.2-phase-1", "capturedAt": "2026-08-03T00:00:00+08:00", "authority": "proposed-model" }, "metadata": {} }
   ],
-  "memory": {
-    "confirmed": [
-      { "statement": "Nexus Atlas is entering long-term v0.2 development.", "verification": "confirmed", "freshness": "current", "provenance": "v0.2-roadmap" },
-      { "statement": "The current phase begins with model and governance design.", "verification": "confirmed", "freshness": "current", "provenance": "v0.2-roadmap" }
+  "contextPackage": {
+    "packageId": "context-package:nexus-atlas-v02",
+    "generatedAt": "2026-08-03T00:00:00+08:00",
+    "project": "project:nexus-atlas",
+    "identitySnapshot": [],
+    "activeGoals": ["decision:context-foundation-first"],
+    "confirmedDecisions": ["decision:long-term-repository", "decision:context-foundation-first", "decision:no-broad-ingestion-first", "decision:no-single-external-store", "decision:self-context-first", "decision:separate-context-states"],
+    "currentEvidence": ["evidence:repository-reference", "evidence:readme-baseline", "evidence:architecture-review"],
+    "disputedContext": [],
+    "staleContext": ["memory:connectors-first-superseded"],
+    "openRisks": ["risk:identity-inference-promotion", "risk:broad-ingestion-too-early", "risk:single-status-collapse", "risk:ui-defines-model", "risk:unprovenanced-model-facts"],
+    "nextActions": ["action:finalize-roadmap", "action:validate-context-model", "action:implement-self-context-provider", "action:define-context-package-tests"],
+    "omittedContext": [
+      { "item": "personal sensitive details", "reason": "Not needed for this product-development context and excluded by privacy governance." },
+      { "item": "credentials", "reason": "Secrets and credentials are never part of provenance or a ContextPackage." },
+      { "item": "unrestricted chat history", "reason": "No automatic full-chat import is in v0.2 scope." },
+      { "item": "unverified inferred preferences", "reason": "Inferred context cannot be silently promoted to confirmed user fact." }
     ],
-    "superseded": [
-      { "statement": "Define v0.2 by first adding many connectors.", "verification": "confirmed", "freshness": "stale", "provenance": "v0.2-scope-decision", "supersededBy": "memory-foundation-first" }
-    ],
-    "inferred": [
-      { "statement": "GitHub may become the first Source Adapter.", "verification": "inferred", "freshness": "current", "provenance": "v0.2-roadmap", "status": "proposed" }
-    ]
-  },
-  "actions": [
-    { "description": "Finalize v0.2 roadmap", "priority": "high", "status": "proposed", "completionCriteria": "Roadmap review confirms scope, phases, non-goals, and acceptance criteria.", "externalEffect": false, "requiresConfirmation": false },
-    { "description": "Validate canonical Context model", "priority": "high", "status": "proposed", "completionCriteria": "ContextNode, ContextEdge, authority, privacy, and migration rules are reviewed.", "externalEffect": false, "requiresConfirmation": false },
-    { "description": "Implement deterministic self-context provider", "priority": "high", "status": "proposed", "completionCriteria": "A provider emits a stable Context Package without inventing user facts.", "externalEffect": false, "requiresConfirmation": false },
-    { "description": "Define Context Package tests", "priority": "medium", "status": "proposed", "completionCriteria": "Tests cover inheritance, provenance, conflicts, stale evidence, and omissions.", "externalEffect": false, "requiresConfirmation": false }
-  ],
-  "risks": [
-    "Treating inferred Identity as confirmed",
-    "Integrating many external sources too early",
-    "Using one status for lifecycle, trust, and freshness",
-    "Letting page structure define the canonical Context Model",
-    "Allowing a model to generate facts without provenance governance"
-  ],
-  "omittedContext": [
-    { "item": "personal sensitive details", "reason": "Not needed for this product-development context and excluded by privacy governance." },
-    { "item": "credentials", "reason": "Secrets and credentials are never part of provenance or a Context Package." },
-    { "item": "unrestricted chat history", "reason": "No automatic full-chat import is in v0.2 scope." },
-    { "item": "unverified inferred preferences", "reason": "Inferred context cannot be silently promoted to confirmed user fact." }
-  ]
+    "sourceSummary": { "repository": 3, "humanDecision": 7, "proposedDocument": 8, "governanceDesign": 5, "roadmap": 3, "selfContextExample": 7 }
+  }
 }
