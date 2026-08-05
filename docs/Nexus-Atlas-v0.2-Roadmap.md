@@ -1,7 +1,7 @@
 # Nexus Atlas v0.2 — Personal Context Foundation
 
 **Status:** Active
-**Implementation:** Phase 2 complete
+**Implementation:** Phase 3A contract design complete
 
 ## 1. Executive Summary
 
@@ -135,20 +135,45 @@ next action、owner、priority、completion criteria、related decision、extern
 - Acceptance tests cover migration, classification, immutability, and determinism.
 - No UI redesign, live source, or external mutation is included.
 
-### Phase 3 — Generalized Context Package — Planned
+### Phase 3 — Generalized Context Package — In progress
 
-Phase 3 将定义通用 Context Package contract，包括：
+Phase 3 将定义并实现通用 Context Package contract。Phase 3A 已完成契约设计；整个 Phase 3 尚未完成。Phase 2C 没有扩展 Context Package 顶层 schema，只通过 Provider 单独返回 Ledger。
 
-- generalized Context Package schema
-- inherited Memory section design
-- inferred and disputed Memory inclusion rules
-- Decision chain inclusion rules
-- unresolved conflict representation
-- multiple-project package selection
-- package-level omission and source-summary rules
-- backward compatibility with the Phase 1 package shape
+#### Phase 3A — Contract Design — Complete
 
-Phase 3 尚未实现。Phase 2C 没有扩展 Context Package 顶层 schema，只通过 Provider 单独返回 Ledger；Phase 3 保持 Planned，不是 In progress。
+- Context Package v0.3 schema
+- explicit project and scope selection
+- Decision / Memory / Conflict sections
+- omission normalization
+- canonical-record source summary
+- v0.2 legacy mapping
+- Phase 3B 32-case test catalog
+
+#### Phase 3B — Generalized Package Builder — Planned
+
+- buildGeneralizedContextPackage
+- v0.3 validation
+- deterministic projection
+- multi-project selection
+- safe omissions
+- sourceSummary
+- automated contract tests
+- no Provider migration
+- no UI integration
+
+#### Phase 3C — Self-Context Migration — Planned
+
+- Self-Context Provider returns v0.2 and v0.3 packages
+- compatibility invariants
+- no removal of v0.2 output
+- no UI integration
+
+#### Phase 3D — Acceptance and Main Merge — Planned
+
+- hardening
+- complete regression
+- fast-forward merge
+- no Phase 4 work
 
 ### Phase 4 — First Source Adapter — Planned
 
