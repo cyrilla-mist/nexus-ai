@@ -132,7 +132,7 @@ The Builder uses no `Date.now`, current-time construction, randomness, environme
 
 ## 9. Error vocabulary
 
-Phase 3B may use: `INVALID_GRAPH`, `INVALID_LEDGER`, `INVALID_PROJECT_ID`, `INVALID_SCOPE_KEY`, `INVALID_GENERATED_AT`, `INVALID_PACKAGE_VERSION`, `PROJECT_NOT_FOUND`, `PROJECT_KIND_MISMATCH`, `PROJECT_NOT_ELIGIBLE`, `LEDGER_VERSION_MISMATCH`, `LEDGER_PROJECT_MISMATCH`, `LEDGER_GENERATED_AT_MISMATCH`, `LEDGER_SCOPE_MISMATCH`, `PACKAGE_REFERENCE_MISSING`, `PACKAGE_REFERENCE_KIND_MISMATCH`, `PACKAGE_REFERENCE_SCOPE_MISMATCH`, `PACKAGE_REFERENCE_RESTRICTED`, `PACKAGE_SECTION_DUPLICATE`, and `PACKAGE_SOURCE_SUMMARY_MISMATCH`. `buildGeneralizedContextPackage` does not accept `packageVersion` and always emits `"0.3"`; the pure adapter throws `INVALID_PACKAGE_VERSION` for a non-object input or `packageVersion !== "0.3"`. Phase 3A defines codes only; it does not implement an Error class.
+Phase 3B may use: `INVALID_GRAPH`, `INVALID_LEDGER`, `INVALID_PROJECT_ID`, `INVALID_SCOPE_KEY`, `INVALID_GENERATED_AT`, `INVALID_PACKAGE_VERSION`, `PROJECT_NOT_FOUND`, `PROJECT_KIND_MISMATCH`, `PROJECT_NOT_ELIGIBLE`, `LEDGER_VERSION_MISMATCH`, `LEDGER_PROJECT_MISMATCH`, `LEDGER_GENERATED_AT_MISMATCH`, `LEDGER_SCOPE_MISMATCH`, `PACKAGE_REFERENCE_MISSING`, `PACKAGE_REFERENCE_KIND_MISMATCH`, `PACKAGE_REFERENCE_SCOPE_MISMATCH`, `PACKAGE_REFERENCE_RESTRICTED`, `PACKAGE_SECTION_DUPLICATE`, and `PACKAGE_SOURCE_SUMMARY_MISMATCH`. `buildGeneralizedContextPackage` does not accept `packageVersion` and always emits `"0.3"`; the pure adapter throws `INVALID_PACKAGE_VERSION` for a non-object input or `packageVersion !== "0.3"`. Phase 3B implements `GeneralizedContextPackageError` with the accepted error vocabulary. Phase 3C does not change these error semantics.
 
 ## 10. Legacy compatibility
 
@@ -164,4 +164,19 @@ The adapter does not access Graph or Ledger, re-run governance, migrate the Prov
 
 ## 11. Phase boundary
 
-This is a Phase 3A design artifact. It does not implement a Builder, Resolver, Ledger runtime, Provider migration, UI integration, Runtime change, external source, or mutation. Phase 3 as a whole remains incomplete until later phases are accepted.
+Phase 3A contract design and Phase 3B Builder/Adapter implementation are complete and accepted on the feature branch.
+
+Phase 3B includes:
+
+- pure v0.3 Builder
+- pure v0.3 → v0.2 Adapter
+- automated 32-case Catalog
+- deterministic Self-Context verification
+- no Provider migration
+- no UI integration
+- no live source
+- no external mutation
+
+Phase 3C remains responsible only for Self-Context Provider dual-version output and compatibility invariants.
+
+Phase 3 as a whole remains incomplete until Phase 3C and Phase 3D are accepted.

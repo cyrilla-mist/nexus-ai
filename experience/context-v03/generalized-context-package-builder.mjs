@@ -45,6 +45,10 @@ function safeSource(node) {
   return { provider: provenance.provider, authority: provenance.authority, reference: localPath(provenance.reference) ? null : (provenance.reference ?? null), capturedAt: provenance.capturedAt ?? null, retrievalMode: provenance.retrievalMode ?? null };
 }
 
+function hasRequiredProvenance(node) {
+  return nonEmptyString(node.provenance?.provider) && nonEmptyString(node.provenance?.authority);
+}
+
 function safeRecord(node) {
   const source = safeSource(node);
   return { id: node.id, kind: node.kind, title: node.title, summary: node.summary, lifecycle: node.lifecycle.state, verification: node.epistemic.verification, confidence: node.epistemic.confidence, freshness: node.epistemic.freshness, source };
@@ -178,7 +182,7 @@ function nonDecisionMemoryOmissionRule(node) {
   if (node.governance.inheritance === "never") return "inheritance-never";
   if (node.governance.inheritance === "explicit_only") return "explicit-only-no-consent";
   if (node.lifecycle.state === "revoked") return "revoked";
-  if (!safeSource(node) || safeSource(node).reference === null) return "provenance-insufficient";
+  if (!hasRequiredProvenance(node)) return "provenance-insufficient";
   return null;
 }
 
