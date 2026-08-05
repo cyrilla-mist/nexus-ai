@@ -158,6 +158,7 @@ Phase 3 将定义并实现通用 Context Package contract。Phase 3A 已完成�
 - safe omissions
 - sourceSummary
 - automated contract tests
+- pure v0.3 → v0.2 compatibility adapter
 - no Provider migration
 - no UI integration
 
