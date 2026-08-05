@@ -1,9 +1,9 @@
 # Nexus Atlas — Generalized Context Package v0.3 Contract
 
 **Status:** Accepted
-**Target:** Phase 3B
-**Implementation:** Not started
-**Phase:** Phase 3A Contract Design Complete
+**Target:** Phase 3C
+**Implementation:** Phase 3B complete
+**Phase:** Phase 3B Generalized Package Builder Complete
 **Compatibility:** Context Package v0.2 preserved
 
 ## 1. Purpose
@@ -11,6 +11,15 @@
 This contract defines a generalized, deterministic Context Package projection for one explicitly selected project. It governs effective decisions, decision supersession chains, unresolved conflicts, safely inherited memories, evidence, generic records, omissions, and an auditable source summary.
 
 The contract does not modify the canonical graph, automatically confirm a user decision, or write to an external system. A package is a derived projection, not new canonical truth.
+
+## Phase 3B Implementation Note
+
+- A pure v0.3 generalized Context Package Builder is implemented.
+- A pure v0.3 to v0.2 compatibility Adapter is implemented.
+- The 32-case Catalog is automated.
+- Self-Context produces a 24-record v0.3 Package.
+- The Adapter matches the existing v0.2 projection.
+- No Provider migration, UI integration, live source, or external mutation was added.
 
 ## 2. Architecture responsibilities
 

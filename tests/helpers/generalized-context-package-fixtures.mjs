@@ -1,0 +1,34 @@
+export const GENERATED_AT = "2026-08-05T09:00:00+08:00";
+export const SCOPE = "project:alpha";
+
+export function cloneFixture(value) { return structuredClone(value); }
+export function createBaseRecord(id, kind, overrides = {}) {
+  return { id, kind, title: `${kind} ${id}`, summary: `Summary for ${id}.`, scope: { userId: "user:self", territoryId: "territory:innovation", projectId: "project:alpha" }, lifecycle: { state: "active", createdAt: GENERATED_AT, updatedAt: GENERATED_AT }, epistemic: { verification: "confirmed", confidence: 1, freshness: "current" }, provenance: { provider: "fixture", reference: `fixture:${id}`, capturedAt: GENERATED_AT, retrievalMode: "fixture", authority: "fixture-authority" }, governance: { sensitivity: "public", inheritance: "project_only", requiresConfirmation: false }, payload: {}, ...overrides };
+}
+export function createProjectNode(id = "project:alpha", overrides = {}) { return createBaseRecord(id, "project", { payload: { purpose: "Synthetic project", currentPhase: "Phase 3B", currentVersion: "v0.3", currentMilestoneId: null, territoryIds: ["territory:innovation"], lastActiveAt: GENERATED_AT, repositoryRefs: ["fixture/repository"] }, ...overrides }); }
+export function createDecisionNode(id, overrides = {}) { return createBaseRecord(id, "decision", { payload: { subjectKey: `${id}.subject`, scopeKey: "project:alpha", question: `Question for ${id}?`, choice: `Choice for ${id}.`, rationale: `Rationale for ${id}.`, evidenceRefs: [], alternatives: [], constraints: [], decidedAt: GENERATED_AT, decidedBy: "user:self", decisionStatus: "confirmed", supersededBy: null }, ...overrides }); }
+export function createMemoryNode(id, overrides = {}) { return createBaseRecord(id, "memory", { payload: { subjectKey: `${id}.subject`, scopeKey: "project:alpha", statement: `Statement for ${id}.`, basis: "Synthetic fixture", relatedEntityRefs: ["project:alpha"], conflictsWith: [], memoryStatus: "recorded", supersededBy: null }, ...overrides }); }
+export function createEvidenceNode(id, overrides = {}) { return createBaseRecord(id, "evidence", { payload: { claim: `Claim for ${id}.`, sourceRef: `source:${id}`, observedAt: GENERATED_AT, appliesToVersion: "v0.3", verificationMethod: "fixture", result: "confirmed" }, ...overrides }); }
+export function createActionNode(id, overrides = {}) { return createBaseRecord(id, "action", { payload: { description: `Description for ${id}.`, owner: "user:self", priority: "high", actionStatus: "proposed", completionCriteria: `Complete ${id}.`, relatedDecisionRefs: [], externalEffect: false, requiresConfirmation: false }, ...overrides }); }
+
+export function createMinimalGraph(overrides = {}) {
+  return { metadata: { schemaVersion: "0.2-proposed", example: true, runtimeEvidence: false, generatedAt: GENERATED_AT }, nodes: [createProjectNode()], edges: [], contextPackage: { omittedContext: [] }, ...overrides };
+}
+
+export function createMinimalLedger(overrides = {}) {
+  return { ledgerVersion: "0.2", generatedAt: GENERATED_AT, projectId: "project:alpha", effectiveDecisions: [], decisionChains: [], proposedDecisions: [], unresolvedConflicts: [], inheritedMemories: [], inferredMemories: [], disputedMemories: [], historicalMemories: [], omittedRecords: [], ...overrides };
+}
+
+export function createFullSyntheticGraph() {
+  const decision = createDecisionNode("decision:alpha-effective");
+  const proposed = createDecisionNode("decision:alpha-proposed", { epistemic: { verification: "inferred", confidence: 0.5, freshness: "current" }, payload: { ...decision.payload, decisionStatus: "proposed" } });
+  const history = createDecisionNode("decision:alpha-history", { lifecycle: { state: "superseded", createdAt: GENERATED_AT, updatedAt: GENERATED_AT }, epistemic: { verification: "confirmed", confidence: 1, freshness: "stale" }, payload: { ...decision.payload, decisionStatus: "superseded", supersededBy: "decision:alpha-effective" } });
+  const nodes = [createProjectNode(), decision, proposed, history, createMemoryNode("memory:alpha-inherited"), createMemoryNode("memory:alpha-inferred", { epistemic: { verification: "inferred", confidence: 0.5, freshness: "current" } }), createMemoryNode("memory:alpha-disputed", { epistemic: { verification: "disputed", confidence: 1, freshness: "current" } }), createMemoryNode("memory:alpha-historical", { lifecycle: { state: "superseded", createdAt: GENERATED_AT, updatedAt: GENERATED_AT }, epistemic: { verification: "confirmed", confidence: 1, freshness: "stale" } }), createEvidenceNode("evidence:alpha-current"), createEvidenceNode("evidence:alpha-inferred", { epistemic: { verification: "inferred", confidence: 0.5, freshness: "current" } }), createEvidenceNode("evidence:alpha-disputed", { epistemic: { verification: "disputed", confidence: 1, freshness: "current" } }), createEvidenceNode("evidence:alpha-historical", { lifecycle: { state: "archived", createdAt: GENERATED_AT, updatedAt: GENERATED_AT }, epistemic: { verification: "confirmed", confidence: 1, freshness: "stale" } }), createBaseRecord("milestone:alpha-disputed", "milestone", { epistemic: { verification: "disputed", confidence: 1, freshness: "current" } }), createBaseRecord("milestone:alpha-historical", "milestone", { lifecycle: { state: "archived", createdAt: GENERATED_AT, updatedAt: GENERATED_AT }, epistemic: { verification: "confirmed", confidence: 1, freshness: "stale" } }), createBaseRecord("risk:alpha-open", "risk", { payload: { severity: "high", likelihood: "medium", mitigation: "Synthetic mitigation." } }), createActionNode("action:alpha-next", { payload: { ...createActionNode("action:tmp").payload, relatedDecisionRefs: ["decision:alpha-effective"] } })];
+  return { metadata: { schemaVersion: "0.2-proposed", example: true, runtimeEvidence: false, generatedAt: GENERATED_AT }, nodes, edges: [], contextPackage: { omittedContext: [] } };
+}
+
+export function createFullSyntheticLedger(overrides = {}) {
+  return createMinimalLedger({ effectiveDecisions: [{ id: "decision:alpha-effective", scopeKey: SCOPE }], proposedDecisions: [{ id: "decision:alpha-proposed", scopeKey: SCOPE }], decisionChains: [{ subjectKey: "decision.subject", scopeKey: SCOPE, rootDecisionIds: ["decision:alpha-history"], orderedDecisionIds: ["decision:alpha-history", "decision:alpha-effective"], terminalDecisionIds: ["decision:alpha-effective"], chainStatus: "resolved" }], inheritedMemories: [{ id: "memory:alpha-inherited", scopeKey: SCOPE }], inferredMemories: [{ id: "memory:alpha-inferred", scopeKey: SCOPE }], disputedMemories: [{ id: "memory:alpha-disputed", scopeKey: SCOPE }], historicalMemories: [{ id: "memory:alpha-historical", scopeKey: SCOPE }], ...overrides });
+}
+
+export function shuffledFixture(value) { const copy = cloneFixture(value); copy.nodes.reverse(); copy.edges.reverse(); return copy; }

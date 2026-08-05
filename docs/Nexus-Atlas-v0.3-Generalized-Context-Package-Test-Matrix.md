@@ -1,7 +1,8 @@
 # Nexus Atlas — Generalized Context Package v0.3 Test Matrix
 
 **Status:** Accepted
-**Target:** Phase 3B
+**Target:** Phase 3C
+**Implementation:** Phase 3B automated suite accepted
 **Total Cases:** 32
 
 This is the machine-aligned Phase 3B contract matrix. Every case records the same nine fields: Case ID, Category, Input State, Expected Package Sections, Expected Omissions, Expected Source Summary, Expected Error, Legacy Mapping, and Rationale. `—` means not applicable. The matrix defines future behavior; it is not runtime evidence.

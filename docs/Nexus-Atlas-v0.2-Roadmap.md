@@ -1,7 +1,7 @@
 # Nexus Atlas v0.2 — Personal Context Foundation
 
 **Status:** Active
-**Implementation:** Phase 3A contract design complete
+**Implementation:** Phase 3B generalized package builder complete
 
 ## 1. Executive Summary
 
@@ -149,7 +149,7 @@ Phase 3 将定义并实现通用 Context Package contract。Phase 3A 已完成�
 - v0.2 legacy mapping
 - Phase 3B 32-case test catalog
 
-#### Phase 3B — Generalized Package Builder — Planned
+#### Phase 3B — Generalized Package Builder — Complete
 
 - buildGeneralizedContextPackage
 - v0.3 validation
