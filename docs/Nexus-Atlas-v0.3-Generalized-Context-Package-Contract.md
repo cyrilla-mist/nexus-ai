@@ -81,17 +81,17 @@ No `rawGraph`, `rawLedger`, resolver internals, secrets, or environment state ma
 
 ## 6. Projection contracts
 
-`project` is `{ id, kind, title, summary, currentPhase, currentVersion, currentMilestoneId, repositoryRefs, source }`, populated from the selected canonical node, not hardcoded. Base-safe sections—`identity.confirmed`, `identity.inferred`, `goals.active`, `risks.open`, `records.disputed`, and `records.historical`—use `{ id, kind, title, summary, lifecycle, verification, confidence, freshness, source }`. `source` is derived only from Graph provenance as `{ provider, authority, reference, capturedAt, retrievalMode }`; absent optional fields are `null`, and restricted records, secrets, and local absolute paths never project.
+`project` is `{ id, kind, title, summary, currentPhase, currentVersion, currentMilestoneId, repositoryRefs, source }`, populated from the selected canonical node, not hardcoded. Base-safe sections—`identity.confirmed`, `identity.inferred`, `goals.active`, `risks.open`, `records.disputed`, and `records.historical`—use `{ id, kind, title, summary, lifecycle, verification, confidence, freshness, source }`, where `lifecycle` is the string `node.lifecycle.state` and may be `active`, `completed`, `archived`, `superseded`, or `revoked`. `source` is derived only from Graph provenance as `{ provider, authority, reference, capturedAt, retrievalMode }`; absent optional fields are `null`, and restricted records, secrets, and local absolute paths never project. No full-record section uses a lifecycle object.
 
-Decision projections are `{ id, kind, title, summary, subjectKey, scopeKey, question, choice, rationale, evidenceRefs, decisionStatus, verification, freshness, decidedAt, decidedBy, source }`. Content comes from Graph; Ledger supplies classification and IDs. Effective and proposed IDs must exactly match Ledger sections. Historical Decisions are not proposed, and inferred verification remains inferred.
+Decision projections are `{ id, kind, title, summary, subjectKey, scopeKey, question, choice, rationale, evidenceRefs, decisionStatus, verification, freshness, lifecycle, decidedAt, decidedBy, supersededBy, source }`. `lifecycle` is the canonical state string and `supersededBy` is copied from `node.payload.supersededBy`; effective Decisions normally have `null`, never a Builder-guessed value. Content comes from Graph; Ledger supplies classification and IDs. Effective and proposed IDs must exactly match Ledger sections. Historical Decisions are not proposed, and inferred verification remains inferred.
 
 Chains preserve the safe Ledger shape `{ subjectKey, scopeKey, rootDecisionIds, orderedDecisionIds, terminalDecisionIds, chainStatus }`. References must be existing, non-restricted Decision IDs; `chainStatus` is one of `resolved`, `branching`, `incomplete`, `no_effective_decision`. Historical Decision payloads appear only through chain IDs.
 
-Memory projections are `{ id, kind, title, summary, subjectKey, scopeKey, statement, basis, memoryStatus, verification, confidence, freshness, relatedEntityRefs, conflictsWith, source }`. Sections map exactly to `inheritedMemories`, `inferredMemories`, `disputedMemories`, and `historicalMemories`. Decisions never enter Memory sections.
+Memory projections are `{ id, kind, title, summary, subjectKey, scopeKey, statement, basis, memoryStatus, verification, confidence, freshness, lifecycle, relatedEntityRefs, conflictsWith, source }`. Sections map exactly to `inheritedMemories`, `inferredMemories`, `disputedMemories`, and `historicalMemories`. Decisions never enter Memory sections.
 
-Evidence projections are `{ id, kind, title, summary, claim, sourceRef, observedAt, appliesToVersion, verificationMethod, result, verification, confidence, freshness, source }`. Current, inferred, disputed, and historical classification follows lifecycle, epistemic, freshness, selected scope, governance, and non-revoked rules. Evidence is not classified by the Decision/Memory Ledger.
+Evidence projections are `{ id, kind, title, summary, claim, sourceRef, observedAt, appliesToVersion, verificationMethod, result, verification, confidence, freshness, lifecycle, source }`. Current, inferred, disputed, and historical classification follows lifecycle, epistemic, freshness, selected scope, governance, and non-revoked rules. Evidence is not classified by the Decision/Memory Ledger.
 
-Actions use `{ id, kind, title, summary, description, owner, priority, actionStatus, completionCriteria, relatedDecisionRefs, externalEffect, requiresConfirmation, lifecycle, verification, confidence, freshness, source }`. `goals.active`, `risks.open`, and next actions use their canonical kind and governance. Completed actions are excluded; next action status is one of `in_progress`, `ready`, `blocked`, or `proposed`. Non-Decision/Memory/Evidence disputed and historical records go only to `records.disputed` or `records.historical`.
+Actions use `{ id, kind, title, summary, description, owner, priority, actionStatus, completionCriteria, relatedDecisionRefs, externalEffect, requiresConfirmation, lifecycle, verification, confidence, freshness, source }`, with string `lifecycle === node.lifecycle.state`. `goals.active`, `risks.open`, and next actions use their canonical kind and governance. Completed actions are excluded; next action status is one of `in_progress`, `ready`, `blocked`, or `proposed`. Non-Decision/Memory/Evidence disputed and historical records go only to `records.disputed` or `records.historical`.
 
 Eligibility is explicit: identity sections require active lifecycle, current freshness, matching confirmed/inferred verification, and allowed governance; goals require active/current, non-disputed verification, and allowed governance; risks require active lifecycle, current freshness, non-disputed verification, and allowed governance; actions require active/current, non-disputed verification, an allowed action status, and allowed governance. Stale or disputed risks/actions therefore fall to generic historical/disputed records rather than overlapping `risks.open` or `actions.next`.
 
@@ -99,7 +99,7 @@ Unresolved conflicts are copied from Ledger without explanation rewriting: `{ co
 
 ## 7. Omissions and consent
 
-Record omissions use `{ id, kind, rule, reason }`; explicit declaration omissions use `{ item, rule: "explicit-declaration", reason }`. Ledger `omittedRecords` are copied rather than recalculated for Decision/Memory. For every non-Decision/Memory record, at most one structured omission is emitted using this first-match priority: `restricted`, `inheritance-never`, `explicit-only-no-consent`, `revoked`, `provenance-insufficient`. A higher-priority match suppresses lower-priority reasons. Explicit declaration omissions remain independent. Omission de-duplication is first-wins by `id + rule` or `item + rule`, preserving normalized order. Restricted omissions must not leak title, summary, statement, choice, payload, or `provenance.reference`. Out-of-scope is never an omission.
+Record omissions use `{ id, kind, rule, reason }`; explicit declaration omissions use `{ item, rule: "explicit-declaration", reason }`. Omission source order is: (1) explicit declarations in declaration order, (2) Ledger Decision/Memory omissions sorted by `id`, then `rule`, and (3) Builder-computed non-Decision/Memory omissions sorted by `id`, then `rule`. First-wins de-duplication then uses `id + rule` for records and `item + rule` for declarations. For every non-Decision/Memory record, at most one structured omission is emitted using this priority: `restricted`, `inheritance-never`, `explicit-only-no-consent`, `revoked`, `provenance-insufficient`. A higher-priority match suppresses lower-priority reasons. Graph and Ledger input order therefore cannot change omission output, while human declaration order remains authoritative. Restricted omissions must not leak title, summary, statement, choice, payload, or `provenance.reference`. Out-of-scope is never an omission.
 
 The Phase 3 Builder does not accept `consentedRecordIds`. Phase 3B initially excludes non-Decision/Memory `explicit_only` records and emits `explicit-only-no-consent`; it does not introduce a second consent API. Any future consent context requires a separate contract.
 
@@ -124,6 +124,24 @@ Phase 3B may use: `INVALID_GRAPH`, `INVALID_LEDGER`, `INVALID_PROJECT_ID`, `INVA
 ## 10. Legacy compatibility
 
 The existing v0.2 output contains exactly `packageVersion`, `packageId`, `generatedAt`, `project`, `identitySnapshot`, `activeGoals`, `confirmedDecisions`, `currentEvidence`, `disputedContext`, `staleContext`, `openRisks`, `nextActions`, `omittedContext`, and `sourceSummary`. The pure `adaptGeneralizedContextPackageToV02(packageV03)` returns all of those fields. It copies `generatedAt`, maps `project`, `identity.confirmed + identity.inferred`, `goals.active`, `decisions.effective`, `evidence.current`, `memories.disputed + evidence.disputed + records.disputed`, `memories.historical + evidence.historical + records.historical`, `risks.open`, and `actions.next`.
+
+### Legacy Source Projection
+
+Every v0.2 record source is exactly `{ provider, reference }`. `authority`, `capturedAt`, and `retrievalMode` are removed.
+
+### Legacy Safe Record
+
+Identity, goals, generic disputed/historical records, risks, and Memory/Evidence records entering legacy disputed or stale sections use `{ id, kind, title, summary, verification, freshness, lifecycle, source }`. `confidence` is removed and `lifecycle` is the canonical state string.
+
+### Legacy Project
+
+The project is `{ id, title, summary, currentPhase, currentVersion, currentMilestoneId, repositoryRefs, source }`; it has no `kind` and no authority, capturedAt, or retrievalMode.
+
+### Legacy Decision, Evidence, and Action
+
+Legacy Decisions extend the safe record with `question`, `choice`, `rationale`, `decisionStatus`, `decidedAt`, `decidedBy`, and `supersededBy`. They omit `subjectKey`, `scopeKey`, `evidenceRefs`, and `confidence`. Legacy Evidence extends it with `claim`, `sourceRef`, `observedAt`, `appliesToVersion`, `verificationMethod`, `result`. Legacy Actions extend it with `description`, `owner`, `priority`, `actionStatus`, `completionCriteria`, `relatedDecisionRefs`, `externalEffect`, and `requiresConfirmation`.
+
+The adapter never inserts v0.3 section objects directly into v0.2 sections; every mapped record is down-projected to its applicable legacy shape.
 
 The legacy package ID removes the leading `project:` from `packageV03.scope.projectId`, applies the v0.3 safe slug rule, and combines it with the same time slug: `context-package:nexus-atlas:2026-08-05T09-00-00-08-00`. Record omissions become `{ id, reason, rule }`; explicit declarations become `{ item, reason }`, with the fixed `explicit-declaration` rule removed. Historical Decision chain IDs, inferred Memories, proposed Decisions, and unresolved conflicts are excluded.
 

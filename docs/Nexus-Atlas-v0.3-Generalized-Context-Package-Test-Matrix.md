@@ -27,18 +27,18 @@ This is the machine-aligned Phase 3B contract matrix. Every case records the sam
 | CP-G01 | governance | decision:alpha-effective is Ledger-effective | decisions.effective: decision:alpha-effective | — | — | — | confirmedDecisions | Ledger governs effective status |
 | CP-G02 | governance | decision:alpha-proposed is proposed/inferred | decisions.proposed: decision:alpha-proposed | — | — | — | — | Inferred status stays inferred |
 | CP-G03 | governance | decision:alpha-history is ordered history | decisions.chains: decision:alpha-history | — | — | — | — | Historical Decision is chain reference only |
-| CP-G04 | governance | Branching or Memory conflict | conflicts.unresolved references | — | — | — | — | Conflicts share one top-level section |
+| CP-G04 | governance | Branching or Memory conflict with conflict:alpha-branching and conflict:alpha-memory | conflicts.unresolved: conflict IDs; recordIds validated separately | — | — | — | — | Conflict IDs and record references are distinct |
 | CP-G05 | governance | Four Memory classifications | all four memories sections | — | — | — | — | One destination per Ledger class |
 | CP-G06 | governance | Four Evidence states | all four evidence sections | — | — | — | currentEvidence | Evidence uses canonical state dimensions |
 | CP-G07 | governance | Disputed/historical generic records | records.disputed/historical | — | — | — | disputedContext/staleContext | Generic records stay exclusive |
 | CP-G08 | governance | Restricted record | — | restricted | — | — | omittedContext | No restricted payload leakage |
-| CP-G09 | governance | Repeated record and declaration omissions | — | restricted, explicit-declaration | — | — | omittedContext | First-wins normalization |
+| CP-G09 | governance | Declarations, sorted Ledger omissions, and sorted Builder omissions | — | restricted, explicit-declaration | — | — | omittedContext | Source precedence then first-wins normalization |
 | CP-G10 | governance | One record classified twice | — | — | — | PACKAGE_SECTION_DUPLICATE | — | Full records are mutually exclusive |
 | CP-C01 | compatibility | Same immutable inputs twice | identical v0.3 packages | — | — | — | — | Repeated build is deep-equal |
 | CP-C02 | compatibility | Inspect package and nested structures | deeply frozen v0.3 package | — | — | — | — | Derived context is immutable |
 | CP-C03 | compatibility | Snapshot Graph and Ledger before build | unchanged inputs | — | — | — | — | Projection is read-only |
 | CP-C04 | compatibility | Shuffle Graph and Ledger arrays | order-independent package | — | — | — | — | Stable sorting removes incidental order |
 | CP-C05 | compatibility | Count included canonical IDs | sourceSummary providers/byKind | — | totalIncludedRecords: 24 | — | — | Summary totals agree |
-| CP-C06 | compatibility | Phase 3B passes completed v0.3 package to pure adapter | v0.2 legacy sections | — | totalIncludedNodes: 19 | — | packageVersion 0.2; exclude proposed, history, inferred memories, conflicts | Pure adapter preserves compatibility |
+| CP-C06 | compatibility | Phase 3B passes completed v0.3 package to pure adapter | v0.2 legacy nested sections | — | totalIncludedNodes: 19 | — | Adapter output packageVersion 0.2, legacy packageId, down-projected source, recomputed summary; exclude proposed, history, inferred memories, conflicts | Pure adapter preserves compatibility without reusing v0.3 objects |
 
 Total: 8 schema + 8 scope + 10 governance + 6 compatibility = 32.
