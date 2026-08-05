@@ -14,6 +14,8 @@ const existing = buildContextPackageV02({ graph, generatedAt, decisionMemoryLedg
 const providerTotal = Object.values(packageV03.sourceSummary.providers).reduce((sum, value) => sum + value, 0);
 const kindTotal = Object.values(packageV03.sourceSummary.byKind).reduce((sum, value) => sum + value, 0);
 const declarations = graph.contextPackage.omittedContext.map((item) => item.item);
+const project = graph.nodes.find((node) => node.id === "project:nexus-atlas");
+const roadmapEvidence = graph.nodes.find((node) => node.id === "evidence:v02-roadmap");
 const assertFrozen = (value) => { if (!value || typeof value !== "object") return; assert.equal(Object.isFrozen(value), true); Object.values(value).forEach(assertFrozen); };
 
 assert.deepEqual(Object.keys(packageV03), ["packageVersion", "packageId", "generatedAt", "scope", "project", "identity", "goals", "decisions", "memories", "evidence", "records", "risks", "actions", "conflicts", "omissions", "sourceSummary"]);
@@ -32,6 +34,14 @@ assert.equal(packageV03.memories.historical.length, 1);
 assert.equal(packageV03.evidence.current.length, 5);
 assert.equal(packageV03.risks.open.length, 5);
 assert.equal(packageV03.actions.next.length, 1);
+assert.deepEqual(packageV03.actions.next.map((item) => item.id), ["action:review-phase4-source-adapter-entry"]);
+assert.equal(project.payload.currentPhase, "Phase 3 complete; Phase 4 planned");
+assert.equal(project.payload.currentVersion, "v0.2 Personal Context Foundation with Context Package v0.3");
+assert.equal(roadmapEvidence.epistemic.verification, "confirmed");
+assert.equal(roadmapEvidence.epistemic.freshness, "current");
+assert.equal(roadmapEvidence.payload.result, "confirmed");
+assert.match(roadmapEvidence.payload.claim, /Phase 3 as complete and Phase 4 as planned/);
+assert.equal(JSON.stringify(roadmapEvidence).includes("Phase 3 as planned"), false);
 assert.equal(packageV03.conflicts.unresolved.length, 0);
 assert.ok(packageV03.decisions.chains.some((chain) => chain.orderedDecisionIds.includes("decision:connectors-first")));
 assert.equal(packageV03.sourceSummary.totalIncludedRecords, 24);

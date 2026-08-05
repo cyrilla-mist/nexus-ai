@@ -18,7 +18,7 @@ test("integrates the canonical graph, Ledger, and Context Package deterministica
 
   validateContextGraph(graph);
   validateDecisionMemoryGraph({ graph, projectId: "project:nexus-atlas", scopeKey: "project:nexus-atlas" });
-  assert.equal(graph.nodes.length, 29);
+  assert.equal(graph.nodes.length, 30);
   assert.equal(graph.edges.length, 9);
   assert.equal(graph.edges.some((edge) => edge.type === "supersedes" && graph.nodes.find((node) => node.id === edge.from)?.kind !== graph.nodes.find((node) => node.id === edge.to)?.kind), false);
 
@@ -37,7 +37,7 @@ test("integrates the canonical graph, Ledger, and Context Package deterministica
   assert.deepEqual(ids(ledger.inferredMemories), ["memory:github-adapter-proposed"]);
   assert.equal(ledger.unresolvedConflicts.length, 0);
   assert.deepEqual(ids(pkg.confirmedDecisions), ids(ledger.effectiveDecisions));
-  assert.deepEqual(ids(pkg.nextActions), ["action:define-phase3-context-package-contract"]);
+  assert.deepEqual(ids(pkg.nextActions), ["action:review-phase4-source-adapter-entry"]);
   assert.equal(pkg.sourceSummary.totalIncludedNodes, 19);
   assert.deepEqual(ids(pkg.currentEvidence), ["evidence:architecture-review", "evidence:readme-baseline", "evidence:repository-reference", "evidence:v02-context-model", "evidence:v02-roadmap"]);
   for (const id of ["evidence:v02-roadmap", "evidence:v02-context-model"]) {

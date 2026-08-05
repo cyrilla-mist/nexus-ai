@@ -1,9 +1,9 @@
 # Nexus Atlas — Generalized Context Package v0.3 Contract
 
 **Status:** Accepted
-**Target:** Phase 3D
-**Implementation:** Phase 3C complete
-**Phase:** Phase 3C Self-Context Provider Integration Complete
+**Target:** Stable v0.3 package baseline
+**Implementation:** Phase 3 complete
+**Phase:** Phase 3 Generalized Context Package Complete
 **Compatibility:** Context Package v0.2 preserved
 
 ## 1. Purpose
@@ -35,6 +35,15 @@ The contract does not modify the canonical graph, automatically confirm a user d
 - Provider mode remains `self-context-v02`.
 - Graph and Ledger caching are preserved.
 - No UI integration, live source, or external mutation was added.
+
+## Phase 3D Implementation Note
+
+- Phase 3D final acceptance completed.
+- Canonical Self-Context was refreshed to the Phase 3 complete state.
+- v0.2 and v0.3 outputs remain compatible and deterministic.
+- Full regression was accepted.
+- Fast-forward main integration completed.
+- No Phase 4 implementation was started.
 
 ## 2. Architecture responsibilities
 
@@ -194,6 +203,6 @@ Phase 3B is complete.
 
 Phase 3C is complete.
 
-Phase 3D remains responsible for final acceptance and main integration.
+Phase 3D is complete and includes final acceptance and main integration.
 
-Phase 3 as a whole remains incomplete until Phase 3C and Phase 3D are accepted.
+Phase 3 as a whole is complete. Phase 4 remains planned and outside this contract.

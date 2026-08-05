@@ -3,7 +3,7 @@
     "schemaVersion": "0.2-proposed",
     "example": true,
     "runtimeEvidence": false,
-    "generatedAt": "2026-08-03T23:30:00+08:00"
+    "generatedAt": "2026-08-05T12:00:00+08:00"
   },
   "nodes": [
     {
@@ -12,11 +12,11 @@
       "title": "Nexus Atlas",
       "summary": "Nexus Atlas manages its own development context as the first v0.2 real scenario.",
       "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
-      "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T23:30:00+08:00" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-05T12:00:00+08:00" },
       "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
-      "provenance": { "provider": "repository", "reference": "cyrilla-mist/nexus-ai", "capturedAt": "2026-08-03T00:00:00+08:00", "retrievalMode": "repository-boundary-inspection", "authority": "repository-scope" },
+      "provenance": { "provider": "repository", "reference": "cyrilla-mist/nexus-ai", "capturedAt": "2026-08-05T12:00:00+08:00", "retrievalMode": "repository-boundary-inspection", "authority": "repository-scope" },
       "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
-      "payload": { "purpose": "Maintain continuity across identity, project, memory, decision, evidence, and action.", "currentPhase": "Phase 2 complete; Phase 3 planned", "currentVersion": "v0.2 Personal Context Foundation", "currentMilestoneId": null, "territoryIds": ["territory:innovation"], "lastActiveAt": "2026-08-03T23:30:00+08:00", "repositoryRefs": ["cyrilla-mist/nexus-ai"] }
+      "payload": { "purpose": "Maintain continuity across identity, project, memory, decision, evidence, and action.", "currentPhase": "Phase 3 complete; Phase 4 planned", "currentVersion": "v0.2 Personal Context Foundation with Context Package v0.3", "currentMilestoneId": null, "territoryIds": ["territory:innovation"], "lastActiveAt": "2026-08-05T12:00:00+08:00", "repositoryRefs": ["cyrilla-mist/nexus-ai"] }
     },
     {
       "id": "milestone:context-foundation",
@@ -142,13 +142,13 @@
       "id": "evidence:v02-roadmap",
       "kind": "evidence",
       "title": "v0.2 roadmap status",
-      "summary": "The roadmap records Phase 2 as complete and Phase 3 as planned.",
+      "summary": "The roadmap records Phase 3 as complete and Phase 4 as planned.",
       "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
-      "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-03T23:30:00+08:00" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-05T12:00:00+08:00" },
       "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
-      "provenance": { "provider": "repository", "reference": "docs/Nexus-Atlas-v0.2-Roadmap.md", "capturedAt": "2026-08-03T23:30:00+08:00", "retrievalMode": "repository-document-review", "authority": "repository-document" },
+      "provenance": { "provider": "repository", "reference": "docs/Nexus-Atlas-v0.2-Roadmap.md", "capturedAt": "2026-08-05T12:00:00+08:00", "retrievalMode": "repository-document-review", "authority": "repository-document" },
       "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
-      "payload": { "claim": "The Nexus Atlas v0.2 roadmap records Phase 2 as complete and Phase 3 as planned.", "sourceRef": "docs/Nexus-Atlas-v0.2-Roadmap.md", "observedAt": "2026-08-03T23:30:00+08:00", "appliesToVersion": "v0.2-phase2-complete", "verificationMethod": "repository document review", "result": "confirmed" }
+      "payload": { "claim": "The Nexus Atlas v0.2 roadmap records Phase 3 as complete and Phase 4 as planned.", "sourceRef": "docs/Nexus-Atlas-v0.2-Roadmap.md", "observedAt": "2026-08-05T12:00:00+08:00", "appliesToVersion": "v0.2-phase3-complete", "verificationMethod": "repository document review", "result": "confirmed" }
     },
     {
       "id": "evidence:v02-context-model",
@@ -346,13 +346,25 @@
       "id": "action:define-phase3-context-package-contract",
       "kind": "action",
       "title": "Define the Phase 3 Context Package contract",
-      "summary": "Generalize the Context Package schema after Decision and Memory governance has been integrated.",
+      "summary": "The generalized Context Package contract, Builder, Adapter, and Provider integration are complete.",
       "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
-      "lifecycle": { "state": "active", "createdAt": "2026-08-03T23:30:00+08:00", "updatedAt": "2026-08-03T23:30:00+08:00" },
+      "lifecycle": { "state": "completed", "createdAt": "2026-08-03T23:30:00+08:00", "updatedAt": "2026-08-05T12:00:00+08:00" },
       "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
-      "provenance": { "provider": "roadmap", "reference": "docs/Nexus-Atlas-v0.2-Roadmap.md", "capturedAt": "2026-08-03T23:30:00+08:00", "retrievalMode": "repository-document-review", "authority": "proposed-plan" },
+      "provenance": { "provider": "roadmap", "reference": "docs/Nexus-Atlas-v0.2-Roadmap.md", "capturedAt": "2026-08-05T12:00:00+08:00", "retrievalMode": "repository-document-review", "authority": "project-roadmap" },
       "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
-      "payload": { "description": "Define the Phase 3 generalized Context Package contract.", "owner": "user:self", "priority": "high", "actionStatus": "proposed", "completionCriteria": "An accepted contract defines how Ledger-governed Decision and Memory sections enter a generalized Context Package.", "relatedDecisionRefs": ["decision:context-foundation-first", "decision:separate-context-states"], "externalEffect": false, "requiresConfirmation": false }
+      "payload": { "description": "Define the Phase 3 generalized Context Package contract.", "owner": "user:self", "priority": "high", "actionStatus": "completed", "completionCriteria": "An accepted contract defines how Ledger-governed Decision and Memory sections enter a generalized Context Package.", "relatedDecisionRefs": ["decision:context-foundation-first", "decision:separate-context-states"], "externalEffect": false, "requiresConfirmation": false }
+    },
+    {
+      "id": "action:review-phase4-source-adapter-entry",
+      "kind": "action",
+      "title": "Review Phase 4 Source Adapter entry",
+      "summary": "Evaluate the read-only Source Adapter boundary before starting Phase 4 implementation.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-05T12:00:00+08:00", "updatedAt": "2026-08-05T12:00:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "roadmap", "reference": "docs/Nexus-Atlas-v0.2-Roadmap.md", "capturedAt": "2026-08-05T12:00:00+08:00", "retrievalMode": "repository-document-review", "authority": "project-roadmap" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": { "description": "Review whether Phase 4 should begin and define the authority, read-only scope, and acceptance boundary for the first Source Adapter.", "owner": "user:self", "priority": "medium", "actionStatus": "proposed", "completionCriteria": "A separate Phase 4 contract identifies the candidate source, authority boundary, read-only behavior, privacy rules, and acceptance tests before implementation.", "relatedDecisionRefs": ["decision:context-foundation-first", "decision:no-broad-ingestion-first"], "externalEffect": false, "requiresConfirmation": false }
     }
   ],
   "edges": [
@@ -368,7 +380,7 @@
   ],
   "contextPackage": {
     "packageId": "context-package:nexus-atlas-v02",
-    "generatedAt": "2026-08-03T23:30:00+08:00",
+    "generatedAt": "2026-08-05T12:00:00+08:00",
     "project": "project:nexus-atlas",
     "identitySnapshot": [],
     "activeGoals": [],
@@ -377,7 +389,7 @@
     "disputedContext": [],
     "staleContext": ["memory:connectors-first-superseded"],
     "openRisks": ["risk:broad-ingestion-too-early", "risk:identity-inference-promotion", "risk:single-status-collapse", "risk:ui-defines-model", "risk:unprovenanced-model-facts"],
-    "nextActions": ["action:define-phase3-context-package-contract"],
+    "nextActions": ["action:review-phase4-source-adapter-entry"],
     "omittedContext": [
       { "item": "personal sensitive details", "reason": "Not needed for this product-development context and excluded by privacy governance." },
       { "item": "credentials", "reason": "Secrets and credentials are never part of provenance or a ContextPackage." },

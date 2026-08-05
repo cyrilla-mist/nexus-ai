@@ -24,7 +24,7 @@ const expectedLegacy = buildContextPackageV02({ graph, generatedAt, decisionMemo
 assert.equal(provider.mode, "self-context-v02");
 assert.equal(provider.source, "deterministic-fixture");
 assert.strictEqual(directV03, generalized);
-assert.equal(graph.nodes.length, 29);
+assert.equal(graph.nodes.length, 30);
 assert.equal(graph.edges.length, 9);
 assert.equal(graph.nodes.filter((node) => node.kind === "decision").length, 7);
 assert.equal(graph.nodes.filter((node) => node.kind === "memory").length, 5);
@@ -79,14 +79,18 @@ assert.strictEqual(result, repeated);
 
 const defaultProvider = createSelfContextProvider();
 const defaultResult = await defaultProvider.loadContextPackage();
-assert.equal(defaultResult.graph.metadata.generatedAt, "2026-08-03T23:30:00+08:00");
+assert.equal(defaultResult.graph.metadata.generatedAt, "2026-08-05T12:00:00+08:00");
 assert.equal(defaultResult.ledger?.generatedAt, undefined);
-assert.equal(defaultResult.decisionMemoryLedger.generatedAt, "2026-08-03T23:30:00+08:00");
-assert.equal(defaultResult.generalizedContextPackage.packageId, "context-package:project-nexus-atlas:2026-08-03T23-30-00-08-00");
+assert.equal(defaultResult.decisionMemoryLedger.generatedAt, "2026-08-05T12:00:00+08:00");
+assert.equal(defaultResult.generalizedContextPackage.packageId, "context-package:project-nexus-atlas:2026-08-05T12-00-00-08-00");
+assert.deepEqual(generalized.actions.next.map((item) => item.id), ["action:review-phase4-source-adapter-entry"]);
+assert.equal(generalized.actions.next.some((item) => item.id === "action:define-phase3-context-package-contract"), false);
+assert.deepEqual(legacy.nextActions.map((item) => item.id), ["action:review-phase4-source-adapter-entry"]);
+assert.equal(legacy.nextActions.some((item) => item.id === "action:define-phase3-context-package-contract"), false);
 
 console.log("Nexus Atlas Phase 3C Self-Context Provider");
 console.log("Provider mode: self-context-v02");
-console.log("Graph nodes: 29");
+console.log("Graph nodes: 30");
 console.log("Graph edges: 9");
 console.log("Ledger version: 0.2");
 console.log("Legacy package version: 0.2");

@@ -29,7 +29,7 @@ test("loadContextPackage returns deterministic read-only source info", async () 
   assert.equal(result.sourceInfo.decisionMemoryIntegrated, true);
   assert.equal(result.sourceInfo.ledgerVersion, "0.2");
   assert.deepEqual(result.contextPackage.project.id, "project:nexus-atlas");
-  assert.equal(result.sourceInfo.nodeCount, 29);
+  assert.equal(result.sourceInfo.nodeCount, 30);
   assert.equal(result.sourceInfo.edgeCount, 9);
   assert.equal(result.sourceInfo.decisionCount, 7);
   assert.equal(result.sourceInfo.memoryCount, 5);

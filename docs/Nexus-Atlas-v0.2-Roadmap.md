@@ -1,7 +1,7 @@
 # Nexus Atlas v0.2 — Personal Context Foundation
 
 **Status:** Active
-**Implementation:** Phase 3C self-context provider integration complete
+**Implementation:** Phase 3 generalized context package complete
 
 ## 1. Executive Summary
 
@@ -135,9 +135,9 @@ next action、owner、priority、completion criteria、related decision、extern
 - Acceptance tests cover migration, classification, immutability, and determinism.
 - No UI redesign, live source, or external mutation is included.
 
-### Phase 3 — Generalized Context Package — In progress
+### Phase 3 — Generalized Context Package — Complete
 
-Phase 3 将定义并实现通用 Context Package contract。Phase 3A 已完成契约设计；整个 Phase 3 尚未完成。Phase 2C 没有扩展 Context Package 顶层 schema，只通过 Provider 单独返回 Ledger。
+Phase 3 已完成通用 Context Package contract、Builder、Adapter、双版本 Provider 集成和最终验收。Phase 2C 没有扩展 Context Package 顶层 schema，只通过 Provider 单独返回 Ledger。
 
 #### Phase 3A — Contract Design — Complete
 
@@ -169,7 +169,17 @@ Phase 3 将定义并实现通用 Context Package contract。Phase 3A 已完成�
 - no removal of v0.2 output
 - no UI integration
 
-#### Phase 3D — Acceptance and Main Merge — Planned
+#### Phase 3D — Acceptance and Main Merge — Complete
+
+- Phase 3A complete
+- Phase 3B complete
+- Phase 3C complete
+- Phase 3D complete
+- v0.2 legacy output preserved
+- v0.3 generalized output integrated
+- complete regression accepted
+- fast-forward main integration completed
+- no Phase 4 implementation
 
 - hardening
 - complete regression

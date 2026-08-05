@@ -24,7 +24,7 @@ test("projects the expected canonical sections", async () => {
     disputedContext: [],
     staleContext: ["memory:connectors-first-superseded"],
     openRisks: ["risk:broad-ingestion-too-early", "risk:identity-inference-promotion", "risk:single-status-collapse", "risk:ui-defines-model", "risk:unprovenanced-model-facts"],
-    nextActions: ["action:define-phase3-context-package-contract"],
+    nextActions: ["action:review-phase4-source-adapter-entry"],
   });
   const expected = refs(input.contextPackage);
   assert.deepEqual(refs(result), expected);
