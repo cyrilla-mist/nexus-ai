@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { validateContextGraph } from "./context-graph-validator.mjs";
 import { validateDecisionMemoryGraph } from "./decision-memory-validator.mjs";
 import { buildDecisionMemoryLedger } from "./decision-memory-ledger.mjs";
-import { buildContextPackageV02 } from "./context-package-projector.mjs";
+import { buildGeneralizedContextPackage, adaptGeneralizedContextPackageToV02 } from "../context-v03/generalized-context-package-builder.mjs";
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const DEFAULT_FIXTURE_PATH = path.join(repositoryRoot, "examples", "nexus-atlas-self-context-v0.2.json");
@@ -35,6 +35,8 @@ export function createSelfContextProvider(options = {}) {
   const consentedRecordIds = [...(providedConsentedRecordIds || [])];
   let graphPromise;
   let ledgerPromise;
+  let generalizedPackagePromise;
+  let contextResultPromise;
 
   async function loadGraph() {
     if (!graphPromise) {
@@ -57,6 +59,42 @@ export function createSelfContextProvider(options = {}) {
     return ledgerPromise;
   }
 
+  async function loadGeneralizedContextPackage() {
+    if (!generalizedPackagePromise) {
+      generalizedPackagePromise = Promise.all([loadGraph(), loadDecisionMemoryLedger()]).then(([graph, decisionMemoryLedger]) => {
+        const generatedAt = configuredGeneratedAt || graph.metadata.generatedAt;
+        return buildGeneralizedContextPackage({ graph, ledger: decisionMemoryLedger, projectId, scopeKey, generatedAt });
+      });
+    }
+    return generalizedPackagePromise;
+  }
+
+  function sourceInfo(graph, decisionMemoryLedger, contextPackage, generalizedContextPackage) {
+    return {
+      mode: "self-context-v02",
+      label: "Nexus Atlas Self-Context",
+      live: false,
+      readOnly: true,
+      deterministic: true,
+      runtimeEvidence: false,
+      decisionMemoryIntegrated: true,
+      ledgerVersion: decisionMemoryLedger.ledgerVersion,
+      nodeCount: graph.nodes.length,
+      edgeCount: graph.edges.length,
+      decisionCount: decisionMemoryLedger.diagnostics.decisionCount,
+      memoryCount: decisionMemoryLedger.diagnostics.memoryCount,
+      effectiveDecisionCount: decisionMemoryLedger.diagnostics.effectiveDecisionCount,
+      chainCount: decisionMemoryLedger.diagnostics.chainCount,
+      conflictCount: decisionMemoryLedger.diagnostics.conflictCount,
+      generalizedContextPackageIntegrated: true,
+      legacyAdapterIntegrated: true,
+      contextPackageVersion: contextPackage.packageVersion,
+      generalizedContextPackageVersion: generalizedContextPackage.packageVersion,
+      legacyIncludedNodeCount: contextPackage.sourceSummary.totalIncludedNodes,
+      generalizedIncludedRecordCount: generalizedContextPackage.sourceSummary.totalIncludedRecords,
+    };
+  }
+
   return {
     mode: "self-context-v02",
     source: "deterministic-fixture",
@@ -66,33 +104,17 @@ export function createSelfContextProvider(options = {}) {
     async loadDecisionMemoryLedger() {
       return loadDecisionMemoryLedger();
     },
+    async loadGeneralizedContextPackage() {
+      return loadGeneralizedContextPackage();
+    },
     async loadContextPackage() {
-      const graph = await loadGraph();
-      const decisionMemoryLedger = await loadDecisionMemoryLedger();
-      const generatedAt = configuredGeneratedAt || graph.metadata.generatedAt;
-      const contextPackage = buildContextPackageV02({ graph, generatedAt, decisionMemoryLedger });
-      return deepFreeze({
-        graph,
-        decisionMemoryLedger,
-        contextPackage,
-        sourceInfo: {
-          mode: "self-context-v02",
-          label: "Nexus Atlas Self-Context",
-          live: false,
-          readOnly: true,
-          deterministic: true,
-          runtimeEvidence: false,
-          decisionMemoryIntegrated: true,
-          ledgerVersion: decisionMemoryLedger.ledgerVersion,
-          nodeCount: graph.nodes.length,
-          edgeCount: graph.edges.length,
-          decisionCount: decisionMemoryLedger.diagnostics.decisionCount,
-          memoryCount: decisionMemoryLedger.diagnostics.memoryCount,
-          effectiveDecisionCount: decisionMemoryLedger.diagnostics.effectiveDecisionCount,
-          chainCount: decisionMemoryLedger.diagnostics.chainCount,
-          conflictCount: decisionMemoryLedger.diagnostics.conflictCount,
-        },
-      });
+      if (!contextResultPromise) {
+        contextResultPromise = Promise.all([loadGraph(), loadDecisionMemoryLedger(), loadGeneralizedContextPackage()]).then(([graph, decisionMemoryLedger, generalizedContextPackage]) => {
+          const contextPackage = adaptGeneralizedContextPackageToV02(generalizedContextPackage);
+          return deepFreeze({ graph, decisionMemoryLedger, contextPackage, generalizedContextPackage, sourceInfo: sourceInfo(graph, decisionMemoryLedger, contextPackage, generalizedContextPackage) });
+        });
+      }
+      return contextResultPromise;
     },
   };
 }
