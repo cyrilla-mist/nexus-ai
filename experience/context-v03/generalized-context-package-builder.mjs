@@ -37,7 +37,7 @@ function nonEmptyString(value) { return typeof value === "string" && Boolean(val
 function strictIsoTimestamp(value) { return nonEmptyString(value) && /(?:Z|[+-]\d{2}:\d{2})$/.test(value) && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2})(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(value) && !Number.isNaN(Date.parse(value)); }
 function safeSlug(value) { return value.replace(/[^A-Za-z0-9._-]+/g, "-").replace(/^-+|-+$/g, ""); }
 function timeSlug(value) { return value.replace(/[:+]/g, "-"); }
-function localPath(value) { return typeof value === "string" && (/^[A-Za-z]:[\\/]/.test(value) || /^\\\\/.test(value) || /^\/(?:home|Users)(?:\/|$)/.test(value) || (/^\//.test(value) && !/^\/[^/]+$/.test(value)) || /^file:\/\//i.test(value)); }
+function localPath(value) { return typeof value === "string" && (/^[A-Za-z]:[\\/]/.test(value) || /^\\\\/.test(value) || /^\//.test(value) || /^file:\/\//i.test(value)); }
 
 function safeSource(node) {
   const provenance = node.provenance || {};
@@ -123,7 +123,7 @@ function validateChains(ledger, nodes, projectId, scopeKey) {
   for (const chain of ledger.decisionChains) {
     if (!chain || typeof chain !== "object" || !nonEmptyString(chain.subjectKey) || !nonEmptyString(chain.scopeKey) || !CHAIN_STATUSES.has(chain.chainStatus) || !["rootDecisionIds", "orderedDecisionIds", "terminalDecisionIds"].every((x) => Array.isArray(chain[x]))) fail("INVALID_LEDGER", "decisionChain is invalid.");
     if (chain.scopeKey !== scopeKey) fail("LEDGER_SCOPE_MISMATCH", "decisionChain scopeKey does not match.");
-    const normalized = { ...chain, rootDecisionIds: [...new Set(chain.rootDecisionIds)].sort(), orderedDecisionIds: [...chain.orderedDecisionIds], terminalDecisionIds: [...new Set(chain.terminalDecisionIds)].sort() };
+    const normalized = { subjectKey: chain.subjectKey, scopeKey: chain.scopeKey, rootDecisionIds: [...new Set(chain.rootDecisionIds)].sort(), orderedDecisionIds: [...new Set(chain.orderedDecisionIds)], terminalDecisionIds: [...new Set(chain.terminalDecisionIds)].sort(), chainStatus: chain.chainStatus };
     for (const id of [...normalized.rootDecisionIds, ...normalized.orderedDecisionIds, ...normalized.terminalDecisionIds]) validateReference({ scopeKey }, nodes.get(id), "decision", projectId, scopeKey, "decisionChains", nodes);
     const key = JSON.stringify([normalized.subjectKey, normalized.scopeKey]);
     if (seen.has(key) && JSON.stringify(seen.get(key)) !== JSON.stringify(normalized)) fail("INVALID_LEDGER", "Duplicate decision chain differs.");
@@ -137,9 +137,16 @@ function validateConflicts(ledger, nodes, projectId, scopeKey) {
   for (const conflict of ledger.unresolvedConflicts) {
     if (!conflict || typeof conflict !== "object" || !nonEmptyString(conflict.conflictId) || !nonEmptyString(conflict.type) || !nonEmptyString(conflict.subjectKey) || !nonEmptyString(conflict.scopeKey) || !Array.isArray(conflict.recordIds) || !nonEmptyString(conflict.explanation) || typeof conflict.autoResolvable !== "boolean" || !nonEmptyString(conflict.requiredResolution)) fail("INVALID_LEDGER", "unresolvedConflict is invalid.");
     if (conflict.scopeKey !== scopeKey) fail("LEDGER_SCOPE_MISMATCH", "conflict scopeKey does not match.");
-    const output = { ...conflict, recordIds: [...new Set(conflict.recordIds)].sort() };
+    const output = { conflictId: conflict.conflictId, type: conflict.type, subjectKey: conflict.subjectKey, scopeKey: conflict.scopeKey, recordIds: [...new Set(conflict.recordIds)].sort(), explanation: conflict.explanation, autoResolvable: conflict.autoResolvable, requiredResolution: conflict.requiredResolution };
     if (!output.recordIds.length || output.recordIds.some((id) => !nonEmptyString(id))) fail("INVALID_LEDGER", "conflict recordIds must be non-empty strings.");
-    for (const id of output.recordIds) validateReference({ scopeKey }, nodes.get(id), nodes.get(id)?.kind, projectId, scopeKey, "unresolvedConflicts", nodes);
+    for (const id of output.recordIds) {
+      const node = nodes.get(id);
+      if (!node) fail("PACKAGE_REFERENCE_MISSING", "unresolvedConflicts references a missing node.");
+      if (!['decision', 'memory'].includes(node.kind)) fail("PACKAGE_REFERENCE_KIND_MISMATCH", "unresolvedConflicts references a non-governed node.");
+      if (node.scope.projectId !== projectId || node.payload.scopeKey !== scopeKey) fail("PACKAGE_REFERENCE_SCOPE_MISMATCH", "unresolvedConflicts references another scope.");
+      if (node.governance.sensitivity === "restricted") fail("PACKAGE_REFERENCE_RESTRICTED", "unresolvedConflicts references restricted content.");
+      if (!safeSource(node)) fail("INVALID_LEDGER", "unresolvedConflicts has insufficient provenance.");
+    }
     if (seen.has(output.conflictId) && JSON.stringify(seen.get(output.conflictId)) !== JSON.stringify(output)) fail("INVALID_LEDGER", "Duplicate conflictId differs.");
     seen.set(output.conflictId, output);
   }
@@ -166,20 +173,25 @@ function explicitOmissions(graph) {
   });
 }
 
-function computedOmissions(nodes) {
-  return nodes.flatMap((node) => {
-    if (node.governance.sensitivity === "restricted") return [{ id: node.id, kind: node.kind, rule: "restricted", reason: "Restricted sensitivity." }];
-    if (node.governance.inheritance === "never") return [{ id: node.id, kind: node.kind, rule: "inheritance-never", reason: "Inheritance is never." }];
-    if (node.governance.inheritance === "explicit_only") return [{ id: node.id, kind: node.kind, rule: "explicit-only-no-consent", reason: "No explicit consent was provided." }];
-    if (node.lifecycle.state === "revoked") return [{ id: node.id, kind: node.kind, rule: "revoked", reason: "Node is revoked." }];
-    if (!safeSource(node)) return [{ id: node.id, kind: node.kind, rule: "provenance-insufficient", reason: "Provenance is insufficient." }];
-    return [];
-  });
+function nonDecisionMemoryOmissionRule(node) {
+  if (node.governance.sensitivity === "restricted") return "restricted";
+  if (node.governance.inheritance === "never") return "inheritance-never";
+  if (node.governance.inheritance === "explicit_only") return "explicit-only-no-consent";
+  if (node.lifecycle.state === "revoked") return "revoked";
+  if (!safeSource(node) || safeSource(node).reference === null) return "provenance-insufficient";
+  return null;
+}
+
+function computedOmission(node, rule) {
+  const reasons = { restricted: "Restricted sensitivity.", "inheritance-never": "Inheritance is never.", "explicit-only-no-consent": "No explicit consent was provided.", revoked: "Node is revoked.", "provenance-insufficient": "Provenance is insufficient." };
+  return { id: node.id, kind: node.kind, rule, reason: reasons[rule] };
 }
 
 function normalizeOmissions(declarations, ledger, computed) {
   const seen = new Set();
-  return [...declarations, ...ledger, ...computed].filter((item) => {
+  const sortedLedger = [...ledger].sort((a, b) => a.id.localeCompare(b.id) || a.rule.localeCompare(b.rule));
+  const sortedComputed = [...computed].sort((a, b) => a.id.localeCompare(b.id) || a.rule.localeCompare(b.rule));
+  return [...declarations, ...sortedLedger, ...sortedComputed].filter((item) => {
     const key = item.item !== undefined ? `d\u0000${item.item}\u0000${item.rule}` : `r\u0000${item.id}\u0000${item.rule}`;
     if (seen.has(key)) return false;
     seen.add(key); return true;
@@ -198,9 +210,11 @@ function buildSummary(project, fullSections, chains, conflicts, nodes) {
 
 function classifyNonGoverned(graphNodes, projectId, full) {
   const result = { identityConfirmed: [], identityInferred: [], goals: [], evidenceCurrent: [], evidenceInferred: [], evidenceDisputed: [], evidenceHistorical: [], recordsDisputed: [], recordsHistorical: [], risks: [], actions: [] };
+  const omissions = [];
   for (const node of graphNodes) {
-    if (node.scope.projectId !== projectId || node.governance.sensitivity === "restricted" || ["project", "decision", "memory"].includes(node.kind)) continue;
-    if (!safeSource(node)) continue;
+    if (node.scope.projectId !== projectId || ["project", "decision", "memory"].includes(node.kind)) continue;
+    const omissionRule = nonDecisionMemoryOmissionRule(node);
+    if (omissionRule) { omissions.push(computedOmission(node, omissionRule)); continue; }
     let destination = null;
     if (node.kind === "identity" && node.lifecycle.state === "active" && node.epistemic.freshness === "current" && node.epistemic.verification === "confirmed") destination = "identityConfirmed";
     else if (node.kind === "identity" && node.lifecycle.state === "active" && node.epistemic.freshness === "current" && node.epistemic.verification === "inferred") destination = "identityInferred";
@@ -216,8 +230,8 @@ function classifyNonGoverned(graphNodes, projectId, full) {
     if (destination && full.has(node.id)) fail("PACKAGE_SECTION_DUPLICATE", `${node.id} appears in multiple full sections.`);
     if (destination) { full.set(node.id, destination); result[destination].push(projectNode(node)); }
   }
-  for (const values of Object.values(result)) values.sort(compareId);
-  return result;
+  for (const [key, values] of Object.entries(result)) values.sort(key.startsWith("evidence") ? (a, b) => String(a.observedAt ?? "").localeCompare(String(b.observedAt ?? "")) || a.id.localeCompare(b.id) : compareId);
+  return { sections: result, omissions };
 }
 
 export function buildGeneralizedContextPackage(options = {}) {
@@ -238,9 +252,10 @@ export function buildGeneralizedContextPackage(options = {}) {
   const memories = { inherited: ledger.inheritedMemories.map((item) => projectMemory(nodes.get(item.id))), inferred: ledger.inferredMemories.map((item) => projectMemory(nodes.get(item.id))), disputed: ledger.disputedMemories.map((item) => projectMemory(nodes.get(item.id))), historical: ledger.historicalMemories.map((item) => projectMemory(nodes.get(item.id))) };
   for (const values of Object.values(memories)) values.sort((a, b) => String(a.subjectKey).localeCompare(String(b.subjectKey)) || String(nodes.get(a.id).lifecycle.updatedAt).localeCompare(String(nodes.get(b.id).lifecycle.updatedAt)) || a.id.localeCompare(b.id));
   const classified = classifyNonGoverned(graph.nodes, projectId, full);
-  const fullSections = [classified.identityConfirmed, classified.identityInferred, classified.goals, decisionsEffective, decisionsProposed, ...Object.values(memories), classified.evidenceCurrent, classified.evidenceInferred, classified.evidenceDisputed, classified.evidenceHistorical, classified.recordsDisputed, classified.recordsHistorical, classified.risks, classified.actions];
-  const omissions = normalizeOmissions(explicitOmissions(graph), ledgerOmissions, computedOmissions(graph.nodes.filter((node) => node.scope.projectId === projectId && !full.has(node.id) && node.kind !== "project" && !["decision", "memory"].includes(node.kind))));
-  const result = { packageVersion: GENERALIZED_CONTEXT_PACKAGE_VERSION, packageId: `context-package:${safeSlug(projectId)}:${timeSlug(generatedAt)}`, generatedAt, scope: { projectId, scopeKey }, project: projectProject(project), identity: { confirmed: classified.identityConfirmed, inferred: classified.identityInferred }, goals: { active: classified.goals }, decisions: { effective: decisionsEffective, proposed: decisionsProposed, chains }, memories, evidence: { current: classified.evidenceCurrent, inferred: classified.evidenceInferred, disputed: classified.evidenceDisputed, historical: classified.evidenceHistorical }, records: { disputed: classified.recordsDisputed, historical: classified.recordsHistorical }, risks: { open: classified.risks }, actions: { next: classified.actions }, conflicts: { unresolved: conflicts }, omissions, sourceSummary: buildSummary(project, fullSections, chains, conflicts, nodes) };
+  const sections = classified.sections;
+  const fullSections = [sections.identityConfirmed, sections.identityInferred, sections.goals, decisionsEffective, decisionsProposed, ...Object.values(memories), sections.evidenceCurrent, sections.evidenceInferred, sections.evidenceDisputed, sections.evidenceHistorical, sections.recordsDisputed, sections.recordsHistorical, sections.risks, sections.actions];
+  const omissions = normalizeOmissions(explicitOmissions(graph), ledgerOmissions, classified.omissions);
+  const result = { packageVersion: GENERALIZED_CONTEXT_PACKAGE_VERSION, packageId: `context-package:${safeSlug(projectId)}:${timeSlug(generatedAt)}`, generatedAt, scope: { projectId, scopeKey }, project: projectProject(project), identity: { confirmed: sections.identityConfirmed, inferred: sections.identityInferred }, goals: { active: sections.goals }, decisions: { effective: decisionsEffective, proposed: decisionsProposed, chains }, memories, evidence: { current: sections.evidenceCurrent, inferred: sections.evidenceInferred, disputed: sections.evidenceDisputed, historical: sections.evidenceHistorical }, records: { disputed: sections.recordsDisputed, historical: sections.recordsHistorical }, risks: { open: sections.risks }, actions: { next: sections.actions }, conflicts: { unresolved: conflicts }, omissions, sourceSummary: buildSummary(project, fullSections, chains, conflicts, nodes) };
   return deepFreeze(clone(result));
 }
 
@@ -263,9 +278,11 @@ export function adaptGeneralizedContextPackageToV02(packageV03) {
   const risks = (packageV03.risks?.open || []).map(legacyRecord);
   const actions = (packageV03.actions?.next || []).map(legacyAction);
   const omittedContext = (packageV03.omissions || []).map((item) => item.item !== undefined ? { item: item.item, reason: item.reason } : { id: item.id, reason: item.reason, rule: item.rule });
-  const records = [packageV03.project, ...identity, ...goals, ...decisions, ...evidence, ...disputed, ...stale, ...risks, ...actions];
-  const ids = new Set(records.map((item) => item.id));
+  const recordsById = new Map();
+  for (const record of [packageV03.project, ...identity, ...goals, ...decisions, ...evidence, ...disputed, ...stale, ...risks, ...actions]) if (!recordsById.has(record.id)) recordsById.set(record.id, record);
+  const records = [...recordsById.values()];
   const providers = Object.fromEntries([...new Set(records.map((item) => item.source.provider))].sort().map((provider) => [provider, records.filter((item) => item.source.provider === provider).length]));
-  const result = { packageVersion: "0.2", packageId: `context-package:${safeSlug(packageV03.scope.projectId.replace(/^project:/, ""))}:${timeSlug(packageV03.generatedAt)}`, generatedAt: packageV03.generatedAt, project: legacyProject(packageV03.project), identitySnapshot: identity, activeGoals: goals, confirmedDecisions: decisions, currentEvidence: evidence, disputedContext: disputed, staleContext: stale, openRisks: risks, nextActions: actions, omittedContext, sourceSummary: { totalIncludedNodes: ids.size, providers } };
+  if (Object.values(providers).reduce((sum, count) => sum + count, 0) !== recordsById.size) fail("PACKAGE_SOURCE_SUMMARY_MISMATCH", "legacy sourceSummary totals do not match.");
+  const result = { packageVersion: "0.2", packageId: `context-package:${safeSlug(packageV03.scope.projectId.replace(/^project:/, ""))}:${timeSlug(packageV03.generatedAt)}`, generatedAt: packageV03.generatedAt, project: legacyProject(packageV03.project), identitySnapshot: identity, activeGoals: goals, confirmedDecisions: decisions, currentEvidence: evidence, disputedContext: disputed, staleContext: stale, openRisks: risks, nextActions: actions, omittedContext, sourceSummary: { totalIncludedNodes: recordsById.size, providers } };
   return deepFreeze(clone(result));
 }

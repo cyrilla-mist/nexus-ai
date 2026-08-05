@@ -20,6 +20,10 @@ The contract does not modify the canonical graph, automatically confirm a user d
 - Self-Context produces a 24-record v0.3 Package.
 - The Adapter matches the existing v0.2 projection.
 - No Provider migration, UI integration, live source, or external mutation was added.
+- Acceptance hardening completed.
+- Catalog expected values are executed, not only enumerated.
+- Governance omissions are applied before section classification.
+- Chain and Conflict projections use strict allowlists.
 
 ## 2. Architecture responsibilities
 

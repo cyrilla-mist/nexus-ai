@@ -14,7 +14,9 @@ const existing = buildContextPackageV02({ graph, generatedAt, decisionMemoryLedg
 const providerTotal = Object.values(packageV03.sourceSummary.providers).reduce((sum, value) => sum + value, 0);
 const kindTotal = Object.values(packageV03.sourceSummary.byKind).reduce((sum, value) => sum + value, 0);
 const declarations = graph.contextPackage.omittedContext.map((item) => item.item);
+const assertFrozen = (value) => { if (!value || typeof value !== "object") return; assert.equal(Object.isFrozen(value), true); Object.values(value).forEach(assertFrozen); };
 
+assert.deepEqual(Object.keys(packageV03), ["packageVersion", "packageId", "generatedAt", "scope", "project", "identity", "goals", "decisions", "memories", "evidence", "records", "risks", "actions", "conflicts", "omissions", "sourceSummary"]);
 assert.equal(packageV03.packageVersion, "0.3");
 assert.equal(packageV03.packageId, "context-package:project-nexus-atlas:2026-08-05T09-00-00-08-00");
 assert.equal(packageV03.sourceSummary.totalIncludedRecords, 24);
@@ -32,7 +34,11 @@ assert.equal(packageV03.risks.open.length, 5);
 assert.equal(packageV03.actions.next.length, 1);
 assert.equal(packageV03.conflicts.unresolved.length, 0);
 assert.ok(packageV03.decisions.chains.some((chain) => chain.orderedDecisionIds.includes("decision:connectors-first")));
+assert.equal(packageV03.sourceSummary.totalIncludedRecords, 24);
+assert.equal(Object.values(packageV03.sourceSummary.byKind).reduce((sum, value) => sum + value, 0), 24);
+assert.equal(packageV03.omissions.length, declarations.length);
 assert.deepEqual(packageV03.omissions.map((item) => item.item), declarations);
+assertFrozen(packageV03);
 assert.equal(legacy.packageVersion, "0.2");
 assert.equal(legacy.packageId, "context-package:nexus-atlas:2026-08-05T09-00-00-08-00");
 assert.equal(legacy.sourceSummary.totalIncludedNodes, 19);
@@ -41,6 +47,9 @@ assert.equal(legacy.currentEvidence.length, 5);
 assert.equal(legacy.staleContext.length, 1);
 assert.equal(legacy.openRisks.length, 5);
 assert.equal(legacy.nextActions.length, 1);
+assert.equal(Object.values(legacy.sourceSummary.providers).reduce((sum, value) => sum + value, 0), 19);
+assert.equal(Object.values(legacy.sourceSummary.providers).reduce((sum, value) => sum + value, 0), legacy.sourceSummary.totalIncludedNodes);
+assertFrozen(legacy);
 assert.deepEqual(legacy, existing);
 
 console.log("Nexus Atlas v0.3 Generalized Context Package");
