@@ -1,9 +1,9 @@
 # Nexus Atlas — Context Import Plan v0.1 Contract
 
-**Status:** Proposed for Phase 4D acceptance  
+**Status:** Accepted
 **Target:** Phase 4D Planner Runtime  
 **Implementation:** Not started  
-**Phase:** Phase 4D Context Import Planner Contract Design  
+**Phase:** Phase 4D Context Import Planner Contract Design Complete
 **Canonical Mutation:** None  
 **External Read:** None
 
@@ -250,3 +250,59 @@ The Canonical Context Model recognizes identity, project, goal, milestone, event
 
 This document freezes the Phase 4D contract only. Planner Runtime is not implemented, Canonical Graph mutation is not implemented, no ContextNode is created, and no live GitHub read is performed.
 
+## 11. Acceptance-hardening input precedence
+
+The future buildContextImportPlanV01 API is:
+
+    export function buildContextImportPlanV01({
+      snapshot,
+      policyVersion,
+      projectId,
+      scopeKey
+    })
+
+Planner input validation has this fixed precedence:
+
+1. The input must be an object, not null or an array, with exactly the keys snapshot, policyVersion, projectId, and scopeKey. Missing or extra keys produce INVALID_IMPORT_PLAN_INPUT.
+2. policyVersion must equal github-context-import-policy-v1, otherwise INVALID_POLICY_VERSION.
+3. projectId must be a non-empty string equal to its trim() result, otherwise INVALID_PROJECT_ID.
+4. scopeKey must be a non-empty string equal to its trim() result, otherwise INVALID_SCOPE_KEY.
+5. Generic Source Snapshot v0.1 validation runs next. Any failure produces INVALID_SOURCE_SNAPSHOT and never leaks SourceAdapterError.
+6. A valid Generic Snapshot with an unsupported adapter/profile produces SOURCE_SNAPSHOT_UNSUPPORTED.
+7. A supported GitHub profile then undergoes complete GitHub Source Snapshot validation; failure produces INVALID_SOURCE_SNAPSHOT.
+
+Therefore a malformed unsupported object is INVALID_SOURCE_SNAPSHOT, while a valid Generic Snapshot with an unsupported profile is SOURCE_SNAPSHOT_UNSUPPORTED. A valid GitHub Planner Snapshot must contain the repository and default-branch core singletons; a mapping case never authorizes a Snapshot containing only the record type under test.
+
+## 12. Future API separation
+
+The future Plan builder validates input and the Source Snapshot, maps records, builds the Plan, validates final coherence, and deep-freezes output. The future validator API is:
+
+    export function validateContextImportPlanV01(plan)
+
+The validator accepts only the Plan and validates internal and descriptor coherence. It performs no Source re-read and does not require the original Snapshot argument. Neither API is implemented in Phase 4D Contract Design.
+
+## 13. Plan Validator error classification
+
+validateContextImportPlanV01 uses IMPORT_PLAN_INVALID for a non-object Plan, non-exact top-level keys, missing or wrong planVersion/policyVersion, malformed sourceSnapshot, target, candidates, exclusions, diagnostics, Candidate payload/provenance/admission, unknown mappingRule, or unknown exclusion rule.
+
+It uses IMPORT_PLAN_SOURCE_MISMATCH when generatedAt differs from sourceSnapshot.capturedAt, a Candidate sourceRecordId is absent from sourceSnapshot.recordIds, proposedPayload.sourceRef differs from the sole sourceRecordId, or provenance.capturedAt differs from the descriptor capture time.
+
+It uses CANDIDATE_ID_INVALID when candidateId is not candidate:evidence:<sole sourceRecordId>, CANDIDATE_DUPLICATE for duplicate candidateId, and IMPORT_PLAN_COVERAGE_MISMATCH for duplicate, missing, or dual Candidate/Exclusion coverage or inconsistent coverage/count diagnostics. SOURCE_RECORD_UNMAPPED belongs only to a supported-profile mapping stage; it is not a silent exclusion fallback.
+
+## 14. Structural precision
+
+Candidate exact keys are candidateId, targetKind, sourceRecordIds, mappingRule, title, summary, proposedPayload, provenance, and admission. sourceRecordIds is an array of exactly one non-empty string. targetKind is exactly evidence. proposedPayload exact keys are claim, sourceRef, observedAt, appliesToVersion, verificationMethod, and result; claim is non-empty, sourceRef equals the sole sourceRecordId, observedAt is null or offset-aware ISO 8601, appliesToVersion is null, verificationMethod is github-source-snapshot-v0.1, result is a non-empty source-local string, and summary equals claim.
+
+Provenance exact keys are provider, reference, capturedAt, retrievalMode, and authority. GitHub v1 fixes provider to github, capturedAt to sourceSnapshot.capturedAt, retrievalMode to read-only-api, and authority to the source-record authority implied by the mapping rule. GitHub v1 records have safe non-empty references. Human-confirmation, human-decision, user-intent, and project-rationale are never authorities here.
+
+Admission exact keys are stage, canonicalWriteAllowed, and confirmationRequirement. They must be candidate, false, and source-authority-sufficient respectively; any deviation is IMPORT_PLAN_INVALID. source-authority-sufficient never means automatic canonical admission.
+
+Diagnostics exact keys are coverageComplete, sourceRecordCount, candidateCount, exclusionCount, byTargetKind, and byConfirmationRequirement. GitHub v1 requires coverageComplete true, exact byTargetKind key evidence, exact byConfirmationRequirement key source-authority-sufficient, sourceRecordCount equal to sourceSnapshot.recordIds.length, candidateCount equal to candidates.length, exclusionCount equal to exclusions.length, candidateCount + exclusionCount equal to sourceRecordCount, and both diagnostic buckets equal to candidateCount.
+
+## 15. Exclusion semantics
+
+An Exclusion is exactly sourceRecordId, reason, and rule. sourceRecordId must belong to sourceSnapshot.recordIds; reason is a non-empty system-generated string and never copies Issue/PR title, commit message, or Release name. rule is exactly one of unsupported-source-type, policy-excluded, authority-insufficient, or unsafe-semantic-promotion. The accepted GitHub v1 policy maps all seven types, so a normal Plan has exclusions equal to [].
+
+## 16. Acceptance status
+
+The Contract is Accepted for Phase 4D Contract Design. The Test Matrix is Accepted with 32 cases. Catalog metadata is Accepted with 7 schema, 6 input/scope, 9 mapping, 6 governance/safety, and 4 determinism/coverage cases. Planner Runtime and Plan Validator Runtime remain not implemented; Phase 4E remains the future Canonical Integration boundary.

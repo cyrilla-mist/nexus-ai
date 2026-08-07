@@ -513,7 +513,9 @@ The next phase is Phase 4D — Context Import Planner.
 ## Phase 4D Follow-up
 
 - The Context Import Plan v0.1 contract now defines the deferred Planner output.
+- The Phase 4D Context Import Plan Contract is accepted.
 - The Source Snapshot remains the sole source-observation input.
 - The Planner performs no source re-read.
 - The Planner produces Candidate-only Evidence proposals.
+- Planner Runtime remains not implemented.
 - No Canonical Graph write is permitted.

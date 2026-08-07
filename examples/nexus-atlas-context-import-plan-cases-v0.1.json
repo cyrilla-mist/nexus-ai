@@ -1,7 +1,7 @@
 {
   "catalogMetadata": {
     "name": "Context Import Plan v0.1",
-    "status": "Proposed for Phase 4D acceptance",
+    "status": "Accepted",
     "totalCases": 32,
     "categories": {
       "schema": 7,
@@ -271,7 +271,7 @@
     {
       "id": "IP-M01",
       "category": "mapping",
-      "inputState": "One Snapshot contains repository, branch, commit, issue, pull_request, release and tag",
+      "inputState": "Valid eight-record GitHub Snapshot covering all seven source types",
       "expected": {
         "outcome": "success",
         "planVersion": "0.1",
@@ -296,16 +296,18 @@
           "stable-candidate-identity"
         ]
       },
-      "rationale": "Each accepted sourceType maps to exactly one closed rule."
+      "rationale": "Each accepted sourceType maps to exactly one closed rule while preserving core singletons."
     },
     {
       "id": "IP-M02",
       "category": "mapping",
-      "inputState": "Same Source Record is planned twice with same inputs",
+      "inputState": "Same validated three-record GitHub Snapshot (repository + branch + commit) planned twice with same inputs",
       "expected": {
         "outcome": "success",
         "planVersion": "0.1",
         "candidateIds": [
+          "candidate:evidence:github:repo:cyrilla-mist/nexus-ai",
+          "candidate:evidence:github:branch:cyrilla-mist/nexus-ai:main",
           "candidate:evidence:github:commit:cyrilla-mist/nexus-ai:2222222222222222222222222222222222222222"
         ],
         "targetKinds": [
@@ -319,17 +321,18 @@
           "input-unchanged"
         ]
       },
-      "rationale": "Identity is source-record based and excludes time, title and array index."
+      "rationale": "Core singleton candidates remain present while the commit Candidate identity is stable."
     },
     {
       "id": "IP-M03",
       "category": "mapping",
-      "inputState": "Repository record with available state",
+      "inputState": "Minimal validated GitHub Snapshot (repository + default branch), repository mapping under test",
       "expected": {
         "outcome": "success",
         "planVersion": "0.1",
         "candidateIds": [
-          "candidate:evidence:github:repo:cyrilla-mist/nexus-ai"
+          "candidate:evidence:github:repo:cyrilla-mist/nexus-ai",
+          "candidate:evidence:github:branch:cyrilla-mist/nexus-ai:main"
         ],
         "targetKinds": [
           "evidence"
@@ -342,16 +345,17 @@
           "no-semantic-promotion"
         ]
       },
-      "rationale": "Repository mapping preserves source state and source event time."
+      "rationale": "Repository mapping is tested with the required branch singleton still present."
     },
     {
       "id": "IP-M04",
       "category": "mapping",
-      "inputState": "Branch record with headSha and observedAt null",
+      "inputState": "Minimal validated GitHub Snapshot (repository + default branch), branch mapping under test",
       "expected": {
         "outcome": "success",
         "planVersion": "0.1",
         "candidateIds": [
+          "candidate:evidence:github:repo:cyrilla-mist/nexus-ai",
           "candidate:evidence:github:branch:cyrilla-mist/nexus-ai:main"
         ],
         "targetKinds": [
@@ -365,16 +369,18 @@
           "no-semantic-promotion"
         ]
       },
-      "rationale": "Branch null source time remains null and is not replaced by capture time."
+      "rationale": "Branch mapping is tested with the required repository singleton still present; source time remains null."
     },
     {
       "id": "IP-M05",
       "category": "mapping",
-      "inputState": "Commit record includes messageHeadline",
+      "inputState": "Validated GitHub Snapshot (repository + branch + commit) with source-controlled messageHeadline sentinel",
       "expected": {
         "outcome": "success",
         "planVersion": "0.1",
         "candidateIds": [
+          "candidate:evidence:github:repo:cyrilla-mist/nexus-ai",
+          "candidate:evidence:github:branch:cyrilla-mist/nexus-ai:main",
           "candidate:evidence:github:commit:cyrilla-mist/nexus-ai:2222222222222222222222222222222222222222"
         ],
         "targetKinds": [
@@ -388,16 +394,18 @@
           "stable-candidate-identity"
         ]
       },
-      "rationale": "Commit message text is excluded from claim and summary."
+      "rationale": "Commit message text is excluded from claim and summary while core candidates remain present."
     },
     {
       "id": "IP-M06",
       "category": "mapping",
-      "inputState": "Issue record includes title and open state",
+      "inputState": "Validated GitHub Snapshot (repository + branch + Issue) with Action-like Issue title",
       "expected": {
         "outcome": "success",
         "planVersion": "0.1",
         "candidateIds": [
+          "candidate:evidence:github:repo:cyrilla-mist/nexus-ai",
+          "candidate:evidence:github:branch:cyrilla-mist/nexus-ai:main",
           "candidate:evidence:github:issue:cyrilla-mist/nexus-ai:17"
         ],
         "targetKinds": [
@@ -411,16 +419,18 @@
           "no-canonical-write"
         ]
       },
-      "rationale": "Issue state becomes Evidence only; title cannot become Action."
+      "rationale": "Issue state becomes Evidence only; title cannot become Action, and core candidates remain present."
     },
     {
       "id": "IP-M07",
       "category": "mapping",
-      "inputState": "Merged pull request record",
+      "inputState": "Validated GitHub Snapshot (repository + branch + merged PR) with completion-like title",
       "expected": {
         "outcome": "success",
         "planVersion": "0.1",
         "candidateIds": [
+          "candidate:evidence:github:repo:cyrilla-mist/nexus-ai",
+          "candidate:evidence:github:branch:cyrilla-mist/nexus-ai:main",
           "candidate:evidence:github:pr:cyrilla-mist/nexus-ai:23"
         ],
         "targetKinds": [
@@ -434,16 +444,18 @@
           "no-canonical-write"
         ]
       },
-      "rationale": "Merged is a source-local PR observation only."
+      "rationale": "Merged is a source-local PR observation only; core candidates remain present."
     },
     {
       "id": "IP-M08",
       "category": "mapping",
-      "inputState": "Published release with tagName v0.1.0",
+      "inputState": "Validated GitHub Snapshot (repository + branch + published release) with version-like name",
       "expected": {
         "outcome": "success",
         "planVersion": "0.1",
         "candidateIds": [
+          "candidate:evidence:github:repo:cyrilla-mist/nexus-ai",
+          "candidate:evidence:github:branch:cyrilla-mist/nexus-ai:main",
           "candidate:evidence:github:release:cyrilla-mist/nexus-ai:release-7"
         ],
         "targetKinds": [
@@ -457,16 +469,18 @@
           "source-authority-preserved"
         ]
       },
-      "rationale": "Release publication cannot set Project.currentVersion."
+      "rationale": "Release publication cannot set Project.currentVersion; core candidates remain present."
     },
     {
       "id": "IP-M09",
       "category": "mapping",
-      "inputState": "Tag with targetSha",
+      "inputState": "Validated GitHub Snapshot (repository + branch + tag with targetSha)",
       "expected": {
         "outcome": "success",
         "planVersion": "0.1",
         "candidateIds": [
+          "candidate:evidence:github:repo:cyrilla-mist/nexus-ai",
+          "candidate:evidence:github:branch:cyrilla-mist/nexus-ai:main",
           "candidate:evidence:github:tag:cyrilla-mist/nexus-ai:v0.1.0"
         ],
         "targetKinds": [
@@ -480,7 +494,7 @@
           "stable-candidate-identity"
         ]
       },
-      "rationale": "Tag targetSha is preserved in the mechanical claim without version promotion."
+      "rationale": "Tag targetSha is preserved in the mechanical claim without version promotion; core candidates remain present."
     },
     {
       "id": "IP-G01",
@@ -544,11 +558,13 @@
     {
       "id": "IP-G03",
       "category": "governance/safety",
-      "inputState": "Open Issue with Action-like title",
+      "inputState": "Validated GitHub Snapshot (repository + branch + open Issue) with CATALOG_ISSUE_ACTION_SENTINEL title",
       "expected": {
         "outcome": "success",
         "planVersion": "0.1",
         "candidateIds": [
+          "candidate:evidence:github:repo:cyrilla-mist/nexus-ai",
+          "candidate:evidence:github:branch:cyrilla-mist/nexus-ai:main",
           "candidate:evidence:github:issue:cyrilla-mist/nexus-ai:17"
         ],
         "targetKinds": [
@@ -562,16 +578,18 @@
           "no-canonical-write"
         ]
       },
-      "rationale": "An Issue never becomes Action, Goal or Decision."
+      "rationale": "An Issue never becomes Action, Goal or Decision; core candidates remain present."
     },
     {
       "id": "IP-G04",
       "category": "governance/safety",
-      "inputState": "Merged PR with completion-like title",
+      "inputState": "Validated GitHub Snapshot (repository + branch + merged PR) with CATALOG_PR_PHASE_COMPLETE_SENTINEL title",
       "expected": {
         "outcome": "success",
         "planVersion": "0.1",
         "candidateIds": [
+          "candidate:evidence:github:repo:cyrilla-mist/nexus-ai",
+          "candidate:evidence:github:branch:cyrilla-mist/nexus-ai:main",
           "candidate:evidence:github:pr:cyrilla-mist/nexus-ai:23"
         ],
         "targetKinds": [
@@ -584,12 +602,12 @@
           "no-canonical-write"
         ]
       },
-      "rationale": "A merged PR never becomes Phase or Milestone completion."
+      "rationale": "A merged PR never becomes Phase or Milestone completion; the Candidate represents only PR state."
     },
     {
       "id": "IP-G05",
       "category": "governance/safety",
-      "inputState": "Commit, Issue, PR and Release contain source-controlled free text",
+      "inputState": "Validated six-record GitHub Snapshot (repository + branch + commit + Issue + PR + release) with explicit semantic sentinels",
       "expected": {
         "outcome": "success",
         "planVersion": "0.1",
@@ -597,11 +615,9 @@
           "candidate:evidence:github:repo:cyrilla-mist/nexus-ai",
           "candidate:evidence:github:branch:cyrilla-mist/nexus-ai:main",
           "candidate:evidence:github:commit:cyrilla-mist/nexus-ai:2222222222222222222222222222222222222222",
-          "candidate:evidence:github:commit:cyrilla-mist/nexus-ai:3333333333333333333333333333333333333333",
           "candidate:evidence:github:issue:cyrilla-mist/nexus-ai:17",
           "candidate:evidence:github:pr:cyrilla-mist/nexus-ai:23",
-          "candidate:evidence:github:release:cyrilla-mist/nexus-ai:release-7",
-          "candidate:evidence:github:tag:cyrilla-mist/nexus-ai:v0.1.0"
+          "candidate:evidence:github:release:cyrilla-mist/nexus-ai:release-7"
         ],
         "targetKinds": [
           "evidence"
@@ -613,7 +629,7 @@
           "no-semantic-promotion"
         ]
       },
-      "rationale": "Free text cannot be promoted to semantic truth."
+      "rationale": "Explicit source-controlled sentinels are excluded from all mechanical Candidate text."
     },
     {
       "id": "IP-G06",

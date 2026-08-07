@@ -219,7 +219,7 @@ Phase 4 is in progress. GitHub is the first implemented Source Adapter profile/c
 
 #### Phase 4D — Context Import Planner — In progress
 
-Contract Design — Complete
+Contract Design — Complete / Accepted
 
 - Context Import Plan v0.1;
 - Candidate Evidence contract;
