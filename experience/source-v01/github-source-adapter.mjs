@@ -15,7 +15,9 @@ const requireShape = (value, method, ref, limit) => { if (!Array.isArray(value.i
 const refFor = (ref, type, id) => `https://github.com/${ref}/${type}/${encodeURIComponent(id)}`;
 
 function projectRepository(raw, ref) {
-  if (!raw || typeof raw !== "object" || typeof raw.name !== "string" || typeof raw.fullName !== "string" || typeof raw.defaultBranch !== "string" || typeof raw.archived !== "boolean" || !["public", "private"].includes(raw.visibility) || !iso(raw.updatedAt) || raw.fullName.toLowerCase() !== ref) throw invalid("SOURCE_RESPONSE_INVALID", "getRepository", ref);
+  if (!raw || typeof raw !== "object" || typeof raw.name !== "string" || typeof raw.fullName !== "string" || typeof raw.defaultBranch !== "string" || typeof raw.archived !== "boolean" || !["public", "private"].includes(raw.visibility) || !iso(raw.updatedAt)) throw invalid("SOURCE_RESPONSE_INVALID", "getRepository", ref);
+  let returnedRef; try { returnedRef = normalizeRepositoryRefV01(raw.fullName); } catch { throw invalid("SOURCE_RESPONSE_INVALID", "getRepository", ref); }
+  if (returnedRef !== ref) throw invalid("SOURCE_SCOPE_MISMATCH", "getRepository", ref);
   return { sourceRecordId: `github:repo:${ref}`, sourceType: "repository", externalId: ref, observedState: raw.archived ? "archived" : "available", observedAt: raw.updatedAt, reference: `https://github.com/${ref}`, authority: "github-repository-state", payload: { name: ref.split("/")[1], fullName: ref, defaultBranch: raw.defaultBranch, archived: raw.archived, visibility: raw.visibility, updatedAt: raw.updatedAt } };
 }
 function projectBranch(raw, ref, branchName) { if (!raw || raw.name !== branchName || !sha(raw.headSha)) throw invalid("SOURCE_RESPONSE_INVALID", "getDefaultBranch", ref); return { sourceRecordId: `github:branch:${ref}:${raw.name}`, sourceType: "branch", externalId: raw.name, observedState: "present", observedAt: null, reference: `https://github.com/${ref}/tree/${encodeURIComponent(raw.name)}`, authority: "github-ref-state", payload: { name: raw.name, headSha: raw.headSha } }; }

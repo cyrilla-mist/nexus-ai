@@ -34,3 +34,16 @@ const validatorCases = [
   ["canonical kind forbidden", s => { s.records[0].payload.kind = "repository"; }, false], ["canonical lifecycle forbidden", s => { s.records[0].payload.lifecycle = "active"; }, false], ["canonical verification forbidden", s => { s.records[0].payload.verification = "verified"; }, false], ["input remains ordinary", s => { s.note = "not part of snapshot"; }, false]
 ];
 for (const [name, mutate, shouldPass] of validatorCases) test(`validator boundary: ${name}`, () => { const snapshot = valid(); mutate(snapshot); const validator = name.startsWith("adapter ") || name === "generic null reference" ? validateSourceSnapshotV01 : validateGitHubSourceSnapshotV01; if (shouldPass) { const output = validator(snapshot); assert(output); } else code(() => validator(snapshot), name.includes("timestamp") ? "INVALID_CAPTURED_AT" : "SOURCE_SNAPSHOT_INVALID"); });
+
+for (const [name, mutate, expected] of [
+  ["empty authority", s => { s.records[0].authority = ""; }, "SOURCE_SNAPSHOT_INVALID"],
+  ["null authority", s => { s.records[0].authority = null; }, "SOURCE_SNAPSHOT_INVALID"],
+  ["numeric authority", s => { s.records[0].authority = 7; }, "SOURCE_SNAPSHOT_INVALID"],
+  ["valid provider-neutral authority", s => { s.adapter = "generic"; s.source.provider = "source"; s.source.reference = null; s.source.retrievalMode = "read-only"; s.source.authority = "external-state"; s.records.forEach(record => { record.reference = null; record.authority = "external-state"; }); }, null]
+]) test(`generic authority: ${name}`, () => { const snapshot = valid(); mutate(snapshot); if (expected) code(() => validateSourceSnapshotV01(snapshot), expected); else assert(validateSourceSnapshotV01(snapshot)); });
+
+const otherScopeIds = [
+  ["repository", "github:repo:other/repo"], ["branch", "github:branch:other/repo:main"], ["commit", "github:commit:other/repo:2222222222222222222222222222222222222222"], ["issue", "github:issue:other/repo:17"], ["pull_request", "github:pr:other/repo:23"], ["release", "github:release:other/repo:release-7"], ["tag", "github:tag:other/repo:v0.1.0"]
+];
+for (const [type, id] of otherScopeIds) test(`identity scope mismatch: ${type}`, () => { const snapshot = valid(); snapshot.records.find(record => record.sourceType === type).sourceRecordId = id; code(() => validateGitHubSourceSnapshotV01(snapshot), "SOURCE_SCOPE_MISMATCH"); });
+for (const [type, id] of [["repository", "github:repo:cyrilla-mist/nexus-ai:extra"], ["branch", "github:branch:cyrilla-mist/nexus-ai"], ["commit", "github:commit:cyrilla-mist/nexus-ai:not-a-sha"], ["issue", "github:issue:cyrilla-mist/nexus-ai:not-a-number"], ["pull_request", "github:pr:cyrilla-mist/nexus-ai:not-a-number"], ["release", "github:release:cyrilla-mist/nexus-ai"], ["tag", "github:tag:cyrilla-mist/nexus-ai"]]) test(`malformed current-scope identity: ${type}`, () => { const snapshot = valid(); snapshot.records.find(record => record.sourceType === type).sourceRecordId = id; code(() => validateGitHubSourceSnapshotV01(snapshot), "SOURCE_RECORD_ID_INVALID"); });

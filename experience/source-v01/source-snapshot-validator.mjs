@@ -53,7 +53,7 @@ function genericRecord(record) {
   if (!exact(record, RECORD_KEYS)) fail("SOURCE_SNAPSHOT_INVALID", "record shape invalid");
   text(record.sourceRecordId, "sourceRecordId"); text(record.sourceType, "sourceType"); text(record.externalId, "externalId"); text(record.observedState, "observedState");
   if (record.observedAt !== null) timestamp(record.observedAt, "SOURCE_SNAPSHOT_INVALID", "observedAt");
-  if (record.reference !== null) text(record.reference, "reference");
+  if (record.reference !== null) text(record.reference, "reference"); text(record.authority, "authority");
   if (!object(record.payload)) fail("SOURCE_SNAPSHOT_INVALID", "payload invalid");
 }
 
@@ -80,7 +80,7 @@ export function validateSourceSnapshotV01(snapshot) {
 }
 
 function identityScope(record, ref) {
-  const match = record.sourceRecordId.match(/^github:(?:repo|branch|commit|issue|pr|release|tag):([^:]+\/[^:]+):/);
+  const match = record.sourceRecordId.match(/^github:(?:repo|branch|commit|issue|pr|release|tag):([^:]+\/[^:]+)(?::|$)/);
   if (match && match[1] !== ref) fail("SOURCE_SCOPE_MISMATCH", "record outside repository scope");
 }
 function safeGitHubReference(record) { if (typeof record.reference !== "string" || !record.reference.startsWith("https://github.com/") || record.reference.includes("?") || record.reference.includes("#")) fail("SOURCE_SNAPSHOT_INVALID", "GitHub reference invalid"); }

@@ -3,7 +3,7 @@
 **Status:** Accepted
 **Target:** Phase 4D
 **Total Cases:** 36  
-**Runtime:** Phase 4C hardened runtime suite accepted
+**Runtime:** Phase 4C final acceptance suite passed
 
 This matrix is the human-readable mirror of `examples/nexus-atlas-source-snapshot-cases-v0.1.json`. Each row states the expected outcome, records, diagnostics and behavior assertions; all 36 cases are executed by `tests/source-snapshot-catalog-v01.test.mjs`.
 

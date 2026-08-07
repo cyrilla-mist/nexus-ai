@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import { createGitHubSourceAdapter } from "../experience/source-v01/github-source-adapter.mjs";
-import { createGitHubClientFixture, createRequestedLimits, createRelease, CAPTURED_AT } from "../tests/helpers/github-source-fixtures.mjs";
+import { createGitHubClientFixture, createRequestedLimits, createRelease, createRepositoryResponse, CAPTURED_AT } from "../tests/helpers/github-source-fixtures.mjs";
 import { isStrictOffsetIsoV01, SOURCE_ADAPTER_ERROR_CODES_V01, validateGitHubSourceSnapshotV01, validateSourceSnapshotV01 } from "../experience/source-v01/source-snapshot-validator.mjs";
 
 const expected = JSON.parse(fs.readFileSync(new URL("../examples/nexus-atlas-source-snapshot-v0.1.json", import.meta.url))).snapshot;
@@ -22,6 +22,12 @@ const releaseSnapshot = await createGitHubSourceAdapter({ client: releaseClient 
 const generic = structuredClone(expected); generic.source.reference = null; generic.records.forEach(record => { record.reference = null; }); assert(validateSourceSnapshotV01(generic)); const githubNull = structuredClone(expected); githubNull.records[0].reference = null; assert.throws(() => validateGitHubSourceSnapshotV01(githubNull), error => error.code === "SOURCE_SNAPSHOT_INVALID");
 const mixedClient = createGitHubClientFixture({ repository: { name: "Nexus-AI", fullName: "Cyrilla-Mist/Nexus-AI", defaultBranch: "main", archived: false, visibility: "public", updatedAt: "2026-08-07T11:00:00Z" } }); const mixed = await createGitHubSourceAdapter({ client: mixedClient }).readSnapshot({ repositoryRef: "Cyrilla-Mist/Nexus-AI", requestedLimits: createRequestedLimits({ commits: 0, issues: 0, pullRequests: 0, releases: 0, tags: 0 }), capturedAt: CAPTURED_AT }); assert.equal(mixed.records[0].payload.fullName, "cyrilla-mist/nexus-ai"); assert.equal(mixed.records[0].payload.name, "nexus-ai");
 assert.equal(new Set(SOURCE_ADAPTER_ERROR_CODES_V01).size, 13); assert.equal(SOURCE_ADAPTER_ERROR_CODES_V01.length, 13);
+const mismatchClient = createGitHubClientFixture({ repository: createRepositoryResponse({ name: "other-repo", fullName: "other-owner/other-repo" }) }); await assert.rejects(() => createGitHubSourceAdapter({ client: mismatchClient }).readSnapshot({ repositoryRef: "cyrilla-mist/nexus-ai", requestedLimits: createRequestedLimits({ commits: 0, issues: 0, pullRequests: 0, releases: 0, tags: 0 }), capturedAt: CAPTURED_AT }), error => error.code === "SOURCE_SCOPE_MISMATCH");
+const malformedClient = createGitHubClientFixture({ repository: { name: "nexus-ai", fullName: "not-a-repository", defaultBranch: "main", archived: false, visibility: "public", updatedAt: "2026-08-07T11:00:00Z" } }); await assert.rejects(() => createGitHubSourceAdapter({ client: malformedClient }).readSnapshot({ repositoryRef: "cyrilla-mist/nexus-ai", requestedLimits: createRequestedLimits({ commits: 0, issues: 0, pullRequests: 0, releases: 0, tags: 0 }), capturedAt: CAPTURED_AT }), error => error.code === "SOURCE_RESPONSE_INVALID");
+const genericAuthority = structuredClone(expected); genericAuthority.source.reference = null; genericAuthority.records.forEach(record => { record.reference = null; record.authority = "external-state"; }); assert(validateSourceSnapshotV01(genericAuthority)); const emptyAuthority = structuredClone(genericAuthority); emptyAuthority.records[0].authority = ""; assert.throws(() => validateSourceSnapshotV01(emptyAuthority), error => error.code === "SOURCE_SNAPSHOT_INVALID");
+for (const type of ["repository", "branch", "commit", "issue", "pull_request", "release", "tag"]) { const outOfScope = structuredClone(expected); const record = outOfScope.records.find(item => item.sourceType === type); const suffix = { repository: "", branch: ":main", commit: `:${record.payload.sha}`, issue: `:${record.payload.number}`, pull_request: `:${record.payload.number}`, release: `:${record.payload.immutableId}`, tag: `:${record.payload.name}` }[type]; const idType = type === "repository" ? "repo" : type === "pull_request" ? "pr" : type; record.sourceRecordId = `github:${idType}:other/repo${suffix}`; assert.throws(() => validateGitHubSourceSnapshotV01(outOfScope), error => error.code === "SOURCE_SCOPE_MISMATCH"); }
+const malformedId = structuredClone(expected); malformedId.records.find(record => record.sourceType === "commit").sourceRecordId = "github:commit:cyrilla-mist/nexus-ai:not-a-sha"; assert.throws(() => validateGitHubSourceSnapshotV01(malformedId), error => error.code === "SOURCE_RECORD_ID_INVALID");
+const catalogSource = fs.readFileSync(new URL("../tests/source-snapshot-catalog-v01.test.mjs", import.meta.url), "utf8"); const catalogIds = JSON.parse(fs.readFileSync(new URL("../examples/nexus-atlas-source-snapshot-cases-v0.1.json", import.meta.url))).cases.map(item => item.id); assert.equal(catalogIds.length, 36); assert(catalogIds.every(id => catalogSource.includes(`\"${id}\"`))); assert(catalogSource.includes("assert.deepEqual(firstSnapshot, secondSnapshot)")); assert(catalogSource.includes("rawBefore") && catalogSource.includes("rawAfter")); assert(catalogSource.includes("const diagnosticsHandlers")); assert(!catalogSource.includes("new SourceAdapterError(expected.errorCode)"));
 console.log("Nexus Atlas Source Snapshot v0.1");
 console.log("Adapter: github");
 console.log(`Repository: ${snapshot.scope.repositoryRef}`);
@@ -41,4 +47,9 @@ console.log("PR source time semantics: PASS");
 console.log("Release ordering semantics: PASS");
 console.log("Repository canonicalization: PASS");
 console.log("Error vocabulary: PASS");
+console.log("Repository source mismatch semantics: PASS");
+console.log("Generic authority validation: PASS");
+console.log("Seven-type scope classification: PASS");
+console.log("Catalog executor coverage: PASS");
+console.log("Catalog behavior semantics: PASS");
 console.log("Source Snapshot v0.1 Runtime: PASS");
