@@ -1,12 +1,12 @@
 # Nexus Atlas — Canonical Admission v0.1 Contract
 
 **Status:** Accepted
-**Target:** Phase 4E Canonical Admission Runtime
-**Implementation:** Not started
-**Phase:** Phase 4E Canonical Integration Contract Design Complete
+**Target:** Phase 4F Acceptance
+**Implementation:** Phase 4E Canonical Admission Runtime complete
+**Phase:** Phase 4E Canonical Integration Complete
 **External Read:** None
 **External Write:** None
-**Canonical Mutation Runtime:** Not implemented
+**Canonical Mutation Runtime:** Pure in-memory Graph application implemented; no persistent canonical store write
 
 ## Contract boundary
 
@@ -156,7 +156,9 @@ Before reconciliation, Apply constructs `authorizedSet = new Set(authorizedCandi
 
 `examples/nexus-atlas-canonical-admission-cases-v0.1.json` is Accepted and freezes 32 design cases: Schema 6, Input/Target 7, Admission/Reconciliation 8, Governance/Safety 7, and Determinism/Application 4. Its behavior vocabulary is a closed set of 14 handlers and its public error coverage includes every normally triggerable code; only `CANONICAL_GRAPH_RESULT_INVALID` is defensive-only. The Test Matrix is Accepted, expands all 32 cases, and does not substitute “see catalog” for expected semantics. CA-G04 is the apply-time authorization binding mismatch case: an Admission Plan built with one authorized Candidate is applied with an empty selection and must reject atomically with `CANONICAL_ADMISSION_AUTHORIZATION_MISMATCH`.
 
-Phase 4E Contract Design is Accepted after these design artifacts and machine self-checks pass. Canonical Admission Runtime remains planned. Phase 4F remains planned.
+Phase 4E Contract Design is Accepted and the Canonical Admission Runtime is complete after the standalone Validator, Build, Apply, explicit authorization rebinding, upstream binding, target policy, reconciliation, atomic Graph application, 32-case suite, and Accepted Example checks pass. Phase 4F remains planned.
+
+Implementation note: `CanonicalAdmissionError`, the standalone Plan Validator, deterministic admission Builder, apply-time Import Plan and authorization rebinding, strict target Project policy, atomic pure Graph application, and automated 32-case Catalog are implemented. Runtime performs no source re-read, semantic promotion, Edge or ContextPackage mutation, persistent write, or Provider integration.
 
 ## Admission Plan exact schema
 

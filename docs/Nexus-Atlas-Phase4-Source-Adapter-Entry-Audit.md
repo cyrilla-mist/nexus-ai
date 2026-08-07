@@ -675,5 +675,15 @@ Phase 4E Canonical Admission authorization binding closure: the future Apply bou
 - canonical observation identity is deterministic;
 - existing Graph reconciliation is explicit;
 - no latest-wins overwrite;
-- Graph application remains future and pure;
+- Graph application is implemented as pure/local/atomic;
 - no Phase 4F work.
+
+## Phase 4E Runtime Follow-up
+
+- validated Import Plan is the canonical admission input;
+- explicit authorization is independently rebound at Apply;
+- only Evidence proposals are admitted;
+- Graph application is pure, local and atomic;
+- no source re-read or external write;
+- no Edge or ContextPackage mutation;
+- Phase 4F remains planned.

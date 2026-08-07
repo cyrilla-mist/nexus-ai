@@ -1,9 +1,9 @@
 # Nexus Atlas — Canonical Admission v0.1 Test Matrix
 
 **Status:** Accepted
-**Target:** Phase 4E Canonical Admission Runtime
+**Target:** Phase 4F Acceptance
 **Total Cases:** 32
-**Runtime:** Not implemented
+**Runtime:** Phase 4E automated runtime suite accepted
 
 The matrix is design-only. It describes the future runtime boundary; it does not execute Graph application or create ContextNodes.
 
