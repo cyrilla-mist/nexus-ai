@@ -1,6 +1,6 @@
 # Nexus Atlas — Source Snapshot v0.1 Contract
 
-**Status:** Proposed for Phase 4B acceptance  
+**Status:** Accepted
 **Target:** Phase 4C  
 **Implementation:** Not started  
 **Phase:** Phase 4B Source Snapshot Contract Design  
@@ -74,7 +74,7 @@ No top-level `provider` is present. The following are forbidden: `contextNodes`,
 | Field | Contract |
 |---|---|
 | `snapshotVersion` | Exactly `"0.1"`. |
-| `adapter` | Non-empty lowercase adapter ID. The Phase 4B example is `"github"`; `github-enterprise` is also structurally valid. |
+| `adapter` | String matching `^[a-z][a-z0-9-]{0,63}$`, length 1–64. The Phase 4B example is `"github"`; `github-enterprise` is structurally valid. |
 | `capturedAt` | Caller-supplied, complete offset-aware ISO 8601 timestamp. The Adapter must not generate it. |
 | `scope` | Explicit finite source scope: `type`, `repositoryRef`, `requestedLimits`. |
 | `source` | Source identity and source-level observation state. |
@@ -101,9 +101,17 @@ The v0.1 `scope` shape is:
 }
 ```
 
-All requested limits are non-negative integers. `null`, `Infinity`, `-1` and numeric strings are invalid. `requestedLimits` records what the caller requested; `diagnostics.collections.<type>.appliedLimit` records what the Adapter actually applied. They are not required to be equal.
+All requested limits are non-negative integers. `null`, `Infinity`, `-1` and numeric strings are invalid. `requestedLimits` records what the caller requested; `diagnostics.collections.<type>.appliedLimit` records what the Adapter actually applied. They are not required to be equal in the Generic contract.
 
 Phase 4B does not make a product-level hard maximum a permanent Nexus fact. Phase 4C must define and enforce a versioned Adapter hard maximum. A request above that configured maximum is `INVALID_ADAPTER_OPTIONS`, not an unbounded read.
+
+### 4.1 GitHub repositoryRef limits and canonicalization
+
+The Nexus v0.1 lexical safety limits are explicit: total `repositoryRef` length is 1–256 characters; the owner and repository segments are each 1–128 characters. The allowed characters are ASCII `A-Z`, `a-z`, `0-9`, `.`, `_` and `-`, plus exactly one `/` separator.
+
+Caller input may use ASCII casing. The Adapter trims, validates lexically, lowercases the owner and repository segments, and then stores the normalized value in `scope.repositoryRef`. Stable IDs always use this normalized value. For example, `Cyrilla-Mist/Nexus-AI` becomes `cyrilla-mist/nexus-ai`.
+
+The normalized `scope.repositoryRef` is the canonical repository identity. For GitHub v1, `source.reference` must equal it exactly and is not a URL. Individual record `reference` fields may be safe GitHub URLs. A returned GitHub full name is checked case-insensitively against the normalized scope; a different repository is `SOURCE_SCOPE_MISMATCH`, never a silent rebind.
 
 ## 5. Source Object and Provider Duplication Rule
 
@@ -135,6 +143,8 @@ The independent top-level `provider` field from the Phase 4A conceptual example 
 
 `source.state` is source-level availability, distinct from each record's `observedState`. A successful Snapshot requires `source.state === "available"`.
 
+For the ordinary GitHub.com Profile v1, a successful `source` must be exactly `{ provider: "github", reference: <normalized scope.repositoryRef>, retrievalMode: "read-only-api", authority: "github-repository-state", state: "available" }`. The generic `github-enterprise` adapter/provider distinction remains structurally possible, but is not the Phase 4C ordinary GitHub.com target.
+
 ## 6. Repository Reference Lexical Contract
 
 `scope.repositoryRef` is one explicit repository selector. It is lexical validation, not proof that a GitHub repository exists.
@@ -154,6 +164,8 @@ invalid: owner\repo
 ```
 
 Existence, authorization and repository state are established only by the Source Client/Adapter response. The Adapter must not discover repositories, infer a main project or aggregate multiple repositories in one v0.1 call.
+
+The adapter ID rule is also exact: it must be a string of length 1–64 matching `^[a-z][a-z0-9-]{0,63}$`. `github`, `github-enterprise` and `github2` are valid; `GitHub`, `-github`, `github_`, `github.adapter` and the empty string are invalid with `SOURCE_SNAPSHOT_INVALID`.
 
 ## 7. Source Record v0.1
 
@@ -190,6 +202,8 @@ The base record must not contain `ContextNode` fields such as `kind`, `lifecycle
 The Generic Snapshot top level is source-neutral. The GitHub Profile supplies one repository scope and these seven target record types only: `repository`, `branch` (default branch only), `commit`, `issue`, `pull_request`, `release`, and `tag`.
 
 The v1 read scope is repository metadata, default branch HEAD, bounded recent commits, bounded Issues, bounded PR references, and bounded Releases/Tags. It does not include comments, Discussions, workflow runs/logs, contributors, stars, forks, arbitrary content, file trees or README body.
+
+Every successful GitHub Profile v1 Snapshot contains exactly one `repository` record and exactly one `branch` record for the default branch, even when every requested collection limit is zero. These are core singletons, not bounded collections. `repository.payload.defaultBranch` must equal `branch.payload.name`; the branch ID is `github:branch:<normalizedRepositoryRef>:<defaultBranch>` and `branch.payload.headSha` must be a full SHA. Missing or duplicate repository/default-branch records, mismatched names, or invalid branch HEADs are Adapter normalization failures (`SOURCE_RESPONSE_INVALID`). A malformed already-built Snapshot is a structural `SOURCE_SNAPSHOT_INVALID`.
 
 README is `OUT_OF_SCOPE_V0.1`. Issue bodies and PR bodies are also excluded from v0.1. Labels are excluded because v0.1 does not define a label contract.
 
@@ -253,7 +267,7 @@ observedState: "open" | "closed" | "merged"
 authority: "github-pull-request-state"
 ```
 
-No body, comments or review text.
+No body, comments or review text. Raw normalization is strict: `merged: true` requires `state: "closed"` and a valid `mergedAt`, producing `observedState: "merged"`. `merged: false` with `state: "open"` produces `observedState: "open"`; `merged: false` with `state: "closed"` produces `observedState: "closed"`. A non-boolean `merged`, non-`open`/`closed` state, merged/open combination, or merged/null-`mergedAt` combination is `SOURCE_RESPONSE_INVALID`.
 
 ### 8.6 Release
 
@@ -266,6 +280,8 @@ observedState: "draft" | "published" | "prerelease"
 authority: "github-release-state"
 ```
 
+`draft` and `prerelease` are required booleans. `createdAt` is required and valid; `publishedAt` is null or valid. Observed-state precedence is fixed: `draft === true` → `draft`; otherwise `prerelease === true` → `prerelease`; otherwise `published`.
+
 ### 8.7 Tag
 
 ```js
@@ -275,6 +291,12 @@ authority: "github-ref-state"
 ```
 
 `targetSha` is retained when returned. A tag name can move or disappear; its source ID is not immutable content identity.
+
+### 8.8 Timestamp requirements
+
+All non-null timestamps are offset-aware ISO 8601 values. `repository.updatedAt`, `issue.createdAt`, `issue.updatedAt`, `pull_request.createdAt`, `pull_request.updatedAt` and `release.createdAt` are required. `issue.closedAt`, `pull_request.closedAt`, `pull_request.mergedAt` and `release.publishedAt` may be null or valid timestamps; `mergedAt` is required when `merged === true`. `branch.observedAt` and `tag.observedAt` are null.
+
+Commit `committedAt` is required and valid; `authoredAt` is null or valid; `commit.observedAt` is exactly `payload.committedAt`. GitHub Profile commit SHA values are exactly 40 hexadecimal characters. Commit sorting is therefore `committedAt` descending, then SHA ascending, without null ambiguity.
 
 ## 9. Stable External Identity
 
@@ -327,9 +349,13 @@ diagnostics: {
 }
 ```
 
-`complete === true` means this contract-scoped bounded read completed within every applied bound. It never means all repository history was read. If `requestedLimit === 0`, that collection is not accessed and its diagnostics are `itemsRead: 0`, `pagesRead: 0`, `truncated: false`, `continuationAvailable: false`. Repository metadata and default branch are core singletons and do not appear in the pagination map.
+`complete === true` means this contract-scoped bounded read completed within every applied bound and both core singletons were read successfully. It never means all repository history was read. Every successful v0.1 Snapshot has `diagnostics.complete === true`; there is no ordinary successful `complete: false` state. Normal bounded truncation leaves `complete === true`. If `requestedLimit === 0`, that collection is not accessed and its diagnostics are `itemsRead: 0`, `pagesRead: 0`, `truncated: false`, `continuationAvailable: false`. Repository metadata and default branch are core singletons and do not appear in the pagination map.
 
 Normal bounded truncation is successful Snapshot diagnostics. `SOURCE_PAGINATION_LIMIT` is reserved for an Adapter/Client attempting to exceed its hard maximum or a pagination response that cannot terminate safely.
+
+For GitHub Profile v1, a successful request must satisfy `requestedLimit <= configuredHardMaximum` and `appliedLimit === requestedLimit`. Requests above the configured hard maximum fail with `INVALID_ADAPTER_OPTIONS`; the Adapter must not silently clamp. Other Source Profiles may define different requested/applied relationships.
+
+Each collection diagnostic satisfies `0 <= itemsRead <= appliedLimit`, with non-negative requested/applied limits. If `truncated === true`, `continuationAvailable === true`; if `continuationAvailable === false`, `truncated` must be false. `itemsRead` counts final normalized records, not raw API items. `requestedLimit === 0` forces all five collection counters to zero and prevents access to that collection.
 
 ## 12. Deterministic Record Ordering
 
@@ -345,7 +371,7 @@ Within a type: repository and branch by `sourceRecordId` ascending; commit by `c
 |---|---|
 | repository | `payload.updatedAt` |
 | branch | `null` |
-| commit | preferably `committedAt` |
+| commit | exactly `committedAt` |
 | issue | `updatedAt` |
 | pull request | `updatedAt` |
 | release | `publishedAt ?? createdAt` |
@@ -428,8 +454,10 @@ The Generic Snapshot contract freezes top-level shape, Source Record base, scope
 
 Google Drive, Notion, Calendar and additional repository providers should add Source Profiles without changing the Generic Snapshot top level.
 
+GitHub Source Client inputs keep `issues` and `pullRequests` as separate logical collections. If a lower-level endpoint returns a mixed payload, the Source Client separates it before Adapter normalization. An Issue produces only `sourceType: "issue"`; a PR produces only `sourceType: "pull_request"`; one PR never produces both.
+
 ## 20. Non-Goals and Phase Boundary
 
 This contract does not implement GitHub Client or Adapter, Snapshot Validator Runtime, Import Planner, Graph mutation, external write, OAuth, Token handling, live GitHub runtime, Provider/Builder/Context Graph/Phase 2/3 Runtime changes, UI, Worker, DataHub, Continuity, README/document-source policy, canonical fixture or canonical Action changes.
 
-GitHub remains a **read-only Source Adapter candidate implementation target**, not a confirmed first Adapter or canonical source. Phase 4C begins only after this proposed contract is accepted.
+GitHub remains a **read-only Source Adapter candidate implementation target**, not a confirmed first Adapter or canonical source. The contract is Accepted, but Phase 4C remains not started and requires its separate implementation gate.

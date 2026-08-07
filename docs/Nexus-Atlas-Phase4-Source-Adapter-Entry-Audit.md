@@ -625,3 +625,10 @@ Only this audit document is intended to be added. The audit does not mark GitHub
 - README, Issue/PR bodies and comments remain out of v0.1.
 - Roadmap now records Phase 4 as In progress at the contract/documentation boundary; Phase 4C Runtime remains Planned.
 - No Runtime started.
+- Phase 4B acceptance hardening completed.
+- Contract/Test Matrix status: Accepted.
+- Successful GitHub Snapshots always include repository and default branch.
+- Repository identity is case-normalized.
+- PR, Release and timestamp normalization is frozen.
+- Successful bounded truncation keeps `diagnostics.complete=true`.
+- Phase 4C remains not started.
