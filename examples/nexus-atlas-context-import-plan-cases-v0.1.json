@@ -149,10 +149,10 @@
         "candidateIds": [],
         "targetKinds": [],
         "exclusionIds": [],
-        "errorCode": "IMPORT_PLAN_INVALID",
+        "errorCode": "IMPORT_PLAN_COVERAGE_MISMATCH",
         "behaviorAssertions": []
       },
-      "rationale": "Diagnostics are structural mapping coverage, not advisory text."
+      "rationale": "Diagnostics have a valid structure but inconsistent candidate/count coverage, so the error belongs to the coverage boundary."
     },
     {
       "id": "IP-P01",
@@ -783,4 +783,3 @@
     }
   ]
 }
-
