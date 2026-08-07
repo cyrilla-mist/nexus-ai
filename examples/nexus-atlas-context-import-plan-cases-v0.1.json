@@ -1,0 +1,770 @@
+{
+  "catalogMetadata": {
+    "name": "Context Import Plan v0.1",
+    "status": "Proposed for Phase 4D acceptance",
+    "totalCases": 32,
+    "categories": {
+      "schema": 7,
+      "input/scope": 6,
+      "mapping": 9,
+      "governance/safety": 6,
+      "determinism/coverage": 4
+    },
+    "behaviorVocabulary": [
+      "deep-equal",
+      "deeply-frozen",
+      "input-unchanged",
+      "coverage-complete",
+      "one-to-one-source-mapping",
+      "source-authority-preserved",
+      "no-semantic-promotion",
+      "no-canonical-write",
+      "source-time-preserved",
+      "free-text-not-promoted",
+      "stable-candidate-identity",
+      "diagnostics-consistent"
+    ],
+    "errorVocabulary": [
+      "INVALID_IMPORT_PLAN_INPUT",
+      "INVALID_POLICY_VERSION",
+      "INVALID_PROJECT_ID",
+      "INVALID_SCOPE_KEY",
+      "INVALID_SOURCE_SNAPSHOT",
+      "SOURCE_SNAPSHOT_UNSUPPORTED",
+      "SOURCE_RECORD_UNMAPPED",
+      "CANDIDATE_ID_INVALID",
+      "CANDIDATE_DUPLICATE",
+      "IMPORT_PLAN_COVERAGE_MISMATCH",
+      "IMPORT_PLAN_SOURCE_MISMATCH",
+      "IMPORT_PLAN_INVALID"
+    ]
+  },
+  "cases": [
+    {
+      "id": "IP-S01",
+      "category": "schema",
+      "inputState": "minimal valid repository + default branch Snapshot",
+      "expected": {
+        "outcome": "success",
+        "planVersion": "0.1",
+        "candidateIds": [
+          "candidate:evidence:github:repo:cyrilla-mist/nexus-ai",
+          "candidate:evidence:github:branch:cyrilla-mist/nexus-ai:main"
+        ],
+        "targetKinds": [
+          "evidence"
+        ],
+        "exclusionIds": [],
+        "errorCode": null,
+        "behaviorAssertions": [
+          "deep-equal",
+          "coverage-complete",
+          "no-canonical-write"
+        ]
+      },
+      "rationale": "The smallest accepted GitHub profile input maps both core records."
+    },
+    {
+      "id": "IP-S02",
+      "category": "schema",
+      "inputState": "Plan candidate omits planVersion",
+      "expected": {
+        "outcome": "error",
+        "planVersion": null,
+        "candidateIds": [],
+        "targetKinds": [],
+        "exclusionIds": [],
+        "errorCode": "IMPORT_PLAN_INVALID",
+        "behaviorAssertions": []
+      },
+      "rationale": "The top-level Plan schema is closed."
+    },
+    {
+      "id": "IP-S03",
+      "category": "schema",
+      "inputState": "Plan has planVersion 0.2",
+      "expected": {
+        "outcome": "error",
+        "planVersion": null,
+        "candidateIds": [],
+        "targetKinds": [],
+        "exclusionIds": [],
+        "errorCode": "IMPORT_PLAN_INVALID",
+        "behaviorAssertions": []
+      },
+      "rationale": "Only Plan version 0.1 is accepted."
+    },
+    {
+      "id": "IP-S04",
+      "category": "schema",
+      "inputState": "generatedAt differs from snapshot.capturedAt",
+      "expected": {
+        "outcome": "error",
+        "planVersion": null,
+        "candidateIds": [],
+        "targetKinds": [],
+        "exclusionIds": [],
+        "errorCode": "IMPORT_PLAN_SOURCE_MISMATCH",
+        "behaviorAssertions": []
+      },
+      "rationale": "Plan generation time is the explicit Snapshot capture time."
+    },
+    {
+      "id": "IP-S05",
+      "category": "schema",
+      "inputState": "sourceSnapshot descriptor has wrong recordIds shape",
+      "expected": {
+        "outcome": "error",
+        "planVersion": null,
+        "candidateIds": [],
+        "targetKinds": [],
+        "exclusionIds": [],
+        "errorCode": "IMPORT_PLAN_INVALID",
+        "behaviorAssertions": []
+      },
+      "rationale": "Descriptor fields and recordIds must be structurally valid."
+    },
+    {
+      "id": "IP-S06",
+      "category": "schema",
+      "inputState": "candidates is not an array",
+      "expected": {
+        "outcome": "error",
+        "planVersion": null,
+        "candidateIds": [],
+        "targetKinds": [],
+        "exclusionIds": [],
+        "errorCode": "IMPORT_PLAN_INVALID",
+        "behaviorAssertions": []
+      },
+      "rationale": "Candidate collection is required and ordered."
+    },
+    {
+      "id": "IP-S07",
+      "category": "schema",
+      "inputState": "diagnostics counts disagree with candidates",
+      "expected": {
+        "outcome": "error",
+        "planVersion": null,
+        "candidateIds": [],
+        "targetKinds": [],
+        "exclusionIds": [],
+        "errorCode": "IMPORT_PLAN_INVALID",
+        "behaviorAssertions": []
+      },
+      "rationale": "Diagnostics are structural mapping coverage, not advisory text."
+    },
+    {
+      "id": "IP-P01",
+      "category": "input/scope",
+      "inputState": "Accepted eight-record GitHub Snapshot with valid policy, project and scope",
+      "expected": {
+        "outcome": "success",
+        "planVersion": "0.1",
+        "candidateIds": [
+          "candidate:evidence:github:repo:cyrilla-mist/nexus-ai",
+          "candidate:evidence:github:branch:cyrilla-mist/nexus-ai:main",
+          "candidate:evidence:github:commit:cyrilla-mist/nexus-ai:2222222222222222222222222222222222222222",
+          "candidate:evidence:github:commit:cyrilla-mist/nexus-ai:3333333333333333333333333333333333333333",
+          "candidate:evidence:github:issue:cyrilla-mist/nexus-ai:17",
+          "candidate:evidence:github:pr:cyrilla-mist/nexus-ai:23",
+          "candidate:evidence:github:release:cyrilla-mist/nexus-ai:release-7",
+          "candidate:evidence:github:tag:cyrilla-mist/nexus-ai:v0.1.0"
+        ],
+        "targetKinds": [
+          "evidence"
+        ],
+        "exclusionIds": [],
+        "errorCode": null,
+        "behaviorAssertions": [
+          "deep-equal",
+          "deeply-frozen",
+          "input-unchanged",
+          "coverage-complete",
+          "one-to-one-source-mapping",
+          "source-authority-preserved",
+          "no-semantic-promotion",
+          "no-canonical-write",
+          "source-time-preserved",
+          "free-text-not-promoted",
+          "stable-candidate-identity",
+          "diagnostics-consistent"
+        ]
+      },
+      "rationale": "All seven Source Record types are in the accepted profile."
+    },
+    {
+      "id": "IP-P02",
+      "category": "input/scope",
+      "inputState": "policyVersion is github-context-import-policy-v2",
+      "expected": {
+        "outcome": "error",
+        "planVersion": null,
+        "candidateIds": [],
+        "targetKinds": [],
+        "exclusionIds": [],
+        "errorCode": "INVALID_POLICY_VERSION",
+        "behaviorAssertions": []
+      },
+      "rationale": "The policy is an explicit compatibility boundary."
+    },
+    {
+      "id": "IP-P03",
+      "category": "input/scope",
+      "inputState": "projectId is empty",
+      "expected": {
+        "outcome": "error",
+        "planVersion": null,
+        "candidateIds": [],
+        "targetKinds": [],
+        "exclusionIds": [],
+        "errorCode": "INVALID_PROJECT_ID",
+        "behaviorAssertions": []
+      },
+      "rationale": "Admission target identity cannot be defaulted."
+    },
+    {
+      "id": "IP-P04",
+      "category": "input/scope",
+      "inputState": "scopeKey is empty",
+      "expected": {
+        "outcome": "error",
+        "planVersion": null,
+        "candidateIds": [],
+        "targetKinds": [],
+        "exclusionIds": [],
+        "errorCode": "INVALID_SCOPE_KEY",
+        "behaviorAssertions": []
+      },
+      "rationale": "Admission scope cannot be defaulted."
+    },
+    {
+      "id": "IP-P05",
+      "category": "input/scope",
+      "inputState": "Snapshot is missing validation or has malformed records",
+      "expected": {
+        "outcome": "error",
+        "planVersion": null,
+        "candidateIds": [],
+        "targetKinds": [],
+        "exclusionIds": [],
+        "errorCode": "INVALID_SOURCE_SNAPSHOT",
+        "behaviorAssertions": []
+      },
+      "rationale": "The Planner accepts only a validated Source Snapshot."
+    },
+    {
+      "id": "IP-P06",
+      "category": "input/scope",
+      "inputState": "Valid generic Snapshot has unsupported adapter/profile",
+      "expected": {
+        "outcome": "error",
+        "planVersion": null,
+        "candidateIds": [],
+        "targetKinds": [],
+        "exclusionIds": [],
+        "errorCode": "SOURCE_SNAPSHOT_UNSUPPORTED",
+        "behaviorAssertions": []
+      },
+      "rationale": "Unsupported profiles fail locally without a network fallback."
+    },
+    {
+      "id": "IP-M01",
+      "category": "mapping",
+      "inputState": "One Snapshot contains repository, branch, commit, issue, pull_request, release and tag",
+      "expected": {
+        "outcome": "success",
+        "planVersion": "0.1",
+        "candidateIds": [
+          "candidate:evidence:github:repo:cyrilla-mist/nexus-ai",
+          "candidate:evidence:github:branch:cyrilla-mist/nexus-ai:main",
+          "candidate:evidence:github:commit:cyrilla-mist/nexus-ai:2222222222222222222222222222222222222222",
+          "candidate:evidence:github:commit:cyrilla-mist/nexus-ai:3333333333333333333333333333333333333333",
+          "candidate:evidence:github:issue:cyrilla-mist/nexus-ai:17",
+          "candidate:evidence:github:pr:cyrilla-mist/nexus-ai:23",
+          "candidate:evidence:github:release:cyrilla-mist/nexus-ai:release-7",
+          "candidate:evidence:github:tag:cyrilla-mist/nexus-ai:v0.1.0"
+        ],
+        "targetKinds": [
+          "evidence"
+        ],
+        "exclusionIds": [],
+        "errorCode": null,
+        "behaviorAssertions": [
+          "one-to-one-source-mapping",
+          "coverage-complete",
+          "stable-candidate-identity"
+        ]
+      },
+      "rationale": "Each accepted sourceType maps to exactly one closed rule."
+    },
+    {
+      "id": "IP-M02",
+      "category": "mapping",
+      "inputState": "Same Source Record is planned twice with same inputs",
+      "expected": {
+        "outcome": "success",
+        "planVersion": "0.1",
+        "candidateIds": [
+          "candidate:evidence:github:commit:cyrilla-mist/nexus-ai:2222222222222222222222222222222222222222"
+        ],
+        "targetKinds": [
+          "evidence"
+        ],
+        "exclusionIds": [],
+        "errorCode": null,
+        "behaviorAssertions": [
+          "deep-equal",
+          "stable-candidate-identity",
+          "input-unchanged"
+        ]
+      },
+      "rationale": "Identity is source-record based and excludes time, title and array index."
+    },
+    {
+      "id": "IP-M03",
+      "category": "mapping",
+      "inputState": "Repository record with available state",
+      "expected": {
+        "outcome": "success",
+        "planVersion": "0.1",
+        "candidateIds": [
+          "candidate:evidence:github:repo:cyrilla-mist/nexus-ai"
+        ],
+        "targetKinds": [
+          "evidence"
+        ],
+        "exclusionIds": [],
+        "errorCode": null,
+        "behaviorAssertions": [
+          "source-authority-preserved",
+          "source-time-preserved",
+          "no-semantic-promotion"
+        ]
+      },
+      "rationale": "Repository mapping preserves source state and source event time."
+    },
+    {
+      "id": "IP-M04",
+      "category": "mapping",
+      "inputState": "Branch record with headSha and observedAt null",
+      "expected": {
+        "outcome": "success",
+        "planVersion": "0.1",
+        "candidateIds": [
+          "candidate:evidence:github:branch:cyrilla-mist/nexus-ai:main"
+        ],
+        "targetKinds": [
+          "evidence"
+        ],
+        "exclusionIds": [],
+        "errorCode": null,
+        "behaviorAssertions": [
+          "source-time-preserved",
+          "source-authority-preserved",
+          "no-semantic-promotion"
+        ]
+      },
+      "rationale": "Branch null source time remains null and is not replaced by capture time."
+    },
+    {
+      "id": "IP-M05",
+      "category": "mapping",
+      "inputState": "Commit record includes messageHeadline",
+      "expected": {
+        "outcome": "success",
+        "planVersion": "0.1",
+        "candidateIds": [
+          "candidate:evidence:github:commit:cyrilla-mist/nexus-ai:2222222222222222222222222222222222222222"
+        ],
+        "targetKinds": [
+          "evidence"
+        ],
+        "exclusionIds": [],
+        "errorCode": null,
+        "behaviorAssertions": [
+          "free-text-not-promoted",
+          "source-authority-preserved",
+          "stable-candidate-identity"
+        ]
+      },
+      "rationale": "Commit message text is excluded from claim and summary."
+    },
+    {
+      "id": "IP-M06",
+      "category": "mapping",
+      "inputState": "Issue record includes title and open state",
+      "expected": {
+        "outcome": "success",
+        "planVersion": "0.1",
+        "candidateIds": [
+          "candidate:evidence:github:issue:cyrilla-mist/nexus-ai:17"
+        ],
+        "targetKinds": [
+          "evidence"
+        ],
+        "exclusionIds": [],
+        "errorCode": null,
+        "behaviorAssertions": [
+          "free-text-not-promoted",
+          "no-semantic-promotion",
+          "no-canonical-write"
+        ]
+      },
+      "rationale": "Issue state becomes Evidence only; title cannot become Action."
+    },
+    {
+      "id": "IP-M07",
+      "category": "mapping",
+      "inputState": "Merged pull request record",
+      "expected": {
+        "outcome": "success",
+        "planVersion": "0.1",
+        "candidateIds": [
+          "candidate:evidence:github:pr:cyrilla-mist/nexus-ai:23"
+        ],
+        "targetKinds": [
+          "evidence"
+        ],
+        "exclusionIds": [],
+        "errorCode": null,
+        "behaviorAssertions": [
+          "no-semantic-promotion",
+          "source-authority-preserved",
+          "no-canonical-write"
+        ]
+      },
+      "rationale": "Merged is a source-local PR observation only."
+    },
+    {
+      "id": "IP-M08",
+      "category": "mapping",
+      "inputState": "Published release with tagName v0.1.0",
+      "expected": {
+        "outcome": "success",
+        "planVersion": "0.1",
+        "candidateIds": [
+          "candidate:evidence:github:release:cyrilla-mist/nexus-ai:release-7"
+        ],
+        "targetKinds": [
+          "evidence"
+        ],
+        "exclusionIds": [],
+        "errorCode": null,
+        "behaviorAssertions": [
+          "no-semantic-promotion",
+          "source-time-preserved",
+          "source-authority-preserved"
+        ]
+      },
+      "rationale": "Release publication cannot set Project.currentVersion."
+    },
+    {
+      "id": "IP-M09",
+      "category": "mapping",
+      "inputState": "Tag with targetSha",
+      "expected": {
+        "outcome": "success",
+        "planVersion": "0.1",
+        "candidateIds": [
+          "candidate:evidence:github:tag:cyrilla-mist/nexus-ai:v0.1.0"
+        ],
+        "targetKinds": [
+          "evidence"
+        ],
+        "exclusionIds": [],
+        "errorCode": null,
+        "behaviorAssertions": [
+          "source-authority-preserved",
+          "no-semantic-promotion",
+          "stable-candidate-identity"
+        ]
+      },
+      "rationale": "Tag targetSha is preserved in the mechanical claim without version promotion."
+    },
+    {
+      "id": "IP-G01",
+      "category": "governance/safety",
+      "inputState": "Accepted eight-record Snapshot",
+      "expected": {
+        "outcome": "success",
+        "planVersion": "0.1",
+        "candidateIds": [
+          "candidate:evidence:github:repo:cyrilla-mist/nexus-ai",
+          "candidate:evidence:github:branch:cyrilla-mist/nexus-ai:main",
+          "candidate:evidence:github:commit:cyrilla-mist/nexus-ai:2222222222222222222222222222222222222222",
+          "candidate:evidence:github:commit:cyrilla-mist/nexus-ai:3333333333333333333333333333333333333333",
+          "candidate:evidence:github:issue:cyrilla-mist/nexus-ai:17",
+          "candidate:evidence:github:pr:cyrilla-mist/nexus-ai:23",
+          "candidate:evidence:github:release:cyrilla-mist/nexus-ai:release-7",
+          "candidate:evidence:github:tag:cyrilla-mist/nexus-ai:v0.1.0"
+        ],
+        "targetKinds": [
+          "evidence"
+        ],
+        "exclusionIds": [],
+        "errorCode": null,
+        "behaviorAssertions": [
+          "no-canonical-write",
+          "no-semantic-promotion",
+          "coverage-complete"
+        ]
+      },
+      "rationale": "Every candidate has canonicalWriteAllowed false."
+    },
+    {
+      "id": "IP-G02",
+      "category": "governance/safety",
+      "inputState": "Accepted eight-record Snapshot",
+      "expected": {
+        "outcome": "success",
+        "planVersion": "0.1",
+        "candidateIds": [
+          "candidate:evidence:github:repo:cyrilla-mist/nexus-ai",
+          "candidate:evidence:github:branch:cyrilla-mist/nexus-ai:main",
+          "candidate:evidence:github:commit:cyrilla-mist/nexus-ai:2222222222222222222222222222222222222222",
+          "candidate:evidence:github:commit:cyrilla-mist/nexus-ai:3333333333333333333333333333333333333333",
+          "candidate:evidence:github:issue:cyrilla-mist/nexus-ai:17",
+          "candidate:evidence:github:pr:cyrilla-mist/nexus-ai:23",
+          "candidate:evidence:github:release:cyrilla-mist/nexus-ai:release-7",
+          "candidate:evidence:github:tag:cyrilla-mist/nexus-ai:v0.1.0"
+        ],
+        "targetKinds": [
+          "evidence"
+        ],
+        "exclusionIds": [],
+        "errorCode": null,
+        "behaviorAssertions": [
+          "no-semantic-promotion",
+          "source-authority-preserved"
+        ]
+      },
+      "rationale": "GitHub v1 targetKind is evidence only."
+    },
+    {
+      "id": "IP-G03",
+      "category": "governance/safety",
+      "inputState": "Open Issue with Action-like title",
+      "expected": {
+        "outcome": "success",
+        "planVersion": "0.1",
+        "candidateIds": [
+          "candidate:evidence:github:issue:cyrilla-mist/nexus-ai:17"
+        ],
+        "targetKinds": [
+          "evidence"
+        ],
+        "exclusionIds": [],
+        "errorCode": null,
+        "behaviorAssertions": [
+          "no-semantic-promotion",
+          "free-text-not-promoted",
+          "no-canonical-write"
+        ]
+      },
+      "rationale": "An Issue never becomes Action, Goal or Decision."
+    },
+    {
+      "id": "IP-G04",
+      "category": "governance/safety",
+      "inputState": "Merged PR with completion-like title",
+      "expected": {
+        "outcome": "success",
+        "planVersion": "0.1",
+        "candidateIds": [
+          "candidate:evidence:github:pr:cyrilla-mist/nexus-ai:23"
+        ],
+        "targetKinds": [
+          "evidence"
+        ],
+        "exclusionIds": [],
+        "errorCode": null,
+        "behaviorAssertions": [
+          "no-semantic-promotion",
+          "no-canonical-write"
+        ]
+      },
+      "rationale": "A merged PR never becomes Phase or Milestone completion."
+    },
+    {
+      "id": "IP-G05",
+      "category": "governance/safety",
+      "inputState": "Commit, Issue, PR and Release contain source-controlled free text",
+      "expected": {
+        "outcome": "success",
+        "planVersion": "0.1",
+        "candidateIds": [
+          "candidate:evidence:github:repo:cyrilla-mist/nexus-ai",
+          "candidate:evidence:github:branch:cyrilla-mist/nexus-ai:main",
+          "candidate:evidence:github:commit:cyrilla-mist/nexus-ai:2222222222222222222222222222222222222222",
+          "candidate:evidence:github:commit:cyrilla-mist/nexus-ai:3333333333333333333333333333333333333333",
+          "candidate:evidence:github:issue:cyrilla-mist/nexus-ai:17",
+          "candidate:evidence:github:pr:cyrilla-mist/nexus-ai:23",
+          "candidate:evidence:github:release:cyrilla-mist/nexus-ai:release-7",
+          "candidate:evidence:github:tag:cyrilla-mist/nexus-ai:v0.1.0"
+        ],
+        "targetKinds": [
+          "evidence"
+        ],
+        "exclusionIds": [],
+        "errorCode": null,
+        "behaviorAssertions": [
+          "free-text-not-promoted",
+          "no-semantic-promotion"
+        ]
+      },
+      "rationale": "Free text cannot be promoted to semantic truth."
+    },
+    {
+      "id": "IP-G06",
+      "category": "governance/safety",
+      "inputState": "Candidate provenance contains source provider, reference, capture, retrieval and authority",
+      "expected": {
+        "outcome": "success",
+        "planVersion": "0.1",
+        "candidateIds": [
+          "candidate:evidence:github:repo:cyrilla-mist/nexus-ai",
+          "candidate:evidence:github:branch:cyrilla-mist/nexus-ai:main",
+          "candidate:evidence:github:commit:cyrilla-mist/nexus-ai:2222222222222222222222222222222222222222",
+          "candidate:evidence:github:commit:cyrilla-mist/nexus-ai:3333333333333333333333333333333333333333",
+          "candidate:evidence:github:issue:cyrilla-mist/nexus-ai:17",
+          "candidate:evidence:github:pr:cyrilla-mist/nexus-ai:23",
+          "candidate:evidence:github:release:cyrilla-mist/nexus-ai:release-7",
+          "candidate:evidence:github:tag:cyrilla-mist/nexus-ai:v0.1.0"
+        ],
+        "targetKinds": [
+          "evidence"
+        ],
+        "exclusionIds": [],
+        "errorCode": null,
+        "behaviorAssertions": [
+          "source-authority-preserved",
+          "source-time-preserved",
+          "no-canonical-write"
+        ]
+      },
+      "rationale": "Provenance retains source authority and never invents human authority."
+    },
+    {
+      "id": "IP-C01",
+      "category": "determinism/coverage",
+      "inputState": "Run twice with identical Snapshot, policy, project, scope and capturedAt",
+      "expected": {
+        "outcome": "success",
+        "planVersion": "0.1",
+        "candidateIds": [
+          "candidate:evidence:github:repo:cyrilla-mist/nexus-ai",
+          "candidate:evidence:github:branch:cyrilla-mist/nexus-ai:main",
+          "candidate:evidence:github:commit:cyrilla-mist/nexus-ai:2222222222222222222222222222222222222222",
+          "candidate:evidence:github:commit:cyrilla-mist/nexus-ai:3333333333333333333333333333333333333333",
+          "candidate:evidence:github:issue:cyrilla-mist/nexus-ai:17",
+          "candidate:evidence:github:pr:cyrilla-mist/nexus-ai:23",
+          "candidate:evidence:github:release:cyrilla-mist/nexus-ai:release-7",
+          "candidate:evidence:github:tag:cyrilla-mist/nexus-ai:v0.1.0"
+        ],
+        "targetKinds": [
+          "evidence"
+        ],
+        "exclusionIds": [],
+        "errorCode": null,
+        "behaviorAssertions": [
+          "deep-equal",
+          "stable-candidate-identity",
+          "diagnostics-consistent"
+        ]
+      },
+      "rationale": "The pure transformation is deterministic."
+    },
+    {
+      "id": "IP-C02",
+      "category": "determinism/coverage",
+      "inputState": "Inspect input before and after and attempt output mutation",
+      "expected": {
+        "outcome": "success",
+        "planVersion": "0.1",
+        "candidateIds": [
+          "candidate:evidence:github:repo:cyrilla-mist/nexus-ai",
+          "candidate:evidence:github:branch:cyrilla-mist/nexus-ai:main",
+          "candidate:evidence:github:commit:cyrilla-mist/nexus-ai:2222222222222222222222222222222222222222",
+          "candidate:evidence:github:commit:cyrilla-mist/nexus-ai:3333333333333333333333333333333333333333",
+          "candidate:evidence:github:issue:cyrilla-mist/nexus-ai:17",
+          "candidate:evidence:github:pr:cyrilla-mist/nexus-ai:23",
+          "candidate:evidence:github:release:cyrilla-mist/nexus-ai:release-7",
+          "candidate:evidence:github:tag:cyrilla-mist/nexus-ai:v0.1.0"
+        ],
+        "targetKinds": [
+          "evidence"
+        ],
+        "exclusionIds": [],
+        "errorCode": null,
+        "behaviorAssertions": [
+          "input-unchanged",
+          "deeply-frozen",
+          "no-canonical-write"
+        ]
+      },
+      "rationale": "The future Runtime must preserve input and deeply freeze output."
+    },
+    {
+      "id": "IP-C03",
+      "category": "determinism/coverage",
+      "inputState": "Snapshot records are in accepted global order",
+      "expected": {
+        "outcome": "success",
+        "planVersion": "0.1",
+        "candidateIds": [
+          "candidate:evidence:github:repo:cyrilla-mist/nexus-ai",
+          "candidate:evidence:github:branch:cyrilla-mist/nexus-ai:main",
+          "candidate:evidence:github:commit:cyrilla-mist/nexus-ai:2222222222222222222222222222222222222222",
+          "candidate:evidence:github:commit:cyrilla-mist/nexus-ai:3333333333333333333333333333333333333333",
+          "candidate:evidence:github:issue:cyrilla-mist/nexus-ai:17",
+          "candidate:evidence:github:pr:cyrilla-mist/nexus-ai:23",
+          "candidate:evidence:github:release:cyrilla-mist/nexus-ai:release-7",
+          "candidate:evidence:github:tag:cyrilla-mist/nexus-ai:v0.1.0"
+        ],
+        "targetKinds": [
+          "evidence"
+        ],
+        "exclusionIds": [],
+        "errorCode": null,
+        "behaviorAssertions": [
+          "one-to-one-source-mapping",
+          "stable-candidate-identity",
+          "coverage-complete"
+        ]
+      },
+      "rationale": "Candidate order follows Snapshot record order."
+    },
+    {
+      "id": "IP-C04",
+      "category": "determinism/coverage",
+      "inputState": "Eight records partition into candidates and exclusions with consistent diagnostics",
+      "expected": {
+        "outcome": "success",
+        "planVersion": "0.1",
+        "candidateIds": [
+          "candidate:evidence:github:repo:cyrilla-mist/nexus-ai",
+          "candidate:evidence:github:branch:cyrilla-mist/nexus-ai:main",
+          "candidate:evidence:github:commit:cyrilla-mist/nexus-ai:2222222222222222222222222222222222222222",
+          "candidate:evidence:github:commit:cyrilla-mist/nexus-ai:3333333333333333333333333333333333333333",
+          "candidate:evidence:github:issue:cyrilla-mist/nexus-ai:17",
+          "candidate:evidence:github:pr:cyrilla-mist/nexus-ai:23",
+          "candidate:evidence:github:release:cyrilla-mist/nexus-ai:release-7",
+          "candidate:evidence:github:tag:cyrilla-mist/nexus-ai:v0.1.0"
+        ],
+        "targetKinds": [
+          "evidence"
+        ],
+        "exclusionIds": [],
+        "errorCode": null,
+        "behaviorAssertions": [
+          "coverage-complete",
+          "one-to-one-source-mapping",
+          "diagnostics-consistent"
+        ]
+      },
+      "rationale": "Every sourceRecordId occurs exactly once and all counts sum to eight."
+    }
+  ]
+}
+

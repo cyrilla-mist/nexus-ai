@@ -642,3 +642,12 @@ Only this audit document is intended to be added. The audit does not mark GitHub
 - Phase 4D is next.
 - Phase 4C acceptance hardening is complete: offset-aware timestamps, explicit truncation semantics, normalized repository projection, and real catalog execution are covered by the runtime suite.
 - Phase 4C final acceptance completed; no Phase 4D work started.
+
+## Phase 4D Contract Follow-up
+
+- Context Import Plan Contract defined.
+- GitHub v1 source observations map only to Evidence Candidates.
+- Semantic promotion is explicitly prohibited.
+- Canonical write remains prohibited.
+- Phase 4D Planner Runtime not started.
+- Phase 4E remains the Canonical Integration boundary.

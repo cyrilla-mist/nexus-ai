@@ -217,7 +217,21 @@ Phase 4 is in progress. GitHub is the first implemented Source Adapter profile/c
 - automated 36-case suite;
 - no concrete HTTP/auth transport, Graph mutation or Planner integration.
 
-#### Phase 4D — Context Import Planner — Planned
+#### Phase 4D — Context Import Planner — In progress
+
+Contract Design — Complete
+
+- Context Import Plan v0.1;
+- Candidate Evidence contract;
+- one-source-record-to-one-candidate v1 mapping;
+- candidate-only admission boundary;
+- provenance / authority preservation;
+- coverage invariant;
+- 32-case catalog;
+- no Planner Runtime;
+- no Graph mutation.
+
+Planner Runtime — Planned
 
 #### Phase 4E — Canonical Integration — Planned
 

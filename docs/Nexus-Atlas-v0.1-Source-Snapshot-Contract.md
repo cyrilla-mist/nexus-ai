@@ -509,3 +509,11 @@ Phase boundary:
 - Phase 4 overall remains In progress.
 
 The next phase is Phase 4D — Context Import Planner.
+
+## Phase 4D Follow-up
+
+- The Context Import Plan v0.1 contract now defines the deferred Planner output.
+- The Source Snapshot remains the sole source-observation input.
+- The Planner performs no source re-read.
+- The Planner produces Candidate-only Evidence proposals.
+- No Canonical Graph write is permitted.
