@@ -48,6 +48,26 @@ The authorization selection is an array of unique non-empty trimmed Candidate ID
 
 The GitHub v1 policy is project-scoped and requires `plan.target.scopeKey === plan.target.projectId`. This is an admission policy restriction, not a Phase 4D Planner assumption.
 
+## Target Project validity
+
+Build and Apply resolve `Import Plan.target.projectId` in this order: an absent Graph ID returns `TARGET_PROJECT_NOT_FOUND`; an existing node whose `kind` is not `project` returns `TARGET_PROJECT_INVALID`; an existing Project whose scope fails the Phase 4E v0.1 exact target policy also returns `TARGET_PROJECT_INVALID`; only after a valid Project is resolved does `Import Plan.target.scopeKey !== Import Plan.target.projectId` return `TARGET_SCOPE_UNSUPPORTED`. Scope-policy failure is never deferred into `CANONICAL_ADMISSION_PLAN_INVALID`.
+
+The Phase 4E GitHub Evidence admission policy is stricter than the generic Context Graph validator. The resolved Project `scope` has exactly these keys and no extras:
+
+```js
+{
+  userId,
+  territoryId,
+  projectId
+}
+```
+
+All three values must be strings that are non-empty and exactly trimmed. `Project.scope.projectId === Project.id`, and `Project.id === Import Plan.target.projectId`; consequently `Project.scope.projectId` also equals the Import Plan target project ID. `territoryId` is required even though the generic validator does not require it. No default territory, inference, `undefined` copy, `Project.payload.territoryIds[0]`, or repository-derived value is permitted. The canonical proposal scope is an exact deep copy of this resolved `Project.scope`; Build does not reconstruct an alternate scope.
+
+Build validation therefore proceeds through validated Graph, validated Import Plan, target ID resolution, target kind, exact Project scope, scopeKey policy, authorization, and only then proposal construction. Apply validates Graph, Import Plan, Admission Plan, and authorization, performs source and target descriptor binding, resolves and revalidates the current target Project's exact scope, checks proposal scope binding, then checks authorization binding, reconciliation, and atomic application. If the current Project becomes scope-invalid after Build, Apply returns `TARGET_PROJECT_INVALID` before mutation. A proposal scope tamper remains `CANONICAL_ADMISSION_SOURCE_MISMATCH`; an invalid Project remains `TARGET_PROJECT_INVALID`.
+
+Normative invalid-target examples are: an existing `evidence` node used as target; a Project scope missing `territoryId`; `scope.projectId !== Project.id`; an empty `scope.userId`; or an extra scope key. Each returns `TARGET_PROJECT_INVALID`. A valid Project with a non-matching Import Plan `scopeKey` returns `TARGET_SCOPE_UNSUPPORTED`.
+
 ## Candidate admissibility
 
 Only Candidates with `targetKind: "evidence"`, `admission.stage: "candidate"`, `admission.canonicalWriteAllowed: false`, and `admission.confirmationRequirement: "source-authority-sufficient"` are admissible. The Candidate's false write flag means it cannot authorize itself; explicit Phase 4E authorization supplies the separate admission authority.
