@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import { createGitHubSourceAdapter } from "../experience/source-v01/github-source-adapter.mjs";
-import { createGitHubClientFixture, createRequestedLimits, CAPTURED_AT } from "../tests/helpers/github-source-fixtures.mjs";
+import { createGitHubClientFixture, createRequestedLimits, createRelease, CAPTURED_AT } from "../tests/helpers/github-source-fixtures.mjs";
+import { isStrictOffsetIsoV01, SOURCE_ADAPTER_ERROR_CODES_V01, validateGitHubSourceSnapshotV01, validateSourceSnapshotV01 } from "../experience/source-v01/source-snapshot-validator.mjs";
 
 const expected = JSON.parse(fs.readFileSync(new URL("../examples/nexus-atlas-source-snapshot-v0.1.json", import.meta.url))).snapshot;
 const client = createGitHubClientFixture();
@@ -10,6 +11,17 @@ const snapshot = await adapter.readSnapshot({ repositoryRef: "Cyrilla-Mist/Nexus
 assert.deepEqual(snapshot, expected);
 assert(Object.isFrozen(snapshot) && Object.isFrozen(snapshot.records[0].payload));
 assert.equal(client.calls.map(call => call[0]).join(","), "repository,branch,commits,issues,pullRequests,releases,tags");
+const offsetSnapshot = await adapter.readSnapshot({ repositoryRef: "Cyrilla-Mist/Nexus-AI", requestedLimits: createRequestedLimits({ commits: 0, issues: 0, pullRequests: 0, releases: 0, tags: 0 }), capturedAt: "2026-08-07T20:00:00+08:00" });
+assert.equal(offsetSnapshot.capturedAt, "2026-08-07T20:00:00+08:00"); assert(isStrictOffsetIsoV01(offsetSnapshot.capturedAt));
+const truncatedClient = createGitHubClientFixture(); const commitResult = await truncatedClient.listCommits({}); truncatedClient.listCommits = async () => ({ items: commitResult.items, pagesRead: 1, continuationAvailable: true });
+const truncated = await createGitHubSourceAdapter({ client: truncatedClient }).readSnapshot({ repositoryRef: "Cyrilla-Mist/Nexus-AI", requestedLimits: createRequestedLimits(), capturedAt: CAPTURED_AT }); assert.equal(truncated.diagnostics.complete, true); assert.equal(truncated.diagnostics.collections.commits.truncated, true);
+const prClient = createGitHubClientFixture(); prClient.listPullRequests = async () => ({ items: [{ number: 23, title: "time", state: "closed", draft: false, merged: true, createdAt: "2026-08-01T00:00:00Z", updatedAt: "2026-08-07T12:00:00Z", closedAt: "2026-08-07T10:00:00Z", mergedAt: "2026-08-07T11:00:00Z", headSha: "4".repeat(40), baseRef: "main" }], pagesRead: 1, continuationAvailable: false });
+const prSnapshot = await createGitHubSourceAdapter({ client: prClient }).readSnapshot({ repositoryRef: "Cyrilla-Mist/Nexus-AI", requestedLimits: createRequestedLimits({ commits: 0, issues: 0, pullRequests: 1, releases: 0, tags: 0 }), capturedAt: CAPTURED_AT }); assert.equal(prSnapshot.records[2].observedAt, "2026-08-07T12:00:00Z");
+const releaseClient = createGitHubClientFixture(); releaseClient.listReleases = async () => ({ items: [createRelease({ immutableId: "a", tagName: "a", publishedAt: "2026-08-07T00:00:00Z" }), createRelease({ immutableId: "b", tagName: "b", publishedAt: "2026-08-06T00:00:00Z" }), createRelease({ immutableId: "c", tagName: "c", publishedAt: null })], pagesRead: 1, continuationAvailable: false });
+const releaseSnapshot = await createGitHubSourceAdapter({ client: releaseClient }).readSnapshot({ repositoryRef: "Cyrilla-Mist/Nexus-AI", requestedLimits: createRequestedLimits({ commits: 0, issues: 0, pullRequests: 0, releases: 3, tags: 0 }), capturedAt: CAPTURED_AT }); assert.deepEqual(releaseSnapshot.records.filter(record => record.sourceType === "release").map(record => record.payload.immutableId), ["a", "b", "c"]);
+const generic = structuredClone(expected); generic.source.reference = null; generic.records.forEach(record => { record.reference = null; }); assert(validateSourceSnapshotV01(generic)); const githubNull = structuredClone(expected); githubNull.records[0].reference = null; assert.throws(() => validateGitHubSourceSnapshotV01(githubNull), error => error.code === "SOURCE_SNAPSHOT_INVALID");
+const mixedClient = createGitHubClientFixture({ repository: { name: "Nexus-AI", fullName: "Cyrilla-Mist/Nexus-AI", defaultBranch: "main", archived: false, visibility: "public", updatedAt: "2026-08-07T11:00:00Z" } }); const mixed = await createGitHubSourceAdapter({ client: mixedClient }).readSnapshot({ repositoryRef: "Cyrilla-Mist/Nexus-AI", requestedLimits: createRequestedLimits({ commits: 0, issues: 0, pullRequests: 0, releases: 0, tags: 0 }), capturedAt: CAPTURED_AT }); assert.equal(mixed.records[0].payload.fullName, "cyrilla-mist/nexus-ai"); assert.equal(mixed.records[0].payload.name, "nexus-ai");
+assert.equal(new Set(SOURCE_ADAPTER_ERROR_CODES_V01).size, 13); assert.equal(SOURCE_ADAPTER_ERROR_CODES_V01.length, 13);
 console.log("Nexus Atlas Source Snapshot v0.1");
 console.log("Adapter: github");
 console.log(`Repository: ${snapshot.scope.repositoryRef}`);
@@ -23,4 +35,10 @@ console.log("Privacy projection: PASS");
 console.log("Determinism: PASS");
 console.log("Immutability: PASS");
 console.log("Accepted example compatibility: PASS");
+console.log("Offset-aware time semantics: PASS");
+console.log("Bounded truncation semantics: PASS");
+console.log("PR source time semantics: PASS");
+console.log("Release ordering semantics: PASS");
+console.log("Repository canonicalization: PASS");
+console.log("Error vocabulary: PASS");
 console.log("Source Snapshot v0.1 Runtime: PASS");

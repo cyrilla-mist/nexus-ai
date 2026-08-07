@@ -20,6 +20,10 @@ Implementation Note:
 - no concrete HTTP client, OAuth or Token handling;
 - no account scan, Graph mutation, Import Planner or Provider integration;
 - no external write.
+- Phase 4C acceptance hardening complete.
+- offset-aware timestamps and truncation semantics aligned with this contract.
+- 36-case Catalog executes real Runtime paths.
+- repository identity projection is normalized at the source boundary.
 
 A Source Snapshot is an immutable, explicitly scoped observation of external source state. It preserves source-native identity, authority, source event time, capture time, bounded-read diagnostics and privacy-safe payloads without silently producing or mutating canonical Nexus Context.
 

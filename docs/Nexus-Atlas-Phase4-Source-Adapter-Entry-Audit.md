@@ -640,3 +640,4 @@ Only this audit document is intended to be added. The audit does not mark GitHub
 - 36 catalog cases are automated.
 - No live authenticated transport, Import Planner or canonical write was added.
 - Phase 4D is next.
+- Phase 4C acceptance hardening is complete: offset-aware timestamps, explicit truncation semantics, normalized repository projection, and real catalog execution are covered by the runtime suite.
