@@ -10,6 +10,17 @@ function invalidPlan(mutate, code = "CANONICAL_ADMISSION_PLAN_INVALID") { test(`
 test("validator returns a frozen clone and leaves caller mutable", () => { const input = base(); const output = validateCanonicalAdmissionPlanV01(input); assert.notEqual(output, input); assert.ok(Object.isFrozen(output)); assert.ok(Object.isFrozen(output.nodeProposals[0])); assert.equal(Object.isFrozen(input), false); input.target.projectId = "project:nexus-atlas"; });
 test("validator accepts accepted plan", () => assert.equal(validateCanonicalAdmissionPlanV01(base()).decisions.length, 8));
 test("deepEqual ignores object insertion order", () => assert.equal(deepEqual({ a: 1, b: { c: 2 } }, { b: { c: 2 }, a: 1 }), true));
+test("deepEqual distinguishes objects and primitives", () => {
+  assert.equal(deepEqual({}, {}), true);
+  assert.equal(deepEqual({}, 5), false);
+  assert.equal(deepEqual({}, null), false);
+  assert.equal(deepEqual({}, "x"), false);
+  assert.equal(deepEqual({ a: {} }, { a: 5 }), false);
+  assert.equal(deepEqual({ a: null }, { a: {} }), false);
+  assert.equal(deepEqual([], {}), false);
+  assert.equal(deepEqual({ a: { b: [] } }, { a: { b: [] } }), true);
+  assert.equal(deepEqual({ z: 1, a: 2 }, { a: 2, z: 1 }), true);
+});
 test("canonical ID formula is deterministic", () => assert.equal(canonicalNodeIdForCandidate(example.admissionPlan.decisions[0].candidateId, example.admissionPlan.generatedAt), example.admissionPlan.decisions[0].canonicalNodeId));
 test("error vocabulary is exact", () => assert.deepEqual(CANONICAL_ADMISSION_ERROR_CODES_V01.length, 16));
 test("unknown error code is TypeError", () => assert.throws(() => new CanonicalAdmissionError("NOPE"), TypeError));
@@ -20,6 +31,7 @@ invalidPlan(plan => { plan.admissionVersion = "0.2"; });
 invalidPlan(plan => { plan.policyVersion = "other"; });
 invalidPlan(plan => { plan.generatedAt = "2026-08-07T12:00:00"; });
 invalidPlan(plan => { plan.generatedAt = "not-a-time"; });
+for (const value of ["2026-02-30T12:00:00Z", "2026-04-31T12:00:00Z", "2026-00-10T12:00:00Z", "2026-13-01T12:00:00Z", "2026-08-07T24:00:00Z", "2026-08-07T12:60:00Z", "2026-08-07T12:00:60Z", "2026-08-07T12:00:00+24:00"]) invalidPlan(plan => { plan.generatedAt = value; });
 invalidPlan(plan => { plan.sourcePlan.generatedAt = "2026-08-07T12:00:01Z"; });
 for (const key of ["planVersion", "policyVersion", "generatedAt", "candidateIds"]) invalidPlan(plan => { delete plan.sourcePlan[key]; });
 invalidPlan(plan => { plan.sourcePlan.extra = true; });
@@ -59,6 +71,7 @@ invalidPlan(plan => { plan.nodeProposals[0].provenance.capturedAt = "2026-08-07T
 invalidPlan(plan => { plan.nodeProposals[0].provenance.reference = ""; });
 invalidPlan(plan => { plan.nodeProposals[0].payload.claim = ""; });
 invalidPlan(plan => { plan.nodeProposals[0].payload.observedAt = "bad"; });
+invalidPlan(plan => { plan.nodeProposals[0].payload.observedAt = "2026-02-30T12:00:00Z"; });
 invalidPlan(plan => { plan.nodeProposals[0].payload.appliesToVersion = "v1"; });
 invalidPlan(plan => { plan.nodeProposals[0].payload.verificationMethod = "other"; });
 invalidPlan(plan => { plan.nodeProposals[0].payload.result = ""; });

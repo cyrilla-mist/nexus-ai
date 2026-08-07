@@ -1,5 +1,6 @@
 export const CANONICAL_ADMISSION_VERSION_V01 = "0.1";
 export const GITHUB_EVIDENCE_CANONICAL_ADMISSION_POLICY_V1 = "github-evidence-canonical-admission-v1";
+import { isStrictOffsetIsoV01 } from "../source-v01/source-snapshot-validator.mjs";
 export const CANONICAL_ADMISSION_ERROR_CODES_V01 = Object.freeze([
   "INVALID_CANONICAL_ADMISSION_INPUT", "INVALID_ADMISSION_POLICY_VERSION", "INVALID_CONTEXT_GRAPH", "INVALID_IMPORT_PLAN",
   "INVALID_AUTHORIZATION_SELECTION", "TARGET_PROJECT_NOT_FOUND", "TARGET_PROJECT_INVALID", "TARGET_SCOPE_UNSUPPORTED",
@@ -23,13 +24,12 @@ const PAYLOAD_KEYS = ["claim", "sourceRef", "observedAt", "appliesToVersion", "v
 const isObject = value => value !== null && typeof value === "object" && !Array.isArray(value);
 export function exactKeys(value, keys) { return isObject(value) && Object.keys(value).sort().join("\u0000") === [...keys].sort().join("\u0000"); }
 export function nonEmptyTrimmedString(value) { return typeof value === "string" && value.length > 0 && value.trim() === value; }
-function offsetIso(value) { return typeof value === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?(?:Z|[+-]\d{2}:\d{2})$/.test(value) && Number.isFinite(Date.parse(value)); }
 export function deepClone(value) { if (Array.isArray(value)) return value.map(deepClone); if (isObject(value)) return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, deepClone(item)])); return value; }
 export function deepFreeze(value) { if ((isObject(value) || Array.isArray(value)) && !Object.isFrozen(value)) { Object.values(value).forEach(deepFreeze); Object.freeze(value); } return value; }
 export function deepEqual(left, right) {
   if (Object.is(left, right)) return true;
   if (Array.isArray(left) || Array.isArray(right)) return Array.isArray(left) && Array.isArray(right) && left.length === right.length && left.every((value, index) => deepEqual(value, right[index]));
-  if (isObject(left) || isObject(right)) { const lk = isObject(left) ? Object.keys(left).sort() : []; const rk = isObject(right) ? Object.keys(right).sort() : []; return lk.length === rk.length && lk.every((key, index) => key === rk[index] && deepEqual(left[key], right[key])); }
+  if (isObject(left) || isObject(right)) { if (!isObject(left) || !isObject(right)) return false; const lk = Object.keys(left).sort(); const rk = Object.keys(right).sort(); return lk.length === rk.length && lk.every((key, index) => key === rk[index] && deepEqual(left[key], right[key])); }
   return false;
 }
 
@@ -55,7 +55,7 @@ function validateProposal(proposal, plan) {
   requiredString(proposal.provenance.reference, "nodeProposals.provenance.reference"); requiredString(proposal.provenance.authority, "nodeProposals.provenance.authority");
   if (!exactKeys(proposal.payload, PAYLOAD_KEYS)) invalidPlan("payload keys invalid", { field: "nodeProposals.payload" });
   requiredString(proposal.payload.claim, "nodeProposals.payload.claim"); requiredString(proposal.payload.sourceRef, "nodeProposals.payload.sourceRef"); requiredString(proposal.payload.result, "nodeProposals.payload.result");
-  if (proposal.payload.observedAt !== null && !offsetIso(proposal.payload.observedAt)) invalidPlan("payload.observedAt invalid", { field: "nodeProposals.payload.observedAt" });
+  if (proposal.payload.observedAt !== null && !isStrictOffsetIsoV01(proposal.payload.observedAt)) invalidPlan("payload.observedAt invalid", { field: "nodeProposals.payload.observedAt" });
   if (proposal.payload.appliesToVersion !== null || proposal.payload.verificationMethod !== "github-source-snapshot-v0.1" || proposal.summary !== proposal.payload.claim) invalidPlan("payload semantics invalid", { field: "nodeProposals.payload" });
 }
 
@@ -63,7 +63,7 @@ export function canonicalNodeIdForCandidate(candidateId, generatedAt) { const pr
 
 export function validateCanonicalAdmissionPlanV01(admissionPlan) {
   try {
-    if (!exactKeys(admissionPlan, PLAN_KEYS) || admissionPlan.admissionVersion !== CANONICAL_ADMISSION_VERSION_V01 || admissionPlan.policyVersion !== GITHUB_EVIDENCE_CANONICAL_ADMISSION_POLICY_V1 || !offsetIso(admissionPlan.generatedAt)) invalidPlan("top-level plan invalid");
+    if (!exactKeys(admissionPlan, PLAN_KEYS) || admissionPlan.admissionVersion !== CANONICAL_ADMISSION_VERSION_V01 || admissionPlan.policyVersion !== GITHUB_EVIDENCE_CANONICAL_ADMISSION_POLICY_V1 || !isStrictOffsetIsoV01(admissionPlan.generatedAt)) invalidPlan("top-level plan invalid");
     if (!exactKeys(admissionPlan.sourcePlan, SOURCE_KEYS) || admissionPlan.sourcePlan.planVersion !== "0.1" || admissionPlan.sourcePlan.policyVersion !== "github-context-import-policy-v1" || admissionPlan.sourcePlan.generatedAt !== admissionPlan.generatedAt || !Array.isArray(admissionPlan.sourcePlan.candidateIds) || admissionPlan.sourcePlan.candidateIds.length < 2) invalidPlan("sourcePlan invalid", { field: "sourcePlan" });
     const ids = admissionPlan.sourcePlan.candidateIds; if (ids.some(id => !nonEmptyTrimmedString(id) || !id.startsWith("candidate:evidence:github:")) || new Set(ids).size !== ids.length) invalidPlan("sourcePlan candidateIds invalid", { field: "sourcePlan.candidateIds" });
     if (!exactKeys(admissionPlan.target, TARGET_KEYS)) invalidPlan("target invalid", { field: "target" }); requiredString(admissionPlan.target.projectId, "target.projectId"); requiredString(admissionPlan.target.scopeKey, "target.scopeKey"); if (admissionPlan.target.scopeKey !== admissionPlan.target.projectId) invalidPlan("target scopeKey invalid", { field: "target.scopeKey" });
@@ -77,4 +77,4 @@ export function validateCanonicalAdmissionPlanV01(admissionPlan) {
   } catch (error) { if (error instanceof CanonicalAdmissionError) throw error; throw new CanonicalAdmissionError("CANONICAL_ADMISSION_PLAN_INVALID", "Admission Plan invalid"); }
 }
 
-export const __canonicalAdmissionValidatorInternals = Object.freeze({ PLAN_KEYS, SOURCE_KEYS, TARGET_KEYS, DECISION_KEYS, PROPOSAL_KEYS, DIAGNOSTIC_KEYS, SCOPE_KEYS, offsetIso });
+export const __canonicalAdmissionValidatorInternals = Object.freeze({ PLAN_KEYS, SOURCE_KEYS, TARGET_KEYS, DECISION_KEYS, PROPOSAL_KEYS, DIAGNOSTIC_KEYS, SCOPE_KEYS, isStrictOffsetIsoV01 });

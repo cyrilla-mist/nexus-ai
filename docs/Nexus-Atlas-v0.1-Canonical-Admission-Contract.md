@@ -265,3 +265,9 @@ Phase 4E accepts only validated Phase 4D Import Plans. Therefore every GitHub v1
 - authorization may select only the Candidate under test, but unselected core Candidates remain present as deferred Decisions.
 
 “Test one Candidate” does not mean “construct a one-Candidate Import Plan.”
+Final Runtime acceptance hardening confirms:
+- strict offset-aware calendar timestamps
+- structurally correct deep equality
+- 32-case executor closure
+- 14-handler behavioral proof
+- exact reconciliation race proof
