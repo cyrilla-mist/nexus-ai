@@ -322,3 +322,10 @@ Phase 4D final acceptance hardening completed.
 - Independent Plan Validator now enforces GitHub descriptor coherence, source type / mapping rule / authority coherence, deterministic candidate ordering, and the mechanical semantic boundary.
 - The complete 32-case behavioral proof is executable; no Phase 4E work was started.
 Phase 4D boundary closure confirms: Planner-owned error boundary; positive GitHub numeric identity; encoded release/tag reference compatibility; sourceRecordId/provenance reference coherence.
+
+Phase 4E Canonical Admission Contract now defines the deferred admission boundary.
+
+- Candidate does not self-authorize canonical write;
+- explicit Phase 4E authorization is required;
+- admission remains Evidence-only with no semantic promotion;
+- no Source re-read occurs at the admission boundary.

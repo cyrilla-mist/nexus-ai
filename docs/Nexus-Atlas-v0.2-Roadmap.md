@@ -241,7 +241,23 @@ Contract Design — Complete / Accepted
 
 Planner Runtime — Complete
 
-#### Phase 4E — Canonical Integration — Planned
+#### Phase 4E — Canonical Integration — In progress
+
+Contract Design — Complete
+
+- Canonical Admission v0.1;
+- explicit authorization boundary;
+- deterministic Evidence node identity;
+- source observation history preservation;
+- insert/noop/conflict/deferred reconciliation;
+- conservative canonical epistemic/governance defaults;
+- atomic Graph application contract;
+- no Edge creation;
+- no ContextPackage mutation;
+- 32-case catalog;
+- no Runtime yet.
+
+Canonical Admission Runtime — Planned
 
 #### Phase 4F — Acceptance — Planned
 
