@@ -258,9 +258,13 @@ Contract Design — Complete / Accepted
 - no Runtime yet.
 - apply re-accepts the validated Import Plan;
 - exact sourcePlan and Candidate-to-proposal binding;
+- apply-time explicit authorization rebinding;
+- independent provenance and authorization proofs;
 - apply-time reconciliation race semantics;
-- 15-code non-retryable error vocabulary;
+- 16-code non-retryable error vocabulary;
 - Contract and Matrix Accepted.
+
+Phase 4E authorization binding closure complete: Apply independently re-accepts `authorizedCandidateIds`, treats the selection as a set normalized in Import Plan order, and rejects any Decision/proposal authorization partition mismatch before reconciliation.
 
 Canonical Admission Runtime — Planned
 

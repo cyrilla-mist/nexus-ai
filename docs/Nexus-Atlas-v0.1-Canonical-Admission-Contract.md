@@ -23,7 +23,7 @@ The future APIs are separate and are design-only in v0.1:
 ```js
 buildCanonicalAdmissionPlanV01({ graph, plan, policyVersion, authorizedCandidateIds })
 validateCanonicalAdmissionPlanV01(plan)
-applyCanonicalAdmissionPlanV01({ graph, importPlan, admissionPlan })
+applyCanonicalAdmissionPlanV01({ graph, importPlan, admissionPlan, authorizedCandidateIds })
 ```
 
 `build` receives a validated Graph, Import Plan, policy and explicit authorization. `validate` validates only an Admission Plan. `apply` receives a Graph, the validated Import Plan, and an Admission Plan; it never accesses Source, Snapshot, Planner or GitHub.
@@ -36,7 +36,11 @@ The future build input has exactly `graph`, `plan`, `policyVersion`, and `author
 
 `source-authority-sufficient` means that the Candidate does not require a second confirmation of what GitHub returned. It does not grant canonical write authority. Phase 4E authorization is still explicit. A Candidate not selected is `deferred`, never rejected, false, or revoked.
 
-Future input validation order is fixed: exact input shape, policy, Context Graph, Import Plan, target project, scope policy, authorization selection, Candidate admissibility, proposal construction, Graph reconciliation, then Admission Plan validation. Graph validation happens before node construction. Apply input has exactly `graph`, `importPlan`, and `admissionPlan`; it does not accept `plan`, `sourcePlan`, `snapshot`, `source`, `client`, or authorization.
+Future input validation order is fixed: exact input shape, Context Graph, Import Plan, Admission Plan, authorization selection, Candidate existence, sourcePlan binding, target binding, Candidate-to-proposal binding, authorization-to-Decision/proposal binding, target Project scope, Graph reconciliation, conflict check, atomic construction, then result Graph validation. Graph validation happens before node construction and authorization binding happens before reconciliation. Build validates policy and authorization selection before proposal construction. Apply input has exactly `graph`, `importPlan`, `admissionPlan`, and `authorizedCandidateIds`; it does not accept `plan`, `sourcePlan`, `snapshot`, `source`, `client`, `GitHub`, `planner`, `policyVersion`, or a new authorization object.
+
+`authorizedCandidateIds` supplied to Apply is the authoritative admission selection for that invocation. It is independently revalidated; an Admission Plan is a deterministic governance result, not a cryptographic authorization token. Structural validity and upstream Candidate binding cannot substitute for apply-time explicit authorization rebinding.
+
+The authorization selection is an array of unique non-empty trimmed Candidate IDs and may be empty. Each ID must exist in the validated Import Plan. The array is a set: caller order has no semantic meaning, and Build and Apply normalize it in Import Plan Candidate order. A non-array, duplicate, empty, or whitespace ID is `INVALID_AUTHORIZATION_SELECTION`; a structurally valid but unknown ID is `CANDIDATE_NOT_FOUND`.
 
 ## Target and scope
 
@@ -104,9 +108,9 @@ v0.1 creates no Edge (`belongs_to`, `supports`, `derived_from`, `implements`, or
 
 ## Error vocabulary
 
-The future public boundary defines these 15 non-retryable codes and wraps lower-level errors rather than leaking `ContextGraphValidationError` or `ContextImportPlanError`:
+The future public boundary defines these 16 non-retryable codes and wraps lower-level errors rather than leaking `ContextGraphValidationError` or `ContextImportPlanError`:
 
-`INVALID_CANONICAL_ADMISSION_INPUT`, `INVALID_ADMISSION_POLICY_VERSION`, `INVALID_CONTEXT_GRAPH`, `INVALID_IMPORT_PLAN`, `INVALID_AUTHORIZATION_SELECTION`, `TARGET_PROJECT_NOT_FOUND`, `TARGET_PROJECT_INVALID`, `TARGET_SCOPE_UNSUPPORTED`, `CANDIDATE_NOT_FOUND`, `CANONICAL_NODE_ID_INVALID`, `CANONICAL_ADMISSION_PLAN_INVALID`, `CANONICAL_ADMISSION_COVERAGE_MISMATCH`, `CANONICAL_ADMISSION_SOURCE_MISMATCH`, `CANONICAL_APPLY_CONFLICT`, `CANONICAL_GRAPH_RESULT_INVALID`.
+`INVALID_CANONICAL_ADMISSION_INPUT`, `INVALID_ADMISSION_POLICY_VERSION`, `INVALID_CONTEXT_GRAPH`, `INVALID_IMPORT_PLAN`, `INVALID_AUTHORIZATION_SELECTION`, `TARGET_PROJECT_NOT_FOUND`, `TARGET_PROJECT_INVALID`, `TARGET_SCOPE_UNSUPPORTED`, `CANDIDATE_NOT_FOUND`, `CANONICAL_NODE_ID_INVALID`, `CANONICAL_ADMISSION_PLAN_INVALID`, `CANONICAL_ADMISSION_COVERAGE_MISMATCH`, `CANONICAL_ADMISSION_SOURCE_MISMATCH`, `CANONICAL_ADMISSION_AUTHORIZATION_MISMATCH`, `CANONICAL_APPLY_CONFLICT`, `CANONICAL_GRAPH_RESULT_INVALID`.
 
 `CANDIDATE_NOT_ADMISSIBLE` is not a v0.1 public code because the accepted Import Plan Validator already fixes the only supported Candidate admissibility shape. `CANONICAL_NODE_CONFLICT` is not a build/plan error: same-ID different-content is a `conflict` Decision and becomes `CANONICAL_APPLY_CONFLICT` only at the write boundary.
 
@@ -114,11 +118,15 @@ The future public boundary defines these 15 non-retryable codes and wraps lower-
 
 The standalone Admission Plan Validator checks exact schema, canonical ID formula, fixed values, ordering, decision/proposal coverage, counts, and mechanical safety. It does not claim to prove upstream Import Plan binding. Apply uses `CANONICAL_ADMISSION_SOURCE_MISMATCH` for sourcePlan/target mismatches and any Candidate-derived proposal mismatch, including title, summary, payload, provenance, or scope tampering.
 
+`CANONICAL_ADMISSION_AUTHORIZATION_MISMATCH` is separate and non-retryable. It is used only when a valid apply-time selection disagrees with the Admission Plan's authorized/deferred Decision and proposal partition. Standalone structural validity proves neither upstream Candidate provenance nor external explicit authorization; Apply rebinds the former through `importPlan` and the latter through `authorizedCandidateIds`.
+
 The canonical ID must be recomputed from the Candidate ID's implied `sourceRecordId` and Admission Plan `generatedAt`; mismatch is `CANONICAL_NODE_ID_INVALID`. Each node proposal has exactly `id`, `kind`, `title`, `summary`, `scope`, `lifecycle`, `epistemic`, `provenance`, `governance`, and `payload`.
 
 ## Apply-time reconciliation races
 
 Apply rechecks current Graph state after all validation and before any append. A planned `insert` with a missing current node remains insertable; with an exact identical current node it is an idempotent noop; with different content it fails with `CANONICAL_APPLY_CONFLICT`. A planned `noop` remains noop only when the identical node is still present; if it is missing or different, apply fails with `CANONICAL_APPLY_CONFLICT`. A planned `conflict` always fails with that code. Deferred Candidates do not participate in apply. All checks complete before one atomic new Graph is constructed; any failure produces zero insertion.
+
+Before reconciliation, Apply constructs `authorizedSet = new Set(authorizedCandidateIds)` and walks Candidates in Import Plan order. A selected Candidate must have exactly one `insert`, `noop`, or `conflict` Decision and exactly one proposal. An unselected Candidate must have `deferred` with reason `not-authorized` and no proposal. The selection set and the Decision/proposal authorization partition must be exactly equal; any mismatch is `CANONICAL_ADMISSION_AUTHORIZATION_MISMATCH`, with zero mutation. This check precedes all race reconciliation.
 
 `CANONICAL_GRAPH_RESULT_INVALID` is a defensive-only result boundary for a pure append whose final Graph unexpectedly fails Context Graph validation; it is normally unreachable for accepted validated inputs.
 
@@ -126,7 +134,7 @@ Apply rechecks current Graph state after all validation and before any append. A
 
 `examples/nexus-atlas-canonical-admission-v0.1.json` is a design example based on the accepted Self-Context Graph and accepted Context Import Plan. It contains eight explicitly authorized Candidates, eight Evidence proposals, eight inserts, zero noop, zero conflict and zero deferred. It does not copy the source files or mutate the canonical fixture.
 
-`examples/nexus-atlas-canonical-admission-cases-v0.1.json` is Accepted and freezes 32 design cases: Schema 6, Input/Target 7, Admission/Reconciliation 8, Governance/Safety 7, and Determinism/Application 4. Its behavior vocabulary is a closed set of 14 handlers and its public error coverage includes every normally triggerable code; only `CANONICAL_GRAPH_RESULT_INVALID` is defensive-only. The Test Matrix is Accepted, expands all 32 cases, and does not substitute “see catalog” for expected semantics.
+`examples/nexus-atlas-canonical-admission-cases-v0.1.json` is Accepted and freezes 32 design cases: Schema 6, Input/Target 7, Admission/Reconciliation 8, Governance/Safety 7, and Determinism/Application 4. Its behavior vocabulary is a closed set of 14 handlers and its public error coverage includes every normally triggerable code; only `CANONICAL_GRAPH_RESULT_INVALID` is defensive-only. The Test Matrix is Accepted, expands all 32 cases, and does not substitute “see catalog” for expected semantics. CA-G04 is the apply-time authorization binding mismatch case: an Admission Plan built with one authorized Candidate is applied with an empty selection and must reject atomically with `CANONICAL_ADMISSION_AUTHORIZATION_MISMATCH`.
 
 Phase 4E Contract Design is Accepted after these design artifacts and machine self-checks pass. Canonical Admission Runtime remains planned. Phase 4F remains planned.
 
@@ -193,8 +201,34 @@ Every `nodeProposal` has exactly these ten top-level keys:
 
 `validateCanonicalAdmissionPlanV01(admissionPlan)` proves only exact internal schema, fixed policy/version, the unified capture time, target descriptor shape, canonical ID formula, Decision order and pairing, proposal structure and defaults, proposal coverage, and diagnostics consistency. Structural validity is not equivalent to upstream provenance binding.
 
-`applyCanonicalAdmissionPlanV01({ graph, importPlan, admissionPlan })` validates the Graph, Import Plan, and Admission Plan; compares sourcePlan descriptor and target exactly; reconstructs the expected proposal from each exact Candidate; and compares title, summary, payload, provenance, and scope. Any mismatch is `CANONICAL_ADMISSION_SOURCE_MISMATCH`. It then performs the frozen reconciliation and atomic application checks already defined above.
+`applyCanonicalAdmissionPlanV01({ graph, importPlan, admissionPlan, authorizedCandidateIds })` validates the Graph, Import Plan, Admission Plan, and authorization selection; compares sourcePlan descriptor and target exactly; reconstructs the expected proposal from each exact Candidate; and compares title, summary, payload, provenance, and scope. These provenance/content mismatches are `CANONICAL_ADMISSION_SOURCE_MISMATCH`. It then verifies the independent authorization partition before performing the frozen reconciliation and atomic application checks already defined above. The exact apply input is four keys and no authorization object is embedded in the Admission Plan.
 
 `nodeProposals` contains exactly one proposal for each `insert`, `noop`, or `conflict` Decision, none for `deferred`, and preserves the relative order of non-deferred Decisions. Any relation mismatch is `CANONICAL_ADMISSION_COVERAGE_MISMATCH`.
 
 `diagnostics` has exactly `{ candidateCount, authorizedCount, deferredCount, proposalCount, insertCount, noopCount, conflictCount, applyAllowed }`. Every count is a non-negative safe integer; candidate count equals source Candidate count, authorized plus deferred equals candidate count, proposal count equals authorized count, disposition counts equal actual Decisions, and `applyAllowed === (conflictCount === 0)`. Malformed shape is `CANONICAL_ADMISSION_PLAN_INVALID`; count or coverage mismatch is `CANONICAL_ADMISSION_COVERAGE_MISMATCH`.
+
+## Authorization binding closure
+
+Candidate correctness and authorization correctness are independent proofs:
+
+```text
+Validated Import Plan
+        ↓
+Candidate provenance/content binding
+
+Explicit authorizedCandidateIds
+        ↓
+Apply-time authorization binding
+
+Canonical Admission Plan
+        ↓
+Apply re-validates both bindings
+
+Canonical Graph
+```
+
+The Admission Plan schema remains exactly eight top-level keys; it gains no `authorization` or `authorizedCandidateIds` field. Copying selection into a potentially tampered Admission Plan would not prove authorization. The standalone validator remains structural-only.
+
+Two tamper examples are normative. If the original authorization is `[]` but a tampered Admission Plan changes Candidate A from `deferred` to `insert` with an otherwise correct proposal, Apply returns `CANONICAL_ADMISSION_AUTHORIZATION_MISMATCH` with zero mutation. If the original authorization is `[A]` but a tampered plan changes A from `insert` to `deferred`, Apply returns the same error with zero mutation. Authorization list order does not affect Build or Apply output: `[A, C, B]` and `[B, A, C]` are the same selection set, while Decisions and proposals remain in Import Plan order.
+
+The error vocabulary has 16 non-retryable codes. `CANONICAL_ADMISSION_SOURCE_MISMATCH` is reserved for sourcePlan, target, Candidate-derived title/summary/payload/provenance/scope, and deterministic policy-output mismatches. `CANONICAL_ADMISSION_AUTHORIZATION_MISMATCH` is reserved for the authorization partition. `CANONICAL_GRAPH_RESULT_INVALID` remains defensive-only.

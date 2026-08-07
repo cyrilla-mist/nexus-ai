@@ -666,6 +666,8 @@ Phase 4D Contract acceptance hardening completed. The GitHub core singleton inva
 Phase 4D final acceptance hardening completed: the independent Plan Validator now enforces GitHub descriptor coherence, source type / mapping rule / authority coherence, deterministic candidate ordering, and the mechanical semantic boundary; the complete 32-case behavioral proof is accepted. No Phase 4E work was started.
 Phase 4D boundary closure confirms: Planner-owned error boundary; positive GitHub numeric identity; encoded release/tag reference compatibility; sourceRecordId/provenance reference coherence.
 
+Phase 4E Canonical Admission authorization binding closure: the future Apply boundary independently rebinds explicit `authorizedCandidateIds` to the Admission Plan Decision/proposal partition before race reconciliation. Candidate provenance/content binding and authorization binding remain separate proofs; no Runtime or Graph mutation is introduced.
+
 ## Phase 4E Contract Follow-up
 
 - Canonical Admission contract accepted;
