@@ -186,9 +186,35 @@ Phase 3 已完成通用 Context Package contract、Builder、Adapter、双版本
 - fast-forward merge
 - no Phase 4 work
 
-### Phase 4 — First Source Adapter — Planned
+### Phase 4 — First Source Adapter — In progress
 
-优先评估 GitHub Adapter，仅读取 repository metadata、commits、issues and pull request references、release and version context。GitHub 只对其可验证的仓库状态具有权威，不是用户身份、偏好和全部决策的权威来源。
+Phase 4 is in progress at the contract/documentation boundary only. GitHub remains a candidate implementation target, not a confirmed canonical source or implemented Adapter. GitHub may be authoritative for its bounded repository state, but not for user identity, preference, rationale or confirmed Decisions.
+
+#### Phase 4A — Source Adapter Entry Audit — Complete
+
+- architecture boundary audit;
+- GitHub candidate assessment;
+- DataHub precedent review;
+- no Runtime implementation.
+
+#### Phase 4B — Source Snapshot Contract — Complete
+
+- generic Source Snapshot v0.1;
+- GitHub Source Profile v1;
+- explicit repository scope;
+- source-native stable identity;
+- time, error and pagination semantics;
+- privacy and authority boundaries;
+- 36-case contract catalog and test matrix;
+- no Runtime implementation.
+
+#### Phase 4C — GitHub Read-only Adapter — Planned
+
+#### Phase 4D — Context Import Planner — Planned
+
+#### Phase 4E — Canonical Integration — Planned
+
+#### Phase 4F — Acceptance — Planned
 
 ### Phase 5 — Product Surface — Planned
 

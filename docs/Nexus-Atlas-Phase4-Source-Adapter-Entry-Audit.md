@@ -614,3 +614,14 @@ This audit did not and must not include:
 ## 33. Final Audit State
 
 Only this audit document is intended to be added. The audit does not mark GitHub as a confirmed first Adapter, does not mark Phase 4 as In Progress or Complete, and does not begin Phase 4B. `package-lock.json` remains an untracked local file and is excluded from the audit change.
+
+## Phase 4B Follow-up
+
+- Phase 4B contract frozen.
+- B/C architecture retained: immutable Snapshot first, explicit Import Planner boundary next.
+- Generic Snapshot and GitHub Profile are separated.
+- Unavailable is an Error, not a successful Snapshot.
+- Normal truncation is a diagnostic, not `SOURCE_PAGINATION_LIMIT`.
+- README, Issue/PR bodies and comments remain out of v0.1.
+- Roadmap now records Phase 4 as In progress at the contract/documentation boundary; Phase 4C Runtime remains Planned.
+- No Runtime started.
