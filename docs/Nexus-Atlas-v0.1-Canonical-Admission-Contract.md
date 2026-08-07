@@ -129,3 +129,72 @@ Apply rechecks current Graph state after all validation and before any append. A
 `examples/nexus-atlas-canonical-admission-cases-v0.1.json` is Accepted and freezes 32 design cases: Schema 6, Input/Target 7, Admission/Reconciliation 8, Governance/Safety 7, and Determinism/Application 4. Its behavior vocabulary is a closed set of 14 handlers and its public error coverage includes every normally triggerable code; only `CANONICAL_GRAPH_RESULT_INVALID` is defensive-only. The Test Matrix is Accepted, expands all 32 cases, and does not substitute “see catalog” for expected semantics.
 
 Phase 4E Contract Design is Accepted after these design artifacts and machine self-checks pass. Canonical Admission Runtime remains planned. Phase 4F remains planned.
+
+## Admission Plan exact schema
+
+The Admission Plan has exactly these eight top-level keys and no extras:
+
+```js
+{
+  admissionVersion,
+  policyVersion,
+  generatedAt,
+  sourcePlan,
+  target,
+  decisions,
+  nodeProposals,
+  diagnostics
+}
+```
+
+`admissionVersion` is exactly `"0.1"`. `policyVersion` is exactly `"github-evidence-canonical-admission-v1"`. `generatedAt` is a valid offset-aware ISO 8601 timestamp and must equal `sourcePlan.generatedAt`; a mismatch is `CANONICAL_ADMISSION_PLAN_INVALID` because it is internal coherence, not upstream source mismatch.
+
+`sourcePlan` has exactly four keys:
+
+```js
+{ planVersion, policyVersion, generatedAt, candidateIds }
+```
+
+Its fixed values are `planVersion: "0.1"` and `policyVersion: "github-context-import-policy-v1"`; its `generatedAt` equals the Admission Plan `generatedAt`. `candidateIds` has at least two unique non-empty trimmed strings, each beginning `candidate:evidence:github:`, and preserves source order. Apply still compares this descriptor exactly with the real Import Plan Candidate order.
+
+`target` has exactly `{ projectId, scopeKey }`, both non-empty trimmed strings. The v1 standalone Plan rule requires `scopeKey === projectId` and reports a malformed generated Plan as `CANONICAL_ADMISSION_PLAN_INVALID`; build-time policy rejection remains `TARGET_SCOPE_UNSUPPORTED`.
+
+Every Decision has exactly `{ candidateId, canonicalNodeId, disposition, reason }`. Each source Candidate ID occurs exactly once and Decisions preserve `sourcePlan.candidateIds` order. The only disposition/reason pairs are `insert/authorized-new-observation`, `noop/authorized-existing-identical`, `conflict/authorized-existing-conflict`, and `deferred/not-authorized`.
+
+For `candidateId: "candidate:evidence:<sourceRecordId>"`, the canonical ID is exactly:
+
+```text
+evidence:source-observation:
++ encodeURIComponent(sourceRecordId)
++ ":captured:"
++ encodeURIComponent(admissionPlan.generatedAt)
+```
+
+For a valid upstream chain, `Candidate.provenance.capturedAt === Import Plan.generatedAt === Admission Plan.generatedAt`, so this is one unified capture-time rule rather than two independent time sources. No second admission timestamp, current clock, or `Date.now()` is permitted.
+
+## Canonical proposal exact schema
+
+Every `nodeProposal` has exactly these ten top-level keys:
+
+```js
+{
+  id, kind, title, summary,
+  scope, lifecycle, epistemic, provenance, governance, payload
+}
+```
+
+`kind` is exactly `"evidence"`; `id` equals its Decision's canonical ID. `title` and `summary` are non-empty trimmed strings and `summary === payload.claim`. `scope` has exactly `{ userId, territoryId, projectId }`, with all three values non-empty trimmed strings. Standalone validation checks only this shape; build and apply additionally require exact equality with the target Project scope.
+
+`lifecycle` has exactly `{ state, createdAt, updatedAt }` and is `{ state: "active", createdAt: generatedAt, updatedAt: generatedAt }`. `epistemic` has exactly `{ verification, confidence, freshness }` and is `{ verification: "confirmed", confidence: 1, freshness: "unknown" }`. `governance` has exactly `{ sensitivity, inheritance, requiresConfirmation }` and is `{ sensitivity: "personal", inheritance: "project_only", requiresConfirmation: false }`.
+
+`provenance` has exactly `{ provider, reference, capturedAt, retrievalMode, authority }`; its internal minimum is `provider: "github"`, a non-empty trimmed reference, `capturedAt === generatedAt`, `retrievalMode: "read-only-api"`, and a non-empty trimmed authority. Apply compares it deep-equal to the exact Import Plan Candidate provenance. `payload` has exactly `{ claim, sourceRef, observedAt, appliesToVersion, verificationMethod, result }`; claim and sourceRef are non-empty trimmed strings, observedAt is null or offset-aware ISO, appliesToVersion is exactly null, verificationMethod is exactly `"github-source-snapshot-v0.1"`, result is non-empty, and summary equals claim. Apply compares it deep-equal to the exact Candidate proposedPayload.
+
+## Standalone and upstream boundaries
+
+`validateCanonicalAdmissionPlanV01(admissionPlan)` proves only exact internal schema, fixed policy/version, the unified capture time, target descriptor shape, canonical ID formula, Decision order and pairing, proposal structure and defaults, proposal coverage, and diagnostics consistency. Structural validity is not equivalent to upstream provenance binding.
+
+`applyCanonicalAdmissionPlanV01({ graph, importPlan, admissionPlan })` validates the Graph, Import Plan, and Admission Plan; compares sourcePlan descriptor and target exactly; reconstructs the expected proposal from each exact Candidate; and compares title, summary, payload, provenance, and scope. Any mismatch is `CANONICAL_ADMISSION_SOURCE_MISMATCH`. It then performs the frozen reconciliation and atomic application checks already defined above.
+
+`nodeProposals` contains exactly one proposal for each `insert`, `noop`, or `conflict` Decision, none for `deferred`, and preserves the relative order of non-deferred Decisions. Any relation mismatch is `CANONICAL_ADMISSION_COVERAGE_MISMATCH`.
+
+`diagnostics` has exactly `{ candidateCount, authorizedCount, deferredCount, proposalCount, insertCount, noopCount, conflictCount, applyAllowed }`. Every count is a non-negative safe integer; candidate count equals source Candidate count, authorized plus deferred equals candidate count, proposal count equals authorized count, disposition counts equal actual Decisions, and `applyAllowed === (conflictCount === 0)`. Malformed shape is `CANONICAL_ADMISSION_PLAN_INVALID`; count or coverage mismatch is `CANONICAL_ADMISSION_COVERAGE_MISMATCH`.
