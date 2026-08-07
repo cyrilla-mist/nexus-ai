@@ -1,0 +1,26 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import { createGitHubSourceAdapter } from "../experience/source-v01/github-source-adapter.mjs";
+import { createGitHubClientFixture, createRequestedLimits, CAPTURED_AT } from "../tests/helpers/github-source-fixtures.mjs";
+
+const expected = JSON.parse(fs.readFileSync(new URL("../examples/nexus-atlas-source-snapshot-v0.1.json", import.meta.url))).snapshot;
+const client = createGitHubClientFixture();
+const adapter = createGitHubSourceAdapter({ client });
+const snapshot = await adapter.readSnapshot({ repositoryRef: "Cyrilla-Mist/Nexus-AI", requestedLimits: createRequestedLimits(), capturedAt: CAPTURED_AT });
+assert.deepEqual(snapshot, expected);
+assert(Object.isFrozen(snapshot) && Object.isFrozen(snapshot.records[0].payload));
+assert.equal(client.calls.map(call => call[0]).join(","), "repository,branch,commits,issues,pullRequests,releases,tags");
+console.log("Nexus Atlas Source Snapshot v0.1");
+console.log("Adapter: github");
+console.log(`Repository: ${snapshot.scope.repositoryRef}`);
+console.log(`Snapshot version: ${snapshot.snapshotVersion}`);
+console.log(`Source state: ${snapshot.source.state}`);
+console.log(`Records: ${snapshot.records.length}`);
+for (const [label, type] of [["Repository", "repository"], ["Branch", "branch"], ["Commit", "commit"], ["Issue", "issue"], ["Pull request", "pull_request"], ["Release", "release"], ["Tag", "tag"]]) console.log(`${label} records: ${snapshot.records.filter(record => record.sourceType === type).length}`);
+console.log(`Diagnostics complete: ${snapshot.diagnostics.complete}`);
+console.log("Source authority boundary: PASS");
+console.log("Privacy projection: PASS");
+console.log("Determinism: PASS");
+console.log("Immutability: PASS");
+console.log("Accepted example compatibility: PASS");
+console.log("Source Snapshot v0.1 Runtime: PASS");

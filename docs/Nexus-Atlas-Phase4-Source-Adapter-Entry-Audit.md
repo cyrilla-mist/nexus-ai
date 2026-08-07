@@ -632,3 +632,11 @@ Only this audit document is intended to be added. The audit does not mark GitHub
 - PR, Release and timestamp normalization is frozen.
 - Successful bounded truncation keeps `diagnostics.complete=true`.
 - Phase 4C remains not started.
+
+## Phase 4C Follow-up
+
+- Accepted Source Snapshot Contract implemented with a validator runtime.
+- GitHub read-only Adapter uses an injected read-only client only.
+- 36 catalog cases are automated.
+- No live authenticated transport, Import Planner or canonical write was added.
+- Phase 4D is next.

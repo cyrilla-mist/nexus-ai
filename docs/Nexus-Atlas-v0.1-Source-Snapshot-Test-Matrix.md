@@ -1,11 +1,11 @@
 # Nexus Atlas — Source Snapshot v0.1 Test Matrix
 
 **Status:** Accepted
-**Target:** Phase 4C  
+**Target:** Phase 4D
 **Total Cases:** 36  
-**Runtime:** Not implemented
+**Runtime:** Phase 4C automated suite accepted
 
-This matrix is the human-readable mirror of `examples/nexus-atlas-source-snapshot-cases-v0.1.json`. Each row states the expected outcome, records, diagnostics and behavior assertions; the Catalog is the machine-readable source for future Phase 4C execution.
+This matrix is the human-readable mirror of `examples/nexus-atlas-source-snapshot-cases-v0.1.json`. Each row states the expected outcome, records, diagnostics and behavior assertions; all 36 cases are executed by `tests/source-snapshot-catalog-v01.test.mjs`.
 
 | Case ID | Category | Input State | Expected Snapshot | Expected Records | Expected Diagnostics | Expected Error | Behavior Assertions | Rationale |
 |---|---|---|---|---|---|---|---|---|

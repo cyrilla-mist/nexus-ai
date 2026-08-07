@@ -1,15 +1,25 @@
 # Nexus Atlas — Source Snapshot v0.1 Contract
 
 **Status:** Accepted
-**Target:** Phase 4C  
-**Implementation:** Not started  
-**Phase:** Phase 4B Source Snapshot Contract Design  
-**Runtime:** None  
+**Target:** Phase 4D
+**Implementation:** Phase 4C read-only Adapter core complete
+**Phase:** Phase 4C GitHub Read-only Source Adapter Complete
+**Runtime:** Injected-client read-only Adapter implemented
 **Canonical Mutation:** None
 
 ## 1. Purpose and Boundary
 
-This document freezes the provider-neutral Source Snapshot v0.1 contract and the GitHub Source Profile v1 that a future Phase 4C read-only adapter may implement. It is a design contract only. It does not add a validator, client, adapter, planner, runtime, test script or live source call.
+This document freezes the provider-neutral Source Snapshot v0.1 contract and the GitHub Source Profile v1. Phase 4C implements the validator and injected-client read-only Adapter core without a concrete transport or live source call.
+
+Implementation Note:
+
+- Source Snapshot v0.1 Validator implemented.
+- GitHub read-only Adapter implemented.
+- 36-case Catalog automated.
+- injected Source Client boundary only.
+- no concrete HTTP client, OAuth or Token handling;
+- no account scan, Graph mutation, Import Planner or Provider integration;
+- no external write.
 
 A Source Snapshot is an immutable, explicitly scoped observation of external source state. It preserves source-native identity, authority, source event time, capture time, bounded-read diagnostics and privacy-safe payloads without silently producing or mutating canonical Nexus Context.
 

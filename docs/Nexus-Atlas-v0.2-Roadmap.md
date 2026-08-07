@@ -188,7 +188,7 @@ Phase 3 已完成通用 Context Package contract、Builder、Adapter、双版本
 
 ### Phase 4 — First Source Adapter — In progress
 
-Phase 4 is in progress at the contract/documentation boundary only. GitHub remains a candidate implementation target, not a confirmed canonical source or implemented Adapter. GitHub may be authoritative for its bounded repository state, but not for user identity, preference, rationale or confirmed Decisions.
+Phase 4 is in progress. GitHub is the first implemented Source Adapter profile/core for bounded repository state, not a confirmed canonical source for user identity, preference, rationale or confirmed Decisions.
 
 #### Phase 4A — Source Adapter Entry Audit — Complete
 
@@ -208,7 +208,14 @@ Phase 4 is in progress at the contract/documentation boundary only. GitHub remai
 - 36-case contract catalog and test matrix;
 - no Runtime implementation.
 
-#### Phase 4C — GitHub Read-only Adapter — Planned
+#### Phase 4C — GitHub Read-only Adapter — Complete
+
+- generic validator runtime and GitHub profile normalization;
+- explicit single-repository scope and injected read-only client;
+- bounded read limits and deterministic immutable Snapshot;
+- privacy allowlist and SourceAdapterError taxonomy;
+- automated 36-case suite;
+- no concrete HTTP/auth transport, Graph mutation or Planner integration.
 
 #### Phase 4D — Context Import Planner — Planned
 
