@@ -428,7 +428,7 @@ SOURCE_SNAPSHOT_INVALID
 
 Structural errors are `INVALID_REPOSITORY_REF`, `INVALID_ADAPTER_OPTIONS`, `INVALID_CAPTURED_AT`, `SOURCE_RESPONSE_INVALID`, `SOURCE_SCOPE_MISMATCH`, `SOURCE_RECORD_ID_INVALID`, `SOURCE_PAGINATION_LIMIT` and `SOURCE_SNAPSHOT_INVALID`. Authorization errors are `SOURCE_AUTH_REQUIRED` and `SOURCE_FORBIDDEN`; source state is `SOURCE_NOT_FOUND`; transient errors are `SOURCE_RATE_LIMITED` and `SOURCE_UNAVAILABLE`.
 
-Future Phase 4C errors use:
+Phase 4C Runtime errors use:
 
 ```js
 {
@@ -459,9 +459,9 @@ Planner output and candidate schema are deferred to Phase 4D. The Snapshot is it
 
 ## 18. Determinism and Immutability
 
-Given the same normalized source response, options and explicit `capturedAt`, a future Snapshot builder must produce deep-equal output. Reordering raw collections must not change output. The result must be deeply frozen and the input must remain unchanged.
+The Phase 4C Snapshot validator and GitHub Adapter implement these determinism and immutability requirements. Given the same normalized source response, options and explicit `capturedAt`, they produce deep-equal output. Reordering raw collections must not change output. The result is deeply frozen and the input remains unchanged.
 
-The future implementation must not call `Date.now()`, `new Date()` for implicit capture time, `Math.random()`, `process.env`, network fallback or file writes. Frozen fixtures must be sufficient for all contract tests; live GitHub is not a test prerequisite.
+The Phase 4C Runtime does not call `Date.now()`, `new Date()` for implicit capture time, `Math.random()`, `process.env`, network fallback or file writes. Frozen fixtures are sufficient for all contract tests; live GitHub is not a test prerequisite.
 
 ## 19. Generic Contract vs GitHub Profile
 
@@ -473,6 +473,39 @@ GitHub Source Client inputs keep `issues` and `pullRequests` as separate logical
 
 ## 20. Non-Goals and Phase Boundary
 
-This contract does not implement GitHub Client or Adapter, Snapshot Validator Runtime, Import Planner, Graph mutation, external write, OAuth, Token handling, live GitHub runtime, Provider/Builder/Context Graph/Phase 2/3 Runtime changes, UI, Worker, DataHub, Continuity, README/document-source policy, canonical fixture or canonical Action changes.
+Phase 4C is complete and accepted.
 
-GitHub remains a **read-only Source Adapter candidate implementation target**, not a confirmed first Adapter or canonical source. The contract is Accepted, but Phase 4C remains not started and requires its separate implementation gate.
+Implemented in Phase 4C:
+
+- Source Snapshot v0.1 Validator Runtime;
+- GitHub Source Profile normalization;
+- injected-client read-only GitHub Adapter core;
+- deterministic immutable Snapshot output;
+- 36-case behavioral contract automation;
+- privacy, source-authority, error and scope boundaries.
+
+The following remain unimplemented:
+
+- concrete HTTP GitHub Client;
+- live authenticated GitHub integration;
+- OAuth and Token handling;
+- account/repository discovery;
+- Import Planner;
+- Canonical Graph mutation;
+- Provider and Context Package integration;
+- external write;
+- UI and Worker integration.
+
+GitHub is the first implemented Source Adapter profile/core. It is not yet a live authenticated source integration and is not a canonical source of personal truth.
+
+Phase boundary:
+
+- Phase 4A Complete;
+- Phase 4B Complete;
+- Phase 4C Complete / Accepted;
+- Phase 4D Planned;
+- Phase 4E Planned;
+- Phase 4F Planned;
+- Phase 4 overall remains In progress.
+
+The next phase is Phase 4D — Context Import Planner.
