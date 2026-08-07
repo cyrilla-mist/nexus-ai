@@ -1,6 +1,6 @@
 # Nexus Atlas — Canonical Admission v0.1 Test Matrix
 
-**Status:** Proposed for Phase 4E acceptance
+**Status:** Accepted
 **Target:** Phase 4E Canonical Admission Runtime
 **Total Cases:** 32
 **Runtime:** Not implemented
@@ -9,7 +9,7 @@ The matrix is design-only. It describes the future runtime boundary; it does not
 
 | Case ID | Category | Input State | Expected Admission | Expected Decisions | Expected Proposals | Expected Error | Behavior Assertions | Rationale |
 |---|---|---|---|---|---:|---|---|---|
-| CA-S01 | schema | Valid repo+branch Plan; both authorized | insert 2 | 2 insert, 0 noop, 0 conflict, 0 deferred | 2 | — | evidence-only; explicit-authorization; deterministic-canonical-identity | Smallest valid admission |
+| CA-S01 | schema | Structurally valid Admission Plan with one tampered canonicalNodeId | reject | — | — | CANONICAL_NODE_ID_INVALID | — | Every Decision ID follows source observation plus generatedAt |
 | CA-S02 | schema | admissionVersion missing | reject | — | — | CANONICAL_ADMISSION_PLAN_INVALID | — | Exact top-level schema |
 | CA-S03 | schema | Unsupported admission policy | reject | — | — | CANONICAL_ADMISSION_PLAN_INVALID | — | Fixed v0.1 policy |
 | CA-S04 | schema | decisions is not an array | reject | — | — | CANONICAL_ADMISSION_PLAN_INVALID | — | One ordered decision per Candidate |
@@ -26,13 +26,13 @@ The matrix is design-only. It describes the future runtime boundary; it does not
 | CA-A02 | admission/reconciliation | Duplicate authorization ID | reject | — | — | INVALID_AUTHORIZATION_SELECTION | — | Selection is unique |
 | CA-A03 | admission/reconciliation | Unknown authorization ID | reject | — | — | CANDIDATE_NOT_FOUND | — | Selection must reference Plan |
 | CA-A04 | admission/reconciliation | Existing identical Evidence | noop | 0 insert, 1 noop, 0 conflict, 0 deferred | 1 | — | idempotent-admission; deterministic-canonical-identity | Same observation is idempotent |
-| CA-A05 | admission/reconciliation | Same ID, different content | conflict | 0 insert, 0 noop, 1 conflict, 0 deferred | 1 | — | atomic-apply | Never overwrite |
-| CA-A06 | admission/reconciliation | At least one conflict | applyAllowed false | 7 insert, 0 noop, 1 conflict, 0 deferred | 8 | — | atomic-apply; no-derived-projection-mutation | No partial apply |
+| CA-A05 | admission/reconciliation | Structurally valid Plan; proposal payload.observedAt differs from Import Plan Candidate | structural validation passes; apply rejects | — | — | CANONICAL_ADMISSION_SOURCE_MISMATCH | source-authority-preserved; atomic-apply | Apply rebinds exact Candidate content |
+| CA-A06 | admission/reconciliation | Admission Plan has conflictCount > 0 | reject with zero mutation | — | — | CANONICAL_APPLY_CONFLICT | atomic-apply; input-unchanged | Conflict is an apply-time public error |
 | CA-A07 | admission/reconciliation | Rebuild after first application | noop 8 | 0 insert, 8 noop, 0 conflict, 0 deferred | 8 | — | idempotent-admission; deep-equal | No duplicate observation nodes |
 | CA-A08 | admission/reconciliation | Same Source Record, new capturedAt | new insert; old retained | 1 insert, 0 noop, 0 conflict, 0 deferred | 1 | — | history-preserved; deterministic-canonical-identity | Capture is part of identity |
 | CA-G01 | governance/safety | All authorized GitHub Evidence Candidates | all proposals kind evidence | 8 insert, 0 noop, 0 conflict, 0 deferred | 8 | — | evidence-only; no-semantic-promotion | No semantic promotion |
-| CA-G02 | governance/safety | Source-local confirmed observations | confirmed; freshness unknown | 8 insert, 0 noop, 0 conflict, 0 deferred | 8 | — | source-authority-preserved; freshness-not-promoted | Confirmed is not current |
-| CA-G03 | governance/safety | Fixed v0.1 governance defaults | personal/project_only/no confirmation | 8 insert, 0 noop, 0 conflict, 0 deferred | 8 | — | no-semantic-promotion | Conservative governance |
+| CA-G02 | governance/safety | Source-local confirmation and fixed governance defaults | confirmed; freshness unknown; personal/project_only/no confirmation | 8 insert, 0 noop, 0 conflict, 0 deferred | 8 | — | source-authority-preserved; freshness-not-promoted; no-semantic-promotion | Confirmed is not current; defaults remain conservative |
+| CA-G03 | governance/safety | Target ID resolves to existing non-project node | reject | — | — | TARGET_PROJECT_INVALID | — | Existing non-Project target is invalid |
 | CA-G04 | governance/safety | Authorization omits Candidate | all omitted deferred | 0 insert, 0 noop, 0 conflict, 8 deferred | 0 | — | explicit-authorization | source-authority is not authorization |
 | CA-G05 | governance/safety | Issue Candidate authorized | Evidence only | 1 insert, 0 noop, 0 conflict, 0 deferred | 1 | — | evidence-only; no-semantic-promotion | Issue does not create Action |
 | CA-G06 | governance/safety | Merged PR and published Release | Evidence; Project unchanged | 2 insert, 0 noop, 0 conflict, 0 deferred | 2 | — | no-semantic-promotion; no-derived-projection-mutation | No phase/version mutation |

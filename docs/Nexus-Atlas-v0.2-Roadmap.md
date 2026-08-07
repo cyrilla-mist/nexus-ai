@@ -243,7 +243,7 @@ Planner Runtime — Complete
 
 #### Phase 4E — Canonical Integration — In progress
 
-Contract Design — Complete
+Contract Design — Complete / Accepted
 
 - Canonical Admission v0.1;
 - explicit authorization boundary;
@@ -256,6 +256,11 @@ Contract Design — Complete
 - no ContextPackage mutation;
 - 32-case catalog;
 - no Runtime yet.
+- apply re-accepts the validated Import Plan;
+- exact sourcePlan and Candidate-to-proposal binding;
+- apply-time reconciliation race semantics;
+- 15-code non-retryable error vocabulary;
+- Contract and Matrix Accepted.
 
 Canonical Admission Runtime — Planned
 

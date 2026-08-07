@@ -1,9 +1,9 @@
 # Nexus Atlas — Canonical Admission v0.1 Contract
 
-**Status:** Proposed for Phase 4E acceptance
+**Status:** Accepted
 **Target:** Phase 4E Canonical Admission Runtime
 **Implementation:** Not started
-**Phase:** Phase 4E Canonical Integration Contract Design
+**Phase:** Phase 4E Canonical Integration Contract Design Complete
 **External Read:** None
 **External Write:** None
 **Canonical Mutation Runtime:** Not implemented
@@ -23,10 +23,12 @@ The future APIs are separate and are design-only in v0.1:
 ```js
 buildCanonicalAdmissionPlanV01({ graph, plan, policyVersion, authorizedCandidateIds })
 validateCanonicalAdmissionPlanV01(plan)
-applyCanonicalAdmissionPlanV01({ graph, admissionPlan })
+applyCanonicalAdmissionPlanV01({ graph, importPlan, admissionPlan })
 ```
 
-`build` receives a validated Graph, Import Plan, policy and explicit authorization. `validate` validates only an Admission Plan. `apply` receives a Graph and accepted Admission Plan and never accesses Source, Snapshot, Planner or GitHub.
+`build` receives a validated Graph, Import Plan, policy and explicit authorization. `validate` validates only an Admission Plan. `apply` receives a Graph, the validated Import Plan, and an Admission Plan; it never accesses Source, Snapshot, Planner or GitHub.
+
+The `sourcePlan` descriptor has exactly `{ planVersion, policyVersion, generatedAt, candidateIds }`; `candidateIds` preserves exact Import Plan Candidate order and no Candidate payload is copied. Structural validity is not equivalent to upstream provenance binding. The apply boundary must receive the validated Import Plan again, validate it, verify exact source descriptor and target binding, reconstruct each expected proposal from the exact Candidate, compare proposals, then reconcile the current Graph.
 
 ## Admission input and authorization
 
@@ -34,7 +36,7 @@ The future build input has exactly `graph`, `plan`, `policyVersion`, and `author
 
 `source-authority-sufficient` means that the Candidate does not require a second confirmation of what GitHub returned. It does not grant canonical write authority. Phase 4E authorization is still explicit. A Candidate not selected is `deferred`, never rejected, false, or revoked.
 
-Future input validation order is fixed: exact input shape, policy, Context Graph, Import Plan, target project, scope policy, authorization selection, Candidate admissibility, proposal construction, Graph reconciliation, then Admission Plan validation. Graph validation happens before node construction.
+Future input validation order is fixed: exact input shape, policy, Context Graph, Import Plan, target project, scope policy, authorization selection, Candidate admissibility, proposal construction, Graph reconciliation, then Admission Plan validation. Graph validation happens before node construction. Apply input has exactly `graph`, `importPlan`, and `admissionPlan`; it does not accept `plan`, `sourcePlan`, `snapshot`, `source`, `client`, or authorization.
 
 ## Target and scope
 
@@ -102,14 +104,28 @@ v0.1 creates no Edge (`belongs_to`, `supports`, `derived_from`, `implements`, or
 
 ## Error vocabulary
 
-The future public boundary defines these 16 non-retryable codes and wraps lower-level errors rather than leaking `ContextGraphValidationError` or `ContextImportPlanError`:
+The future public boundary defines these 15 non-retryable codes and wraps lower-level errors rather than leaking `ContextGraphValidationError` or `ContextImportPlanError`:
 
-`INVALID_CANONICAL_ADMISSION_INPUT`, `INVALID_ADMISSION_POLICY_VERSION`, `INVALID_CONTEXT_GRAPH`, `INVALID_IMPORT_PLAN`, `INVALID_AUTHORIZATION_SELECTION`, `TARGET_PROJECT_NOT_FOUND`, `TARGET_PROJECT_INVALID`, `TARGET_SCOPE_UNSUPPORTED`, `CANDIDATE_NOT_FOUND`, `CANDIDATE_NOT_ADMISSIBLE`, `CANONICAL_NODE_ID_INVALID`, `CANONICAL_NODE_CONFLICT`, `CANONICAL_ADMISSION_PLAN_INVALID`, `CANONICAL_ADMISSION_COVERAGE_MISMATCH`, `CANONICAL_APPLY_CONFLICT`, `CANONICAL_GRAPH_RESULT_INVALID`.
+`INVALID_CANONICAL_ADMISSION_INPUT`, `INVALID_ADMISSION_POLICY_VERSION`, `INVALID_CONTEXT_GRAPH`, `INVALID_IMPORT_PLAN`, `INVALID_AUTHORIZATION_SELECTION`, `TARGET_PROJECT_NOT_FOUND`, `TARGET_PROJECT_INVALID`, `TARGET_SCOPE_UNSUPPORTED`, `CANDIDATE_NOT_FOUND`, `CANONICAL_NODE_ID_INVALID`, `CANONICAL_ADMISSION_PLAN_INVALID`, `CANONICAL_ADMISSION_COVERAGE_MISMATCH`, `CANONICAL_ADMISSION_SOURCE_MISMATCH`, `CANONICAL_APPLY_CONFLICT`, `CANONICAL_GRAPH_RESULT_INVALID`.
+
+`CANDIDATE_NOT_ADMISSIBLE` is not a v0.1 public code because the accepted Import Plan Validator already fixes the only supported Candidate admissibility shape. `CANONICAL_NODE_CONFLICT` is not a build/plan error: same-ID different-content is a `conflict` Decision and becomes `CANONICAL_APPLY_CONFLICT` only at the write boundary.
+
+`TARGET_PROJECT_NOT_FOUND` means the target ID is absent. `TARGET_PROJECT_INVALID` means it exists but is not a Project or its Project scope is invalid/inconsistent. `TARGET_SCOPE_UNSUPPORTED` means the valid target has `scopeKey !== projectId`.
+
+The standalone Admission Plan Validator checks exact schema, canonical ID formula, fixed values, ordering, decision/proposal coverage, counts, and mechanical safety. It does not claim to prove upstream Import Plan binding. Apply uses `CANONICAL_ADMISSION_SOURCE_MISMATCH` for sourcePlan/target mismatches and any Candidate-derived proposal mismatch, including title, summary, payload, provenance, or scope tampering.
+
+The canonical ID must be recomputed from the Candidate ID's implied `sourceRecordId` and Admission Plan `generatedAt`; mismatch is `CANONICAL_NODE_ID_INVALID`. Each node proposal has exactly `id`, `kind`, `title`, `summary`, `scope`, `lifecycle`, `epistemic`, `provenance`, `governance`, and `payload`.
+
+## Apply-time reconciliation races
+
+Apply rechecks current Graph state after all validation and before any append. A planned `insert` with a missing current node remains insertable; with an exact identical current node it is an idempotent noop; with different content it fails with `CANONICAL_APPLY_CONFLICT`. A planned `noop` remains noop only when the identical node is still present; if it is missing or different, apply fails with `CANONICAL_APPLY_CONFLICT`. A planned `conflict` always fails with that code. Deferred Candidates do not participate in apply. All checks complete before one atomic new Graph is constructed; any failure produces zero insertion.
+
+`CANONICAL_GRAPH_RESULT_INVALID` is a defensive-only result boundary for a pure append whose final Graph unexpectedly fails Context Graph validation; it is normally unreachable for accepted validated inputs.
 
 ## Example and acceptance boundary
 
 `examples/nexus-atlas-canonical-admission-v0.1.json` is a design example based on the accepted Self-Context Graph and accepted Context Import Plan. It contains eight explicitly authorized Candidates, eight Evidence proposals, eight inserts, zero noop, zero conflict and zero deferred. It does not copy the source files or mutate the canonical fixture.
 
-`examples/nexus-atlas-canonical-admission-cases-v0.1.json` freezes 32 design cases: Schema 6, Input/Target 7, Admission/Reconciliation 8, Governance/Safety 7, and Determinism/Application 4. Its behavior vocabulary is a closed set of 14 handlers. The Test Matrix expands all 32 cases and does not substitute “see catalog” for expected semantics.
+`examples/nexus-atlas-canonical-admission-cases-v0.1.json` is Accepted and freezes 32 design cases: Schema 6, Input/Target 7, Admission/Reconciliation 8, Governance/Safety 7, and Determinism/Application 4. Its behavior vocabulary is a closed set of 14 handlers and its public error coverage includes every normally triggerable code; only `CANONICAL_GRAPH_RESULT_INVALID` is defensive-only. The Test Matrix is Accepted, expands all 32 cases, and does not substitute “see catalog” for expected semantics.
 
-Phase 4E Contract Design is complete after these design artifacts and machine self-checks pass. Canonical Admission Runtime remains planned. Phase 4F remains planned.
+Phase 4E Contract Design is Accepted after these design artifacts and machine self-checks pass. Canonical Admission Runtime remains planned. Phase 4F remains planned.

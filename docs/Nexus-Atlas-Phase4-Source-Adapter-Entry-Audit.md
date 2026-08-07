@@ -668,7 +668,7 @@ Phase 4D boundary closure confirms: Planner-owned error boundary; positive GitHu
 
 ## Phase 4E Contract Follow-up
 
-- Canonical Admission contract defined;
+- Canonical Admission contract accepted;
 - explicit authorization separated from Candidate generation;
 - canonical observation identity is deterministic;
 - existing Graph reconciliation is explicit;
