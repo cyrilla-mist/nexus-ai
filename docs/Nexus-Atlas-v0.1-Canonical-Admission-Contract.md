@@ -232,3 +232,14 @@ The Admission Plan schema remains exactly eight top-level keys; it gains no `aut
 Two tamper examples are normative. If the original authorization is `[]` but a tampered Admission Plan changes Candidate A from `deferred` to `insert` with an otherwise correct proposal, Apply returns `CANONICAL_ADMISSION_AUTHORIZATION_MISMATCH` with zero mutation. If the original authorization is `[A]` but a tampered plan changes A from `insert` to `deferred`, Apply returns the same error with zero mutation. Authorization list order does not affect Build or Apply output: `[A, C, B]` and `[B, A, C]` are the same selection set, while Decisions and proposals remain in Import Plan order.
 
 The error vocabulary has 16 non-retryable codes. `CANONICAL_ADMISSION_SOURCE_MISMATCH` is reserved for sourcePlan, target, Candidate-derived title/summary/payload/provenance/scope, and deterministic policy-output mismatches. `CANONICAL_ADMISSION_AUTHORIZATION_MISMATCH` is reserved for the authorization partition. `CANONICAL_GRAPH_RESULT_INVALID` remains defensive-only.
+
+## Upstream GitHub core invariant
+
+Phase 4E accepts only validated Phase 4D Import Plans. Therefore every GitHub v1 Admission Case inherits the Source Snapshot / Import Plan core singleton invariant:
+
+- exactly one repository Candidate;
+- exactly one default branch Candidate;
+- any additional commit, issue, pull request, release, or tag Candidate is additive;
+- authorization may select only the Candidate under test, but unselected core Candidates remain present as deferred Decisions.
+
+“Test one Candidate” does not mean “construct a one-Candidate Import Plan.”
