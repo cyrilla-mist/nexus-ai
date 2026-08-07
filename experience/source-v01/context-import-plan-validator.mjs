@@ -37,15 +37,26 @@ export class ContextImportPlanError extends Error {
   }
 }
 
+function validateCanonicalRepositoryRef(value) {
+  if (!nonEmptyTrimmedString(value)) invalid("IMPORT_PLAN_INVALID", "repositoryRef invalid", { field: "sourceSnapshot.repositoryRef" });
+  let normalized;
+  try { normalized = normalizeRepositoryRefV01(value); } catch { invalid("IMPORT_PLAN_INVALID", "repositoryRef invalid", { field: "sourceSnapshot.repositoryRef" }); }
+  if (normalized !== value) invalid("IMPORT_PLAN_INVALID", "repositoryRef must be canonical", { field: "sourceSnapshot.repositoryRef" });
+  return value;
+}
+
 export function parseGitHubSourceRecordIdV01(sourceRecordId, repositoryRef) {
   if (!nonEmptyTrimmedString(sourceRecordId) || !nonEmptyTrimmedString(repositoryRef)) invalid("IMPORT_PLAN_INVALID", "sourceRecordId invalid");
-  const normalized = normalizeRepositoryRefV01(repositoryRef);
+  const normalized = validateCanonicalRepositoryRef(repositoryRef);
   if (sourceRecordId === `github:repo:${normalized}`) return { sourceType: "repository", externalIdentity: normalized };
   const match = sourceRecordId.match(/^github:(branch|commit|issue|pr|release|tag):([^:]+\/[^:]+):(.+)$/);
   if (!match || match[2] !== normalized || !nonEmptyTrimmedString(match[3]) || /[\r\n]/.test(match[3])) invalid("IMPORT_PLAN_INVALID", "sourceRecordId identity invalid", { sourceRecordId });
   const sourceType = match[1] === "pr" ? "pull_request" : match[1];
   if (["commit"].includes(match[1]) && !/^[0-9a-f]{40}$/.test(match[3])) invalid("IMPORT_PLAN_INVALID", "commit identity invalid", { sourceRecordId });
-  if (["issue", "pr"].includes(match[1]) && !/^\d+$/.test(match[3])) invalid("IMPORT_PLAN_INVALID", "number identity invalid", { sourceRecordId });
+  if (["issue", "pr"].includes(match[1])) {
+    if (!/^\d+$/.test(match[3])) invalid("IMPORT_PLAN_INVALID", "number identity invalid", { sourceRecordId });
+    const number = Number(match[3]); if (!Number.isSafeInteger(number) || number <= 0 || String(number) !== match[3]) invalid("IMPORT_PLAN_INVALID", "number identity invalid", { sourceRecordId });
+  }
   return { sourceType, externalIdentity: match[3] };
 }
 
@@ -64,17 +75,24 @@ function expectedTitle(sourceType, identity) {
   return "GitHub tag observation";
 }
 function referenceIsSafe(value) { return typeof value === "string" && nonEmptyTrimmedString(value) && value.startsWith("https://github.com/") && !value.includes("?") && !value.includes("#") && !value.includes("@") && !/[\r\n]/.test(value); }
-function expectedClaim(sourceType, identity, result, repositoryRef, reference) {
-  if (sourceType === "repository") return `GitHub repository ${repositoryRef} is ${result}.`;
-  if (sourceType === "branch") return `GitHub default branch ${identity} points to commit ${result === "present" ? (reference.match(/\/tree\/(.+)$/)?.[1] && "") : ""}`;
-  if (sourceType === "commit") return `GitHub commit ${identity} is present.`;
-  if (sourceType === "issue") return `GitHub issue #${identity} is ${result}.`;
-  if (sourceType === "pull_request") return `GitHub pull request #${identity} is ${result}.`;
-  if (sourceType === "release") { const tag = reference.match(/\/releases\/tag\/([^/]+)$/)?.[1]; if (!tag) invalid("IMPORT_PLAN_INVALID", "release reference invalid"); return `GitHub release ${tag} is ${result}.`; }
-  const tag = identity; return `GitHub tag ${tag} ${result === "present" ? "is present" : "is present"}.`;
+function validateReference(sourceType, identity, repositoryRef, reference) {
+  if (!referenceIsSafe(reference)) invalid("IMPORT_PLAN_INVALID", "provenance reference invalid", { field: "provenance.reference" });
+  const base = `https://github.com/${repositoryRef}`;
+  if (sourceType === "repository" && reference === base) return {};
+  const expected = { branch: `${base}/tree/${encodeURIComponent(identity)}`, commit: `${base}/commit/${identity}`, issue: `${base}/issues/${identity}`, pull_request: `${base}/pull/${identity}`, tag: `${base}/releases/tag/${encodeURIComponent(identity)}` };
+  if (sourceType !== "release" && reference !== expected[sourceType]) invalid("IMPORT_PLAN_INVALID", "provenance reference does not match source identity", { field: "provenance.reference" });
+  if (sourceType === "release") {
+    const prefix = `${base}/releases/tag/`; if (!reference.startsWith(prefix)) invalid("IMPORT_PLAN_INVALID", "release reference path invalid", { field: "provenance.reference" });
+    const segment = reference.slice(prefix.length); if (!segment || segment.includes("/")) invalid("IMPORT_PLAN_INVALID", "release reference segment invalid", { field: "provenance.reference" });
+    let tagName; try { tagName = decodeURIComponent(segment); } catch { invalid("IMPORT_PLAN_INVALID", "release reference encoding invalid", { field: "provenance.reference" }); }
+    if (!nonEmptyTrimmedString(tagName) || /[\r\n]/.test(tagName) || encodeURIComponent(tagName) !== segment) invalid("IMPORT_PLAN_INVALID", "release tag invalid", { field: "provenance.reference" });
+    return { tagName };
+  }
+  return {};
 }
 function validateDescriptor(value) {
-  if (!exactKeys(value, ["snapshotVersion", "adapter", "capturedAt", "repositoryRef", "recordIds"]) || value.snapshotVersion !== CONTEXT_IMPORT_PLAN_VERSION_V01 || value.adapter !== "github" || !isStrictOffsetIsoV01(value.capturedAt) || !nonEmptyTrimmedString(value.repositoryRef) || normalizeRepositoryRefV01(value.repositoryRef) !== value.repositoryRef || !Array.isArray(value.recordIds) || value.recordIds.length < 2 || value.recordIds.some(id => !nonEmptyTrimmedString(id)) || new Set(value.recordIds).size !== value.recordIds.length) invalid("IMPORT_PLAN_INVALID", "sourceSnapshot descriptor invalid", { field: "sourceSnapshot" });
+  if (!exactKeys(value, ["snapshotVersion", "adapter", "capturedAt", "repositoryRef", "recordIds"]) || value.snapshotVersion !== CONTEXT_IMPORT_PLAN_VERSION_V01 || value.adapter !== "github" || !isStrictOffsetIsoV01(value.capturedAt) || !Array.isArray(value.recordIds) || value.recordIds.length < 2 || value.recordIds.some(id => !nonEmptyTrimmedString(id)) || new Set(value.recordIds).size !== value.recordIds.length) invalid("IMPORT_PLAN_INVALID", "sourceSnapshot descriptor invalid", { field: "sourceSnapshot" });
+  validateCanonicalRepositoryRef(value.repositoryRef);
   const parsed = value.recordIds.map(id => parseGitHubSourceRecordIdV01(id, value.repositoryRef));
   if (parsed.filter(item => item.sourceType === "repository").length !== 1 || parsed.filter(item => item.sourceType === "branch").length !== 1) invalid("IMPORT_PLAN_INVALID", "GitHub core descriptor invalid", { field: "sourceSnapshot.recordIds" });
 }
@@ -93,13 +111,14 @@ function validateCandidate(candidate, descriptor, seen, candidateIds, actualOrde
   if (!exactKeys(candidate.proposedPayload, payloadKeys)) invalid("IMPORT_PLAN_INVALID", "proposedPayload invalid", { field: "proposedPayload" });
   if (candidate.proposedPayload.sourceRef !== sourceRecordId) invalid("IMPORT_PLAN_SOURCE_MISMATCH", "sourceRef mismatch", { sourceRecordId });
   if (!nonEmptyTrimmedString(candidate.proposedPayload.claim) || (candidate.proposedPayload.observedAt !== null && !isStrictOffsetIsoV01(candidate.proposedPayload.observedAt)) || candidate.proposedPayload.appliesToVersion !== null || candidate.proposedPayload.verificationMethod !== "github-source-snapshot-v0.1" || !resultEnums[parsed.sourceType]?.has(candidate.proposedPayload.result)) invalid("IMPORT_PLAN_INVALID", "proposedPayload invalid", { field: "proposedPayload" });
-  if (!referenceIsSafe(candidate.provenance?.reference) || !exactKeys(candidate.provenance, ["provider", "reference", "capturedAt", "retrievalMode", "authority"]) || candidate.provenance.provider !== "github" || candidate.provenance.retrievalMode !== "read-only-api" || candidate.provenance.authority !== AUTHORITIES[parsed.sourceType]) invalid("IMPORT_PLAN_INVALID", "provenance invalid", { field: "provenance" });
+  if (!exactKeys(candidate.provenance, ["provider", "reference", "capturedAt", "retrievalMode", "authority"]) || candidate.provenance.provider !== "github" || candidate.provenance.retrievalMode !== "read-only-api" || candidate.provenance.authority !== AUTHORITIES[parsed.sourceType]) invalid("IMPORT_PLAN_INVALID", "provenance invalid", { field: "provenance" });
+  const referenceInfo = validateReference(parsed.sourceType, parsed.externalIdentity, descriptor.repositoryRef, candidate.provenance.reference);
   if (candidate.provenance.capturedAt !== descriptor.capturedAt) invalid("IMPORT_PLAN_SOURCE_MISMATCH", "provenance capture mismatch", { field: "provenance.capturedAt" });
   if (parsed.sourceType === "branch") {
     const sha = candidate.proposedPayload.claim.match(/^GitHub default branch (.+) points to commit ([0-9a-f]{40})\.$/); if (!sha || sha[1] !== parsed.externalIdentity) invalid("IMPORT_PLAN_INVALID", "branch claim invalid", { field: "proposedPayload.claim" });
   }
-  const claim = expectedClaim(parsed.sourceType, parsed.externalIdentity, candidate.proposedPayload.result, descriptor.repositoryRef, candidate.provenance.reference);
-  if (parsed.sourceType !== "branch" && parsed.sourceType !== "tag" && candidate.proposedPayload.claim !== claim) invalid("IMPORT_PLAN_INVALID", "claim is not mechanical", { field: "proposedPayload.claim" });
+  const claims = { repository: `GitHub repository ${descriptor.repositoryRef} is ${candidate.proposedPayload.result}.`, commit: `GitHub commit ${parsed.externalIdentity} is present.`, issue: `GitHub issue #${parsed.externalIdentity} is ${candidate.proposedPayload.result}.`, pull_request: `GitHub pull request #${parsed.externalIdentity} is ${candidate.proposedPayload.result}.`, release: `GitHub release ${referenceInfo.tagName} is ${candidate.proposedPayload.result}.` };
+  if (["repository", "commit", "issue", "pull_request", "release"].includes(parsed.sourceType) && candidate.proposedPayload.claim !== claims[parsed.sourceType]) invalid("IMPORT_PLAN_INVALID", "claim is not mechanical", { field: "proposedPayload.claim" });
   if (parsed.sourceType === "tag" && !new RegExp(`^GitHub tag ${parsed.externalIdentity.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")} (?:is present|points to commit [0-9a-f]{40})\\.$`).test(candidate.proposedPayload.claim)) invalid("IMPORT_PLAN_INVALID", "tag claim invalid", { field: "proposedPayload.claim" });
   if (candidate.summary !== candidate.proposedPayload.claim) invalid("IMPORT_PLAN_INVALID", "summary must equal claim", { field: "summary" });
   if (!exactKeys(candidate.admission, ["stage", "canonicalWriteAllowed", "confirmationRequirement"]) || candidate.admission.stage !== "candidate" || candidate.admission.canonicalWriteAllowed !== false || candidate.admission.confirmationRequirement !== "source-authority-sufficient") invalid("IMPORT_PLAN_INVALID", "admission invalid", { field: "admission" });

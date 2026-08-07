@@ -3,7 +3,8 @@ import sourceExample from "../examples/nexus-atlas-source-snapshot-v0.1.json" wi
 import acceptedPlan from "../examples/nexus-atlas-context-import-plan-v0.1.json" with { type: "json" };
 import catalog from "../examples/nexus-atlas-context-import-plan-cases-v0.1.json" with { type: "json" };
 import { buildContextImportPlanV01 } from "../experience/source-v01/context-import-planner.mjs";
-import { ContextImportPlanError, validateContextImportPlanV01 } from "../experience/source-v01/context-import-plan-validator.mjs";
+import { ContextImportPlanError, parseGitHubSourceRecordIdV01, validateContextImportPlanV01 } from "../experience/source-v01/context-import-plan-validator.mjs";
+import { SourceAdapterError } from "../experience/source-v01/source-snapshot-validator.mjs";
 
 const input = { snapshot: sourceExample.snapshot, policyVersion: "github-context-import-policy-v1", projectId: "project:nexus-atlas", scopeKey: "project:nexus-atlas" };
 const actual = buildContextImportPlanV01(input);
@@ -36,6 +37,11 @@ expectInvalid(plan => { plan.candidates[2].mappingRule = plan.candidates[0].mapp
 expectInvalid(plan => { plan.candidates[2].provenance.authority = plan.candidates[0].provenance.authority; });
 expectInvalid(plan => { plan.candidates.reverse(); });
 expectInvalid(plan => { plan.candidates[5].proposedPayload.claim = "GitHub pull request #23 is merged, therefore Phase complete."; plan.candidates[5].summary = plan.candidates[5].proposedPayload.claim; });
+for (const repositoryRef of ["https://github.com/a/b", "a//b", "a/../b", "A/B", " a/b "]) { const malformed = structuredClone(actual); malformed.sourceSnapshot.repositoryRef = repositoryRef; assert.throws(() => validateContextImportPlanV01(malformed), error => error instanceof ContextImportPlanError && !(error instanceof SourceAdapterError) && error.code === "IMPORT_PLAN_INVALID"); }
+for (const raw of ["0", "00", "-1", "1.2", "9007199254740992"]) { assert.throws(() => parseGitHubSourceRecordIdV01(`github:issue:cyrilla-mist/nexus-ai:${raw}`, "cyrilla-mist/nexus-ai"), error => error instanceof ContextImportPlanError && error.code === "IMPORT_PLAN_INVALID"); assert.throws(() => parseGitHubSourceRecordIdV01(`github:pr:cyrilla-mist/nexus-ai:${raw}`, "cyrilla-mist/nexus-ai"), error => error instanceof ContextImportPlanError && error.code === "IMPORT_PLAN_INVALID"); }
+assert.deepEqual(parseGitHubSourceRecordIdV01("github:issue:cyrilla-mist/nexus-ai:17", "cyrilla-mist/nexus-ai"), { sourceType: "issue", externalIdentity: "17" }); assert.deepEqual(parseGitHubSourceRecordIdV01("github:pr:cyrilla-mist/nexus-ai:23", "cyrilla-mist/nexus-ai"), { sourceType: "pull_request", externalIdentity: "23" });
+const encodedSnapshot = structuredClone(sourceExample.snapshot); const releaseRecord = encodedSnapshot.records.find(record => record.sourceType === "release"); releaseRecord.payload.tagName = "release/v1"; releaseRecord.reference = "https://github.com/cyrilla-mist/nexus-ai/releases/tag/release%2Fv1"; const encodedPlan = buildContextImportPlanV01({ ...input, snapshot: encodedSnapshot }); const encodedCandidate = encodedPlan.candidates.find(candidate => candidate.sourceRecordIds[0] === releaseRecord.sourceRecordId); assert.equal(encodedCandidate.proposedPayload.claim, "GitHub release release/v1 is published."); assert.doesNotThrow(() => validateContextImportPlanV01(encodedPlan));
+const tamperedCommit = structuredClone(actual); tamperedCommit.candidates[2].provenance.reference = "https://github.com/other/repo/commit/2222222222222222222222222222222222222222"; assert.throws(() => validateContextImportPlanV01(tamperedCommit), error => error instanceof ContextImportPlanError && error.code === "IMPORT_PLAN_INVALID");
 
 console.log("Nexus Atlas Context Import Plan v0.1");
 console.log("Policy: github-context-import-policy-v1");
@@ -53,4 +59,8 @@ console.log("Determinism: PASS");
 console.log("Input immutability: PASS");
 console.log("Immutability: PASS");
 console.log("Accepted example compatibility: PASS");
+console.log("Planner error boundary: PASS");
+console.log("Positive GitHub numeric identity: PASS");
+console.log("Encoded release tag compatibility: PASS");
+console.log("Provenance reference coherence: PASS");
 console.log("Context Import Plan v0.1 Runtime: PASS");

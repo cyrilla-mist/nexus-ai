@@ -274,3 +274,4 @@ v0.2 暂不做：多用户协作平台、全量 Notion 同步、全量 Google Dr
 
 后续方向仅包括 multiple real projects、additional source adapters、user-controlled context capture、outcome write-back、cross-territory views 和 richer agent assistance；这些不是 v0.2 已承诺功能。
 Phase 4D final acceptance hardening completed: the independent Plan Validator now enforces GitHub descriptor coherence, source type / mapping rule / authority coherence, deterministic candidate ordering, and the mechanical semantic boundary; the complete 32-case behavioral proof is accepted. No Phase 4E work was started.
+Phase 4D boundary closure confirms: Planner-owned error boundary; positive GitHub numeric identity; encoded release/tag reference compatibility; sourceRecordId/provenance reference coherence.
