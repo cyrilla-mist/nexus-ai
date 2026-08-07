@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { buildClaim, buildContextImportPlanV01, GITHUB_CONTEXT_IMPORT_MAPPING_RULES_V1 } from "../experience/source-v01/context-import-planner.mjs";
-import { ContextImportPlanError } from "../experience/source-v01/context-import-plan-validator.mjs";
+import { ContextImportPlanError, validateContextImportPlanV01 } from "../experience/source-v01/context-import-plan-validator.mjs";
 import { acceptedPlan, makeGitHubSnapshot, makePlannerInput } from "./helpers/context-import-plan-fixtures.mjs";
 
 const errorCode = (fn, code) => assert.throws(fn, error => error instanceof ContextImportPlanError && error.code === code && error.retryable === false);
@@ -64,4 +64,7 @@ test("merged PR does not promote Phase", () => { const p=buildContextImportPlanV
 test("release does not promote version", () => { const p=buildContextImportPlanV01(makePlannerInput(["release"])); assert.equal(p.candidates[2].proposedPayload.appliesToVersion,null); });
 test("commit does not promote decision", () => { const p=buildContextImportPlanV01(makePlannerInput(["commit"])); assert.equal(p.candidates[2].targetKind,"evidence"); });
 test("buildClaim helper is mechanical", () => { const snapshot=makeGitHubSnapshot(["repository"]); const record=snapshot.records[0]; assert.equal(buildClaim(record,snapshot.scope.repositoryRef),"GitHub repository cyrilla-mist/nexus-ai is available."); });
-
+test("planner mapping rules match inferred source types", () => { const plan = buildContextImportPlanV01(makePlannerInput()); const expected = { repository: "github-repository-state-to-evidence", branch: "github-branch-state-to-evidence", commit: "github-commit-state-to-evidence", issue: "github-issue-state-to-evidence", pull_request: "github-pull-request-state-to-evidence", release: "github-release-state-to-evidence", tag: "github-tag-state-to-evidence" }; for (const candidate of plan.candidates) { const rawType = candidate.sourceRecordIds[0].split(":")[1]; const type = rawType === "repo" ? "repository" : rawType === "pr" ? "pull_request" : rawType; assert.equal(candidate.mappingRule, expected[type]); } });
+test("planner preserves exact source authority", () => { const input = makePlannerInput(); const plan = buildContextImportPlanV01(input); const sourceMap = new Map(input.snapshot.records.map(record => [record.sourceRecordId, record.authority])); for (const candidate of plan.candidates) assert.equal(candidate.provenance.authority, sourceMap.get(candidate.sourceRecordIds[0])); });
+test("planner preserves exact source ordering", () => { const input = makePlannerInput(); const plan = buildContextImportPlanV01(input); assert.deepEqual(plan.candidates.map(candidate => candidate.sourceRecordIds[0]), input.snapshot.records.map(record => record.sourceRecordId)); });
+test("planner mechanical claims pass hardened validator", () => { const plan = buildContextImportPlanV01(makePlannerInput()); assert.doesNotThrow(() => validateContextImportPlanV01(plan)); assert(plan.candidates.every(candidate => candidate.summary === candidate.proposedPayload.claim)); });

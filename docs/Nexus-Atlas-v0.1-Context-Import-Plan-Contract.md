@@ -317,3 +317,7 @@ An Exclusion is exactly sourceRecordId, reason, and rule. sourceRecordId must be
 ## 16. Acceptance status
 
 The Contract is Accepted for Phase 4D Runtime. The Test Matrix is Accepted with 32 cases. Catalog metadata is Accepted with 7 schema, 6 input/scope, 9 mapping, 6 governance/safety, and 4 determinism/coverage cases. Planner Runtime and Plan Validator Runtime are complete; Phase 4E remains the future Canonical Integration boundary.
+Phase 4D final acceptance hardening completed.
+
+- Independent Plan Validator now enforces GitHub descriptor coherence, source type / mapping rule / authority coherence, deterministic candidate ordering, and the mechanical semantic boundary.
+- The complete 32-case behavioral proof is executable; no Phase 4E work was started.

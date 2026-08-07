@@ -663,3 +663,4 @@ Phase 4D Contract acceptance hardening completed. The GitHub core singleton inva
 - no source re-read.
 - no Canonical Graph write.
 - Phase 4E remains next.
+Phase 4D final acceptance hardening completed: the independent Plan Validator now enforces GitHub descriptor coherence, source type / mapping rule / authority coherence, deterministic candidate ordering, and the mechanical semantic boundary; the complete 32-case behavioral proof is accepted. No Phase 4E work was started.

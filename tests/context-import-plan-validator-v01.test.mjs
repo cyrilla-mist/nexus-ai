@@ -15,7 +15,7 @@ const cases = [
   ["wrong plan version", p => { p.planVersion = "0.2"; }, "IMPORT_PLAN_INVALID"],
   ["wrong policy", p => { p.policyVersion = "other"; }, "IMPORT_PLAN_INVALID"],
   ["bad descriptor", p => { p.sourceSnapshot.recordIds = {}; }, "IMPORT_PLAN_INVALID"],
-  ["duplicate descriptor IDs", p => { p.sourceSnapshot.recordIds[1] = p.sourceSnapshot.recordIds[0]; }, "IMPORT_PLAN_COVERAGE_MISMATCH"],
+  ["duplicate descriptor IDs", p => { p.sourceSnapshot.recordIds[1] = p.sourceSnapshot.recordIds[0]; }, "IMPORT_PLAN_INVALID"],
   ["bad target", p => { p.target.projectId = ""; }, "IMPORT_PLAN_INVALID"],
   ["candidates not array", p => { p.candidates = {}; }, "IMPORT_PLAN_INVALID"],
   ["exclusions not array", p => { p.exclusions = {}; }, "IMPORT_PLAN_INVALID"],
@@ -60,3 +60,27 @@ const cases = [
   ["whitespace target", p => { p.target.scopeKey = " scope "; }, "IMPORT_PLAN_INVALID"]
 ];
 for (const [name, fn, expected] of cases) test("validator " + name, () => { if (name === "non object" || name === "array") code(() => validateContextImportPlanV01(fn()), expected); else mutate(fn, expected); });
+
+const expectInvalid = (name, change) => test("validator hardening " + name, () => mutate(change, "IMPORT_PLAN_INVALID"));
+expectInvalid("descriptor adapter drive", p => { p.sourceSnapshot.adapter = "drive"; });
+expectInvalid("noncanonical repositoryRef", p => { p.sourceSnapshot.repositoryRef = "Cyrilla-Mist/nexus-ai"; });
+expectInvalid("empty recordIds", p => { p.sourceSnapshot.recordIds = []; });
+expectInvalid("missing repository core", p => { p.sourceSnapshot.recordIds = p.sourceSnapshot.recordIds.filter(id => !id.startsWith("github:repo:")); });
+expectInvalid("missing branch core", p => { p.sourceSnapshot.recordIds = p.sourceSnapshot.recordIds.filter(id => !id.startsWith("github:branch:")); });
+for (const [index, label, other] of [[0, "repository", 1], [1, "branch", 2], [2, "commit", 4], [4, "issue", 5], [5, "pull_request", 6], [6, "release", 7], [7, "tag", 0]]) expectInvalid("mapping type mismatch " + label, p => { p.candidates[index].mappingRule = p.candidates[other].mappingRule; });
+for (const [index, label, other] of [[0, "repository", 1], [1, "branch", 2], [2, "commit", 4], [4, "issue", 5], [5, "pull_request", 6], [6, "release", 7], [7, "tag", 0]]) expectInvalid("authority mismatch " + label, p => { p.candidates[index].provenance.authority = p.candidates[other].provenance.authority; });
+expectInvalid("external reference host", p => { p.candidates[0].provenance.reference = "https://example.com/x"; });
+expectInvalid("query reference", p => { p.candidates[0].provenance.reference += "?token=x"; });
+expectInvalid("fragment reference", p => { p.candidates[0].provenance.reference += "#fragment"; });
+expectInvalid("reverse Candidate order", p => { p.candidates.reverse(); });
+expectInvalid("unsorted exclusions", p => { const removed = p.candidates.splice(-2); p.exclusions = removed.map((candidate, index) => ({ sourceRecordId: candidate.sourceRecordIds[0], reason: "policy", rule: index ? "policy-excluded" : "unsupported-source-type" })).reverse(); p.diagnostics.candidateCount = 6; p.diagnostics.exclusionCount = 2; p.diagnostics.byTargetKind.evidence = 6; p.diagnostics.byConfirmationRequirement["source-authority-sufficient"] = 6; });
+expectInvalid("wrong repository title", p => { p.candidates[0].title = "Repository imported"; });
+expectInvalid("wrong Issue title", p => { p.candidates[4].title = "Issue imported"; });
+expectInvalid("invalid repository result", p => { p.candidates[0].proposedPayload.result = "present"; });
+expectInvalid("invalid PR result", p => { p.candidates[5].proposedPayload.result = "published"; });
+expectInvalid("semantic claim injection", p => { p.candidates[5].proposedPayload.claim = "GitHub pull request #23 is merged, therefore Phase complete."; p.candidates[5].summary = p.candidates[5].proposedPayload.claim; });
+expectInvalid("commit claim SHA mismatch", p => { p.candidates[2].proposedPayload.claim = "GitHub commit 9999999999999999999999999999999999999999 is present."; p.candidates[2].summary = p.candidates[2].proposedPayload.claim; });
+expectInvalid("Issue claim number mismatch", p => { p.candidates[4].proposedPayload.claim = "GitHub issue #99 is open."; p.candidates[4].summary = p.candidates[4].proposedPayload.claim; });
+expectInvalid("PR claim number mismatch", p => { p.candidates[5].proposedPayload.claim = "GitHub pull request #99 is merged."; p.candidates[5].summary = p.candidates[5].proposedPayload.claim; });
+expectInvalid("branch malformed claim SHA", p => { p.candidates[1].proposedPayload.claim = "GitHub default branch main points to commit not-a-sha."; p.candidates[1].summary = p.candidates[1].proposedPayload.claim; });
+expectInvalid("tag malformed claim", p => { p.candidates[7].proposedPayload.claim = "GitHub tag v0.1.0 points to commit not-a-sha."; p.candidates[7].summary = p.candidates[7].proposedPayload.claim; });
