@@ -1,9 +1,9 @@
 # Nexus Atlas — Context Import Plan v0.1 Test Matrix
 
 **Status:** Accepted
-**Target:** Phase 4D Planner Runtime  
+**Target:** Phase 4E Canonical Integration
 **Total Cases:** 32  
-**Runtime:** Not implemented
+**Runtime:** Phase 4D automated runtime suite accepted
 
 This matrix is machine-readable by its exact nine-column table. Candidate and exclusion references are exact IDs in backticks; error and empty collections use none.
 

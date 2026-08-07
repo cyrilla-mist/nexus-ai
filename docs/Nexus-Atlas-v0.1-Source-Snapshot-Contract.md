@@ -503,19 +503,19 @@ Phase boundary:
 - Phase 4A Complete;
 - Phase 4B Complete;
 - Phase 4C Complete / Accepted;
-- Phase 4D Planned;
+- Phase 4D Complete;
 - Phase 4E Planned;
 - Phase 4F Planned;
 - Phase 4 overall remains In progress.
 
-The next phase is Phase 4D — Context Import Planner.
+The next phase is Phase 4E — Canonical Integration.
 
 ## Phase 4D Follow-up
 
-- The Context Import Plan v0.1 contract now defines the deferred Planner output.
+- Phase 4D Planner Runtime complete.
 - The Phase 4D Context Import Plan Contract is accepted.
 - The Source Snapshot remains the sole source-observation input.
-- The Planner performs no source re-read.
+- The Planner does not re-read GitHub.
 - The Planner produces Candidate-only Evidence proposals.
-- Planner Runtime remains not implemented.
+- Canonical admission remains Phase 4E.
 - No Canonical Graph write is permitted.

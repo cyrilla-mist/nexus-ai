@@ -1,11 +1,22 @@
 # Nexus Atlas — Context Import Plan v0.1 Contract
 
 **Status:** Accepted
-**Target:** Phase 4D Planner Runtime  
-**Implementation:** Not started  
-**Phase:** Phase 4D Context Import Planner Contract Design Complete
+**Target:** Phase 4E Canonical Integration
+**Implementation:** Phase 4D Planner Runtime complete
+**Phase:** Phase 4D Context Import Planner Complete
 **Canonical Mutation:** None  
 **External Read:** None
+
+Implementation Note:
+
+- ContextImportPlanError implemented.
+- Plan Validator implemented.
+- deterministic Evidence Candidate Planner implemented.
+- 32-case Catalog automated.
+- Accepted Example compatibility verified.
+- Source Snapshot input only; no source re-read.
+- no Canonical Graph.
+- no Provider integration.
 
 ## 1. Boundary
 
@@ -248,7 +259,7 @@ Phase 4D is Snapshot → Candidate Plan. Phase 4E handles governance, canonical 
 
 The Canonical Context Model recognizes identity, project, goal, milestone, event, decision, evidence, memory, risk, action, and source. GitHub v1 proposes only evidence. Candidate records deliberately do not copy ContextNode and do not define a future Evidence node ID. The Context Model remains unchanged.
 
-This document freezes the Phase 4D contract only. Planner Runtime is not implemented, Canonical Graph mutation is not implemented, no ContextNode is created, and no live GitHub read is performed.
+This document freezes the Phase 4D contract and records its accepted Runtime. Canonical Graph mutation is not implemented, no ContextNode is created, and no live GitHub read is performed.
 
 ## 11. Acceptance-hardening input precedence
 
@@ -279,7 +290,7 @@ The future Plan builder validates input and the Source Snapshot, maps records, b
 
     export function validateContextImportPlanV01(plan)
 
-The validator accepts only the Plan and validates internal and descriptor coherence. It performs no Source re-read and does not require the original Snapshot argument. Neither API is implemented in Phase 4D Contract Design.
+The validator accepts only the Plan and validates internal and descriptor coherence. It performs no Source re-read and does not require the original Snapshot argument. Both APIs are implemented in the Phase 4D Runtime.
 
 ## 13. Plan Validator error classification
 
@@ -305,4 +316,4 @@ An Exclusion is exactly sourceRecordId, reason, and rule. sourceRecordId must be
 
 ## 16. Acceptance status
 
-The Contract is Accepted for Phase 4D Contract Design. The Test Matrix is Accepted with 32 cases. Catalog metadata is Accepted with 7 schema, 6 input/scope, 9 mapping, 6 governance/safety, and 4 determinism/coverage cases. Planner Runtime and Plan Validator Runtime remain not implemented; Phase 4E remains the future Canonical Integration boundary.
+The Contract is Accepted for Phase 4D Runtime. The Test Matrix is Accepted with 32 cases. Catalog metadata is Accepted with 7 schema, 6 input/scope, 9 mapping, 6 governance/safety, and 4 determinism/coverage cases. Planner Runtime and Plan Validator Runtime are complete; Phase 4E remains the future Canonical Integration boundary.

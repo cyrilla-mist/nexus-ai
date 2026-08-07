@@ -652,4 +652,14 @@ Only this audit document is intended to be added. The audit does not mark GitHub
 - Phase 4D Planner Runtime not started.
 - Phase 4E remains the Canonical Integration boundary.
 
-Phase 4D Contract acceptance hardening completed. The GitHub core singleton invariant remains preserved through Planner Cases, and Phase 4D Runtime remains next.
+Phase 4D Contract acceptance hardening completed. The GitHub core singleton invariant remains preserved through Planner Cases, and Phase 4D Runtime is complete.
+
+## Phase 4D Runtime Follow-up
+
+- Context Import Planner Runtime implemented.
+- Plan Validator implemented.
+- 32 accepted cases automated.
+- Evidence-only mapping preserved.
+- no source re-read.
+- no Canonical Graph write.
+- Phase 4E remains next.
