@@ -1,6 +1,6 @@
 # Nexus Atlas v0.1 — Phase 4 Acceptance Contract
 
-**Status:** Draft for Phase 4F acceptance
+**Status:** Accepted / Frozen
 **Phase:** 4F — Acceptance and policy hardening
 **Baseline:** `c1376a682210396cdca525013edd6d18abcd8447`
 **Baseline state:** Phase 4E COMPLETE / FROZEN
@@ -123,19 +123,22 @@ Phase 4F does not add:
 
 ## 6. Acceptance Evidence
 
-Phase 4F is COMPLETE only when repository evidence shows:
+Phase 4F acceptance is backed by repository evidence:
 
-- frozen baseline preserved or any reopening explicitly justified;
-- dedicated Phase 4F acceptance matrix fully automated;
-- failure-policy cases for auth, forbidden, rate limit, unavailable and not found;
-- cross-layer privacy sentinel proof;
-- explicit authorization/review proof;
-- successful end-to-end Evidence admission proof;
-- complete Phase 0–4 regression passing;
-- package-lock exclusion confirmed;
-- no unexpected changed files;
-- final branch/commit state recorded.
+- Phase 4E frozen baseline: `c1376a682210396cdca525013edd6d18abcd8447`;
+- dedicated cross-layer verifier: `scripts/verify-phase4-v01.mjs`;
+- 30 dedicated executable cross-layer checks covering fixture stability, source failure policy, privacy, explicit review/authorization and end-to-end Graph application;
+- accepted catalog closure retained at Source Snapshot `36`, Context Import Plan `32` and Canonical Admission `32`, with Canonical Admission behavior vocabulary `14`;
+- clean-checkout GitHub Actions run `31399296273` completed the dedicated Phase 4F acceptance step, full `npm test` step and full `npm run check` step successfully;
+- all 12 workflow/job steps in that clean-checkout run completed successfully;
+- root `package-lock.json` is explicitly excluded and no dependency was added;
+- frozen-boundary review found only Phase 4F acceptance/policy/CI files changed relative to the Phase 4E SHA before final status recording;
+- no Phase 4B–4E Runtime, accepted JSON fixture/catalog, Context Graph Validator, Provider, UI, live transport or persistence boundary was reopened.
+
+The final acceptance-record commits modify documentation/status only beyond the already accepted Phase 4F verification surface. The branch head is re-run through the same clean-checkout gate before the Phase 4F frozen SHA is recorded externally.
 
 ## 7. Completion Rule
 
-Phase 4F completion freezes Phase 4 as a bounded first Source Adapter foundation. Completion does **not** mean GitHub becomes authoritative for user identity, preferences, rationale or confirmed Decisions, and does **not** authorize live persistent writes.
+Phase 4F is accepted when the final branch head passes the same clean-checkout gate with the frozen-boundary review intact. At that point Phase 4 is frozen as a bounded first Source Adapter foundation.
+
+Completion does **not** mean GitHub becomes authoritative for user identity, preferences, rationale or confirmed Decisions, and does **not** authorize live persistent writes.
