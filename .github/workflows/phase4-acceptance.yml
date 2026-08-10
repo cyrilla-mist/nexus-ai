@@ -1,0 +1,46 @@
+name: Phase 4 Acceptance
+
+on:
+  push:
+    branches:
+      - feature/phase4f-acceptance
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Environment
+        run: |
+          node --version
+          npm --version
+          python --version
+
+      - name: Phase 4F dedicated acceptance
+        run: npm run verify:phase4-v01
+
+      - name: Full Node test suite
+        run: npm test
+
+      - name: Full repository check
+        run: npm run check
