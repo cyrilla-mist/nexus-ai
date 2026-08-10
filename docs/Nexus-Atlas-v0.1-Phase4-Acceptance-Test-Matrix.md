@@ -1,6 +1,6 @@
 # Nexus Atlas v0.1 — Phase 4F Acceptance Test Matrix
 
-**Status:** Draft for automation
+**Status:** Accepted / Automated
 **Baseline:** `c1376a682210396cdca525013edd6d18abcd8447`
 **Target:** Phase 4F Acceptance and policy hardening
 
@@ -76,20 +76,32 @@ Phase 4F does not replace the accepted Phase 4B–4E catalogs. It adds cross-lay
 
 ## Required automation shape
 
-The dedicated Phase 4F automation must:
+The dedicated Phase 4F automation:
 
-1. execute the accepted Source Snapshot, Planner and Canonical Admission APIs rather than matching strings only;
-2. use a real injected client fixture for source failure-policy tests;
-3. use a unique privacy sentinel and verify absence across every downstream artifact;
-4. perform at least one real reviewed subset admission and Apply;
-5. independently validate the final Graph;
-6. verify the source, planner and admission catalog cardinalities;
-7. run without network access, credentials, OAuth, persistent writes or new dependencies.
+1. executes the accepted Source Snapshot, Planner and Canonical Admission APIs rather than matching strings only;
+2. uses a real injected client fixture for source failure-policy tests;
+3. uses a unique privacy sentinel and verifies absence across every downstream artifact;
+4. performs a real reviewed subset admission and Apply;
+5. independently validates the final Graph;
+6. verifies the source, planner and admission catalog cardinalities;
+7. runs without credentials, OAuth, persistent writes or new dependencies.
+
+## Accepted automation coverage
+
+The 38 matrix requirements are closed through three complementary proof layers:
+
+- **30 dedicated Phase 4F executable checks** in `scripts/verify-phase4-v01.mjs`, covering A01–A05, B01–B06, C01–C05, D01–D07, E01–E06 and F08;
+- **existing accepted Phase 4B–4E catalogs and verifiers**, preserving the Source Snapshot `36`, Context Import Plan `32`, Canonical Admission `32` and Canonical Admission behavior vocabulary `14` closures;
+- **clean-checkout workflow and changed-file review**, covering F01–F07 and F09.
+
+GitHub Actions run `31399296273` completed all 12 job steps successfully, including `npm run verify:phase4-v01`, the full `npm test` suite and the full `npm run check` gate. The final documentation/status head is required to pass the same clean-checkout workflow before the Phase 4F frozen SHA is recorded.
 
 ## Acceptance threshold
 
-All matrix cases are blocking for Phase 4F completion. A failure in an accepted Phase 4B–4E Runtime does not permit fixture rewriting; it must be classified as either:
+All matrix cases are blocking for Phase 4F completion. No accepted Phase 4B–4E fixture or Runtime was rewritten to satisfy Phase 4F.
+
+Any future failure against this frozen matrix must be classified as one of:
 
 - acceptance-test defect;
 - documentation/policy mismatch;
-- real Runtime blocker requiring explicit reopening.
+- real Runtime regression requiring an explicit reopening decision.
