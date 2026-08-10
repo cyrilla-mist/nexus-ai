@@ -1,7 +1,7 @@
 # Nexus Atlas v0.2 — Personal Context Foundation
 
 **Status:** Active
-**Implementation:** Phase 3 generalized context package complete
+**Implementation:** Phase 4 first Source Adapter foundation complete
 
 ## 1. Executive Summary
 
@@ -186,9 +186,9 @@ Phase 3 已完成通用 Context Package contract、Builder、Adapter、双版本
 - fast-forward merge
 - no Phase 4 work
 
-### Phase 4 — First Source Adapter — In progress
+### Phase 4 — First Source Adapter — Complete
 
-Phase 4 is in progress. GitHub is the first implemented Source Adapter profile/core for bounded repository state, not a confirmed canonical source for user identity, preference, rationale or confirmed Decisions.
+Phase 4 is complete and frozen at the bounded first Source Adapter foundation. GitHub is the first implemented Source Adapter profile/core for explicit repository state, not a canonical authority for user identity, preference, rationale or confirmed Decisions.
 
 #### Phase 4A — Source Adapter Entry Audit — Complete
 
@@ -276,7 +276,20 @@ Canonical Admission Runtime — Complete
 - automated 32-case suite and Accepted Example compatibility;
 - no persistent write, source re-read, Edge or ContextPackage mutation.
 
-#### Phase 4F — Acceptance — Planned
+#### Phase 4F — Acceptance and Policy Hardening — Complete / Accepted
+
+- dedicated Phase 4F cross-layer acceptance contract and 38-case matrix;
+- 30 dedicated executable checks across fixture stability, source failure policy, privacy, explicit authorization review and end-to-end Graph application;
+- Source Snapshot 36-case, Context Import Plan 32-case and Canonical Admission 32-case closures retained;
+- auth, forbidden, rate-limit, unavailable and not-found source failure semantics proven without successful/partial error Snapshots;
+- privacy sentinel proven absent across Snapshot, Import Plan, Admission Plan and applied Graph;
+- reviewed subset authorization, Apply-time authorization rebinding, Evidence-only admission, atomicity, idempotence and source observation history proven across layers;
+- root `package-lock.json` excluded; no dependency introduced;
+- clean-checkout GitHub Actions gate executes dedicated Phase 4F verification, full Node tests and full repository check;
+- acceptance run `31399296273` completed all 12 workflow/job steps successfully;
+- frozen-boundary review found no Phase 4B–4E Runtime, accepted JSON fixture/catalog, Context Graph Validator, Provider, UI, live transport or persistence reopening.
+
+Phase 4 completion preserves the original bounded architecture: transport/source normalization, candidate planning and canonical admission remain independently testable; GitHub-derived observations can enter only as explicitly reviewed Evidence, not as silently promoted personal or project truth.
 
 ### Phase 5 — Product Surface — Planned
 
@@ -306,5 +319,5 @@ v0.2 暂不做：多用户协作平台、全量 Notion 同步、全量 Google Dr
 ## 9. v0.3 Direction
 
 后续方向仅包括 multiple real projects、additional source adapters、user-controlled context capture、outcome write-back、cross-territory views 和 richer agent assistance；这些不是 v0.2 已承诺功能。
-Phase 4D final acceptance hardening completed: the independent Plan Validator now enforces GitHub descriptor coherence, source type / mapping rule / authority coherence, deterministic candidate ordering, and the mechanical semantic boundary; the complete 32-case behavioral proof is accepted. Phase 4E Canonical Admission Runtime is now complete at the pure in-memory Graph boundary; Phase 4F remains planned.
-Phase 4D boundary closure confirms: Planner-owned error boundary; positive GitHub numeric identity; encoded release/tag reference compatibility; sourceRecordId/provenance reference coherence.
+
+Phase 4 is complete at the first bounded Source Adapter foundation. Source Snapshot, Import Planning and Canonical Admission remain separated by explicit contracts and authority boundaries. Phase 5 remains planned and must not reinterpret Phase 4 completion as authorization for live persistent writes, semantic promotion or UI integration.
