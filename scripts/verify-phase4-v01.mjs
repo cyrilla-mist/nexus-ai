@@ -128,7 +128,7 @@ await checked("4F-E06 Apply failure is atomic", async () => {
   assert.throws(() => applyAdmission(graphExample, privacyPlan, tampered, reviewedIds), error => error?.code === "CANONICAL_ADMISSION_SOURCE_MISMATCH"); assert.deepEqual(graphExample, original);
 });
 
-await checked("4F-F08 package-lock exclusion policy", async () => { const ignore = fs.readFileSync(new URL("../.gitignore", import.meta.url), "utf8"); assert.match(ignore, /(?:^|\n)\/package-lock\.json(?:\n|$)/); });
+await checked("4F-F08 package-lock exclusion policy", async () => { const ignore = fs.readFileSync(new URL("../.gitignore", import.meta.url), "utf8"); assert.match(ignore, /(?:^|\r?\n)\/package-lock\.json(?:\r?\n|$)/); });
 
 console.log(`Phase 4F dedicated checks: ${checks}/${checks} PASS`);
 console.log("Phase 4F cross-layer acceptance: PASS");
