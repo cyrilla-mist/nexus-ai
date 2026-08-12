@@ -11,6 +11,7 @@ import {
 } from "../experience/product-surface-v01/product-surface-projector.mjs";
 
 const phase5FixtureUrl = new URL("../examples/nexus-atlas-self-context-phase5-v0.1.json", import.meta.url);
+const browserSnapshotUrl = new URL("../examples/nexus-atlas-product-surface-phase5-v0.1.json", import.meta.url);
 const historicalFixtureUrl = new URL("../examples/nexus-atlas-self-context-v0.2.json", import.meta.url);
 
 function assertDeepFrozen(value) {
@@ -84,6 +85,13 @@ test("Product Surface v0.1 projects Nexus Self-Context without Verity coupling",
   });
   assert.doesNotMatch(structuralBinding, /Verity/i);
   assert.doesNotMatch(structuralBinding, /Phase 3 complete; Phase 4 planned/i);
+});
+
+test("Accepted browser snapshot is byte-semantic equivalent to the projector output", async () => {
+  const result = await loadPhase5ProviderResult();
+  const projected = buildProductSurface({ providerResult: result, view: "desk" });
+  const snapshot = JSON.parse(await readFile(browserSnapshotUrl, "utf8"));
+  assert.deepEqual(snapshot, projected);
 });
 
 test("Product Surface preserves state, governance, provenance and confirmation boundaries", async () => {
