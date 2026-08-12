@@ -129,6 +129,7 @@ Selection is explicit-only:
     applyAllowed: false
   },
   resultMode: "in-memory-preview",
+  reconciliation: "not-run" | "admission-plan",
   persistentWrite: false,
   graphMutation: false,
   edgeCreation: false,
@@ -136,7 +137,7 @@ Selection is explicit-only:
 }
 ```
 
-The preview may display deterministic Candidate-derived Evidence proposals and dispositions from the accepted Canonical Admission contract. It must not apply them to a persistent or shared Graph, and `applyAllowed` is fixed to `false` at the Product Surface boundary even when the underlying pure in-memory admission plan has no conflict.
+When no Context Graph is injected, the preview is explicitly `reconciliation: "not-run"`: it may display selected Candidate-derived Evidence proposal summaries, but it must not invent `insert`, `noop` or `conflict` dispositions. When an optional validated Context Graph is injected, the projector may reuse the accepted pure Canonical Admission builder and set `reconciliation: "admission-plan"`; it must still not call Apply. In both modes it must not apply anything to a persistent or shared Graph, and `applyAllowed` is fixed to `false` at the Product Surface boundary even when the underlying pure in-memory admission plan has no conflict.
 
 No preview proposal may create or modify an Edge, Project, Identity, Decision, Memory, Action or other canonical semantic record. A later write flow, if ever proposed, requires a separate accepted contract and explicit authorization boundary.
 
@@ -176,4 +177,3 @@ Phase 5E contract design is complete when the blocking matrix proves:
 - local preview-only behavior with `canonicalWriteAllowed === false` and `applyAllowed === false`;
 - no source re-read, persistence, Edge creation or semantic promotion;
 - Phase 4B–4F and Phase 5C–5D boundaries remain unchanged.
-
