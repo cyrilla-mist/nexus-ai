@@ -1,0 +1,343 @@
+{
+  "metadata": {
+    "schemaVersion": "0.2-proposed",
+    "example": true,
+    "runtimeEvidence": false,
+    "generatedAt": "2026-08-12T23:20:00+08:00"
+  },
+  "nodes": [
+    {
+      "id": "project:nexus-atlas",
+      "kind": "project",
+      "title": "Nexus Atlas",
+      "summary": "Personal Intelligence Infrastructure for preserving context continuity across long-running work.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-12T23:20:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "project-roadmap", "reference": "docs/Nexus-Atlas-v0.2-Roadmap.md", "capturedAt": "2026-08-12T23:20:00+08:00", "retrievalMode": "repository-document-review", "authority": "project-roadmap" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": {
+        "purpose": "Maintain continuity across identity, project, memory, decision, evidence, risk, and action.",
+        "currentPhase": "Phase 5C — Nexus Self-Context Desk in progress",
+        "currentVersion": "v0.2 Personal Context Foundation · Product Surface v0.1",
+        "currentMilestoneId": "milestone:product-surface",
+        "territoryIds": ["territory:innovation"],
+        "lastActiveAt": "2026-08-12T23:20:00+08:00",
+        "repositoryRefs": ["cyrilla-mist/nexus-ai"]
+      }
+    },
+    {
+      "id": "milestone:product-surface",
+      "kind": "milestone",
+      "title": "Product Surface",
+      "summary": "Turn the accepted Context foundation into a truthful provider-neutral Atlas surface.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-12T22:30:00+08:00", "updatedAt": "2026-08-12T23:20:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "project-roadmap", "reference": "docs/Nexus-Atlas-v0.2-Roadmap.md", "capturedAt": "2026-08-12T23:20:00+08:00", "retrievalMode": "repository-document-review", "authority": "project-roadmap" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": {
+        "milestoneStatus": "in_progress",
+        "completionCriteria": [
+          "Product Surface projector accepted",
+          "Nexus Self-Context Desk renders without Verity data",
+          "Historical Re-entry routes remain functional"
+        ]
+      }
+    },
+    {
+      "id": "identity:nexus-owner",
+      "kind": "identity",
+      "title": "Nexus Atlas project owner",
+      "summary": "The user remains the final decision authority for Nexus Atlas product direction and consequential changes.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-03T00:00:00+08:00", "updatedAt": "2026-08-12T23:20:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "human-instruction", "reference": "long-term-development-scope", "capturedAt": "2026-08-12T23:20:00+08:00", "retrievalMode": "explicit-instruction", "authority": "human-confirmation" },
+      "governance": { "sensitivity": "personal", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": { "category": "role", "value": "project-owner", "appliesTo": "project:nexus-atlas" }
+    },
+    {
+      "id": "decision:archive-cartography",
+      "kind": "decision",
+      "title": "Use Archive Cartography as the product visual direction",
+      "summary": "New Nexus Atlas product surfaces use an archival, editorial, map-desk language rather than cosmic or neon graph metaphors.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-07-30T00:00:00+08:00", "updatedAt": "2026-08-12T23:20:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "architecture-baseline", "reference": "docs/architecture/Nexus-Atlas-Long-Term-Product-Baseline.md", "capturedAt": "2026-08-12T23:20:00+08:00", "retrievalMode": "repository-document-review", "authority": "human-confirmation" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": {
+        "subjectKey": "product.visual-direction",
+        "scopeKey": "project:nexus-atlas",
+        "question": "What visual language should guide new Nexus Atlas surfaces?",
+        "choice": "Archive Cartography.",
+        "rationale": "The product should feel like a contemporary working atlas with provenance, routes, indexes, and restrained material texture.",
+        "evidenceRefs": ["evidence:phase5-entry-audit"],
+        "alternatives": ["Star Map", "cosmic deep-space UI", "purple-blue neon graph"],
+        "constraints": ["Do not regress to the legacy Star Map metaphor for new Phase 5 surfaces."],
+        "decidedAt": "2026-07-30T00:00:00+08:00",
+        "decidedBy": "user:self",
+        "decisionStatus": "confirmed",
+        "supersededBy": null
+      }
+    },
+    {
+      "id": "decision:self-context-desk-first",
+      "kind": "decision",
+      "title": "Make Nexus Self-Context Desk the first Phase 5 slice",
+      "summary": "The first migrated Product Surface shows Nexus Atlas itself rather than extending the Verity competition fixture.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-12T22:30:00+08:00", "updatedAt": "2026-08-12T23:20:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "phase5-entry-audit", "reference": "docs/Nexus-Atlas-Phase5-Product-Surface-Entry-Audit.md", "capturedAt": "2026-08-12T23:20:00+08:00", "retrievalMode": "accepted-design-review", "authority": "human-confirmation" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": {
+        "subjectKey": "phase5.first-slice",
+        "scopeKey": "project:nexus-atlas",
+        "question": "What should be the first real Product Surface slice?",
+        "choice": "Nexus Self-Context Desk.",
+        "rationale": "It validates that the canonical Context foundation can power the permanent Atlas shell without Verity-specific data contracts.",
+        "evidenceRefs": ["evidence:phase5-entry-audit", "evidence:product-surface-contract"],
+        "alternatives": ["Extend the Verity fixture", "Build a GitHub connector UI first"],
+        "constraints": ["Migrate Desk first and keep Re-entry functional during the transition."],
+        "decidedAt": "2026-08-12T22:30:00+08:00",
+        "decidedBy": "user:self",
+        "decisionStatus": "confirmed",
+        "supersededBy": null
+      }
+    },
+    {
+      "id": "decision:no-live-connector-claim",
+      "kind": "decision",
+      "title": "Do not claim live GitHub connectivity in Phase 5C",
+      "summary": "The first Product Surface remains deterministic and read-only; Phase 4 did not implement OAuth or concrete HTTP transport.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-12T22:30:00+08:00", "updatedAt": "2026-08-12T23:20:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "phase5-entry-audit", "reference": "docs/Nexus-Atlas-Phase5-Product-Surface-Entry-Audit.md", "capturedAt": "2026-08-12T23:20:00+08:00", "retrievalMode": "accepted-design-review", "authority": "human-confirmation" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": {
+        "subjectKey": "phase5.transport-boundary",
+        "scopeKey": "project:nexus-atlas",
+        "question": "Should Phase 5C present GitHub as a live connected source?",
+        "choice": "No.",
+        "rationale": "Phase 4 accepted a bounded adapter core with injected read-only client, not OAuth, repository discovery, or production transport.",
+        "evidenceRefs": ["evidence:phase4-frozen", "evidence:phase5-entry-audit"],
+        "alternatives": ["Show a Connect GitHub control"],
+        "constraints": ["Source metadata must be labeled honestly as fixture/local/read-only where applicable."],
+        "decidedAt": "2026-08-12T22:30:00+08:00",
+        "decidedBy": "user:self",
+        "decisionStatus": "confirmed",
+        "supersededBy": null
+      }
+    },
+    {
+      "id": "decision:no-persistent-write-claim",
+      "kind": "decision",
+      "title": "Do not claim persistent canonical writes",
+      "summary": "Product Surface review and admission preview remain local/in-memory until a separate persistence contract is accepted.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-12T22:30:00+08:00", "updatedAt": "2026-08-12T23:20:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "product-surface-contract", "reference": "docs/Nexus-Atlas-v0.1-Product-Surface-Contract.md", "capturedAt": "2026-08-12T23:20:00+08:00", "retrievalMode": "accepted-contract-review", "authority": "human-confirmation" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": {
+        "subjectKey": "phase5.persistence-boundary",
+        "scopeKey": "project:nexus-atlas",
+        "question": "Does approval in Product Surface v0.1 persist canonical Graph changes?",
+        "choice": "No; Phase 5C/5E remain read-only or in-memory preview only.",
+        "rationale": "Canonical Admission v0.1 is pure/local/in-memory and Phase 5 does not broaden that authority by UI implication.",
+        "evidenceRefs": ["evidence:phase4-frozen", "evidence:product-surface-contract"],
+        "alternatives": ["Treat UI approval as persistent mutation"],
+        "constraints": ["Persistent write requires a separate accepted contract."],
+        "decidedAt": "2026-08-12T22:30:00+08:00",
+        "decidedBy": "user:self",
+        "decisionStatus": "confirmed",
+        "supersededBy": null
+      }
+    },
+    {
+      "id": "memory:phase4-complete",
+      "kind": "memory",
+      "title": "Phase 4 is complete and frozen",
+      "summary": "The bounded first Source Adapter foundation was accepted and merged into main before Phase 5 began.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-12T22:00:00+08:00", "updatedAt": "2026-08-12T23:20:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "repository-history", "reference": "main@79d66207bbd5818010eae0695e9923e174f5b47a", "capturedAt": "2026-08-12T23:20:00+08:00", "retrievalMode": "repository-history-review", "authority": "repository-scope" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": {
+        "subjectKey": "implementation.phase4",
+        "scopeKey": "project:nexus-atlas",
+        "statement": "Phase 4 is complete and frozen at the bounded first Source Adapter foundation.",
+        "basis": "Accepted Phase 4F verification and main merge.",
+        "memoryStatus": "recorded",
+        "relatedEntityRefs": ["project:nexus-atlas", "evidence:phase4-frozen"],
+        "conflictsWith": [],
+        "supersededBy": null
+      }
+    },
+    {
+      "id": "memory:phase5-started",
+      "kind": "memory",
+      "title": "Phase 5 Product Surface has started",
+      "summary": "Phase 5A and Phase 5B established the surface boundary before Desk implementation begins.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-12T22:30:00+08:00", "updatedAt": "2026-08-12T23:20:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "project-roadmap", "reference": "docs/Nexus-Atlas-v0.2-Roadmap.md", "capturedAt": "2026-08-12T23:20:00+08:00", "retrievalMode": "repository-document-review", "authority": "project-roadmap" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": {
+        "subjectKey": "implementation.phase5",
+        "scopeKey": "project:nexus-atlas",
+        "statement": "Phase 5 Product Surface is in progress, with Phase 5A and 5B complete and Phase 5C beginning.",
+        "basis": "Accepted Product Surface Entry Audit, Contract, Matrix, and source mapping.",
+        "memoryStatus": "recorded",
+        "relatedEntityRefs": ["project:nexus-atlas", "evidence:phase5-entry-audit", "evidence:product-surface-contract"],
+        "conflictsWith": [],
+        "supersededBy": null
+      }
+    },
+    {
+      "id": "evidence:phase4-frozen",
+      "kind": "evidence",
+      "title": "Phase 4F frozen acceptance",
+      "summary": "Phase 4F was frozen at bf4f26180ed6d219dce5c843b350ff6e2a2cafb8 and merged into main through 79d66207bbd5818010eae0695e9923e174f5b47a.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-12T22:00:00+08:00", "updatedAt": "2026-08-12T23:20:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "repository-history", "reference": "bf4f26180ed6d219dce5c843b350ff6e2a2cafb8", "capturedAt": "2026-08-12T23:20:00+08:00", "retrievalMode": "repository-history-review", "authority": "repository-scope" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": {
+        "claim": "Phase 4 is complete and frozen before Phase 5 Product Surface work.",
+        "sourceRef": "bf4f26180ed6d219dce5c843b350ff6e2a2cafb8",
+        "observedAt": "2026-08-12T22:00:00+08:00",
+        "appliesToVersion": "main@79d66207bbd5818010eae0695e9923e174f5b47a",
+        "verificationMethod": "accepted regression and repository merge review",
+        "result": "confirmed"
+      }
+    },
+    {
+      "id": "evidence:phase5-entry-audit",
+      "kind": "evidence",
+      "title": "Phase 5 Product Surface Entry Audit",
+      "summary": "The accepted audit retains the Archive Cartography Atlas shell and chooses Nexus Self-Context Desk as the first migrated slice.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-12T22:30:00+08:00", "updatedAt": "2026-08-12T23:20:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "repository-document", "reference": "docs/Nexus-Atlas-Phase5-Product-Surface-Entry-Audit.md", "capturedAt": "2026-08-12T23:20:00+08:00", "retrievalMode": "repository-document-review", "authority": "accepted-design" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": {
+        "claim": "Nexus Self-Context Desk is the first Phase 5 product slice and Archive Cartography remains binding.",
+        "sourceRef": "docs/Nexus-Atlas-Phase5-Product-Surface-Entry-Audit.md",
+        "observedAt": "2026-08-12T22:30:00+08:00",
+        "appliesToVersion": "feature/phase5-product-surface@0d615ab6cf6b13156bc8ff635f9314252ef63e0a",
+        "verificationMethod": "accepted design audit",
+        "result": "confirmed"
+      }
+    },
+    {
+      "id": "evidence:product-surface-contract",
+      "kind": "evidence",
+      "title": "Product Surface Contract v0.1",
+      "summary": "The accepted contract defines a provider-neutral read-only surface boundary with explicit state, provenance, governance, and privacy rules.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-12T23:00:00+08:00", "updatedAt": "2026-08-12T23:20:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "repository-document", "reference": "docs/Nexus-Atlas-v0.1-Product-Surface-Contract.md", "capturedAt": "2026-08-12T23:20:00+08:00", "retrievalMode": "repository-document-review", "authority": "accepted-contract" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": {
+        "claim": "Product Surface v0.1 is a deterministic provider-neutral read-only projection boundary.",
+        "sourceRef": "docs/Nexus-Atlas-v0.1-Product-Surface-Contract.md",
+        "observedAt": "2026-08-12T23:00:00+08:00",
+        "appliesToVersion": "feature/phase5-product-surface@530a377d8734cf1791566e3d191e10a3acd6c602",
+        "verificationMethod": "accepted contract review",
+        "result": "confirmed"
+      }
+    },
+    {
+      "id": "risk:stale-historical-self-context",
+      "kind": "risk",
+      "title": "Historical self-context fixture is stale for Phase 5 Desk",
+      "summary": "The frozen v0.2 self-context fixture still reports Phase 3 complete / Phase 4 planned and must not masquerade as current Product Surface data.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-12T23:10:00+08:00", "updatedAt": "2026-08-12T23:20:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "phase5-mapping-review", "reference": "docs/Nexus-Atlas-v0.1-Product-Surface-Source-Mapping.md", "capturedAt": "2026-08-12T23:20:00+08:00", "retrievalMode": "accepted-mapping-review", "authority": "accepted-design" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": {
+        "severity": "medium",
+        "likelihood": "high",
+        "mitigation": "Use this independently validated Phase-5-specific self-context fixture through the existing Provider fixturePath boundary."
+      }
+    },
+    {
+      "id": "action:implement-product-surface-projector",
+      "kind": "action",
+      "title": "Implement Product Surface projector",
+      "summary": "Adapt the accepted Self-Context Provider result into Product Surface v0.1 without re-resolving governance.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-12T23:20:00+08:00", "updatedAt": "2026-08-12T23:20:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "project-roadmap", "reference": "docs/Nexus-Atlas-v0.2-Roadmap.md", "capturedAt": "2026-08-12T23:20:00+08:00", "retrievalMode": "repository-document-review", "authority": "project-roadmap" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": {
+        "description": "Implement deterministic Product Surface v0.1 projection from the accepted Self-Context Provider transaction.",
+        "owner": "user:self",
+        "priority": "high",
+        "actionStatus": "in_progress",
+        "completionCriteria": "Projector passes Phase 5C contract tests and does not mutate upstream artifacts.",
+        "relatedDecisionRefs": ["decision:self-context-desk-first"],
+        "externalEffect": false,
+        "requiresConfirmation": false
+      }
+    },
+    {
+      "id": "action:migrate-desk-route",
+      "kind": "action",
+      "title": "Migrate Atlas Desk to Nexus Self-Context",
+      "summary": "Replace Verity-specific Desk data with Product Surface v0.1 while leaving Re-entry available.",
+      "scope": { "userId": "user:self", "territoryId": "territory:innovation", "projectId": "project:nexus-atlas" },
+      "lifecycle": { "state": "active", "createdAt": "2026-08-12T23:20:00+08:00", "updatedAt": "2026-08-12T23:20:00+08:00" },
+      "epistemic": { "verification": "confirmed", "confidence": 1, "freshness": "current" },
+      "provenance": { "provider": "project-roadmap", "reference": "docs/Nexus-Atlas-v0.2-Roadmap.md", "capturedAt": "2026-08-12T23:20:00+08:00", "retrievalMode": "repository-document-review", "authority": "project-roadmap" },
+      "governance": { "sensitivity": "public", "inheritance": "project_only", "requiresConfirmation": false },
+      "payload": {
+        "description": "Render Nexus Self-Context Desk through the existing Archive Cartography Atlas shell.",
+        "owner": "user:self",
+        "priority": "high",
+        "actionStatus": "proposed",
+        "completionCriteria": "Desk route no longer depends on Verity Scenario fields and existing Re-entry remains functional.",
+        "relatedDecisionRefs": ["decision:self-context-desk-first", "decision:archive-cartography"],
+        "externalEffect": false,
+        "requiresConfirmation": false
+      }
+    }
+  ],
+  "edges": [],
+  "contextPackage": {
+    "project": "project:nexus-atlas",
+    "identitySnapshot": ["identity:nexus-owner"],
+    "activeGoals": [],
+    "confirmedDecisions": [
+      "decision:archive-cartography",
+      "decision:self-context-desk-first",
+      "decision:no-live-connector-claim",
+      "decision:no-persistent-write-claim"
+    ],
+    "currentEvidence": [
+      "evidence:phase4-frozen",
+      "evidence:phase5-entry-audit",
+      "evidence:product-surface-contract"
+    ],
+    "disputedContext": [],
+    "staleContext": [],
+    "openRisks": ["risk:stale-historical-self-context"],
+    "nextActions": [
+      "action:implement-product-surface-projector",
+      "action:migrate-desk-route"
+    ],
+    "omittedContext": []
+  }
+}
