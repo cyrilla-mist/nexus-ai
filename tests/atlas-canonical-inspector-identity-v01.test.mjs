@@ -46,7 +46,7 @@ test("every accepted inspector descriptor resolves exactly one matching Product 
 
 test("Desk Inspector resolves through inspectorIndex instead of an unbounded all-record scan", () => {
   assert.match(desk, /function inspectorDescriptorById\(/);
-  assert.match(desk, /state\.surface\?\.inspectorIndex\?\.filter/);
+  assert.ok(desk.includes("state.surface?.inspectorIndex?.filter"));
   assert.match(desk, /matches\.length === 1/);
   assert.match(desk, /function recordsForInspectorSection\(/);
   assert.match(desk, /record\.kind !== descriptor\.kind/);
