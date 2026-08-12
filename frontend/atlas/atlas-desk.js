@@ -64,29 +64,43 @@ async function loadProductSurface() {
   return surface;
 }
 
-function allSurfaceRecords() {
+function inspectorDescriptorById(id) {
+  const matches = state.surface?.inspectorIndex?.filter((descriptor) => descriptor.id === id) || [];
+  return matches.length === 1 ? matches[0] : null;
+}
+
+function recordsForInspectorSection(section) {
   const surface = state.surface;
-  if (!surface) return [];
-  return [
-    { ...surface.project, kind: "project", governance: null, relatedIds: [] },
-    ...surface.identity,
-    ...surface.decisions.effective,
-    ...surface.decisions.proposed,
-    ...surface.decisions.historical,
-    ...surface.memories.confirmed,
-    ...surface.memories.inferred,
-    ...surface.memories.disputed,
-    ...surface.memories.historical,
-    ...surface.evidence.current,
-    ...surface.evidence.stale,
-    ...surface.evidence.disputed,
-    ...surface.risks,
-    ...surface.actions,
-  ];
+  if (!surface) return null;
+  const sections = {
+    project: [{ ...surface.project, kind: "project", governance: null, relatedIds: [] }],
+    identity: surface.identity,
+    "decisions.effective": surface.decisions.effective,
+    "decisions.proposed": surface.decisions.proposed,
+    "decisions.historical": surface.decisions.historical,
+    "memories.confirmed": surface.memories.confirmed,
+    "memories.inferred": surface.memories.inferred,
+    "memories.disputed": surface.memories.disputed,
+    "memories.historical": surface.memories.historical,
+    "evidence.current": surface.evidence.current,
+    "evidence.stale": surface.evidence.stale,
+    "evidence.disputed": surface.evidence.disputed,
+    risks: surface.risks,
+    actions: surface.actions,
+  };
+  return Object.hasOwn(sections, section) ? sections[section] : null;
 }
 
 function surfaceRecordById(id) {
-  return allSurfaceRecords().find((record) => record.id === id) || null;
+  const descriptor = inspectorDescriptorById(id);
+  if (!descriptor) return null;
+  const records = recordsForInspectorSection(descriptor.section);
+  if (!records) return null;
+  const matches = records.filter((record) => record.id === descriptor.id);
+  if (matches.length !== 1) return null;
+  const [record] = matches;
+  if (record.kind !== descriptor.kind) return null;
+  return record;
 }
 
 function sectionRecords(key) {
@@ -160,6 +174,9 @@ function renderDesk() {
   const surface = state.surface;
   const project = surface.project;
   const totalRecords = surface.inspectorIndex.length;
+  const identities = surface.identity;
+  const confirmedIdentities = identities.filter((record) => record.state?.verification === "confirmed");
+  const inferredIdentities = identities.filter((record) => record.state?.verification === "inferred");
   const decisions = surface.decisions.effective;
   const memories = surface.memories.confirmed;
   const evidence = surface.evidence.current;
@@ -191,7 +208,7 @@ function renderDesk() {
         <h2>One context, explicit states</h2>
         <p>The Desk reads Product Surface v0.1. It preserves verification, freshness, provenance, and governance without creating new canonical truth.</p>
         <div class="territory-summary-list">
-          <div class="territory-summary"><span>01</span><div><strong>Identity</strong><small>Confirmed user authority</small></div><em>${surface.identity.length}</em></div>
+          <div class="territory-summary"><span>01</span><div><strong>Identity</strong><small>Accepted identity records</small></div><em>${surface.identity.length}</em></div>
           <div class="territory-summary"><span>02</span><div><strong>Memory</strong><small>Confirmed continuity records</small></div><em>${memories.length}</em></div>
           <div class="territory-summary"><span>03</span><div><strong>Evidence</strong><small>Current accepted support</small></div><em>${evidence.length}</em></div>
           <div class="territory-summary"><span>04</span><div><strong>Sources</strong><small>Bounded projected providers</small></div><em>${surface.sourceSummary.length}</em></div>
@@ -207,6 +224,16 @@ function renderDesk() {
     </section>
 
     <div class="workspace-grid">
+      <section class="workspace-section is-wide">
+        <span class="card-kicker">IDENTITY CONTEXT</span>
+        <h2>Who has authority in this project</h2>
+        <p>Identity records come only from accepted upstream context. Inferred identity, when present, remains explicitly inferred and is never presented as user-confirmed truth.</p>
+        <div class="finding-list">
+          ${identities.map((record) => renderRecordButton(record, record.state?.verification === "confirmed" ? "CONFIRMED IDENTITY" : "INFERRED IDENTITY")).join("")}
+        </div>
+        <p class="inspector-empty">${confirmedIdentities.length} confirmed · ${inferredIdentities.length} inferred · no identity capture or promotion occurs in this Desk.</p>
+      </section>
+
       <section class="workspace-section">
         <span class="card-kicker">DECISION CONTEXT</span>
         <h2>What remains effective</h2>
@@ -263,6 +290,7 @@ function renderSourceHealth() {
 function renderInspector(entityId, open = true) {
   state.selectedEntityId = entityId;
   state.inspectorOpen = open;
+  const descriptor = inspectorDescriptorById(entityId);
   const record = surfaceRecordById(entityId);
 
   if (state.inspectorOpen) inspector.classList.remove("is-closed");
@@ -272,8 +300,8 @@ function renderInspector(entityId, open = true) {
   if (openControl) openControl.hidden = state.inspectorOpen;
   inspectorTitle.textContent = "CONTEXT INSPECTOR";
 
-  if (!record) {
-    inspectorContent.innerHTML = `<p class="inspector-empty">Select a Product Surface record to inspect its state, provenance, governance, and relations.</p>`;
+  if (!record || !descriptor) {
+    inspectorContent.innerHTML = `<p class="inspector-empty">This record is not available through the accepted Product Surface inspector index. No raw source or Graph fallback was attempted.</p>`;
     return;
   }
 
@@ -288,10 +316,23 @@ function renderInspector(entityId, open = true) {
       <div><dt>OWNER</dt><dd>${escapeHtml(record.owner || "unassigned")}</dd></div>
       <div><dt>CONFIRMATION</dt><dd>${record.requiresConfirmation ? "required" : "not required"}</dd></div>
     </dl>` : "";
+  const identityDetails = record.kind === "identity" ? `
+    <span class="inspector-kicker">IDENTITY AUTHORITY</span>
+    <dl class="inspector-data">
+      <div><dt>VERIFICATION</dt><dd>${escapeHtml(record.state?.verification || "unknown")}</dd></div>
+      <div><dt>FRESHNESS</dt><dd>${escapeHtml(record.state?.freshness || "unknown")}</dd></div>
+      <div><dt>INHERITANCE</dt><dd>${escapeHtml(governance.inheritance || "unknown")}</dd></div>
+      <div><dt>CONFIRMATION</dt><dd>${governance.requiresConfirmation ? "required" : "not required"}</dd></div>
+    </dl>
+    <p class="inspector-empty">${record.state?.verification === "confirmed"
+      ? "This Identity record is confirmed by accepted upstream authority."
+      : record.state?.verification === "inferred"
+        ? "This Identity record is inferred and is not user-confirmed truth."
+        : "This Identity record keeps its upstream verification state without promotion."}</p>` : "";
 
   inspectorContent.innerHTML = `
     <section class="inspector-panel">
-      <span class="inspector-kicker">${escapeHtml(record.kind.toUpperCase())}</span>
+      <span class="inspector-kicker">${escapeHtml(record.kind.toUpperCase())} · ${escapeHtml(descriptor.section)}</span>
       <h2>${escapeHtml(record.title)}</h2>
       <span class="inspector-status">${escapeHtml(record.state?.verification || "unknown")} · ${escapeHtml(record.state?.freshness || "unknown")}</span>
       <p>${escapeHtml(record.summary)}</p>
@@ -303,6 +344,7 @@ function renderInspector(entityId, open = true) {
         <div><dt>AUTHORITY</dt><dd>${escapeHtml(provenance.authority || "unknown")}</dd></div>
         <div><dt>SENSITIVITY</dt><dd>${escapeHtml(governance.sensitivity || "project")}</dd></div>
       </dl>
+      ${identityDetails}
       ${actionDetails}
       ${related.length ? `
         <span class="inspector-kicker">RELATED CONTEXT</span>
