@@ -1,0 +1,294 @@
+{
+  "exampleMetadata": {
+    "example": true,
+    "runtimeEvidence": false,
+    "sourceBaseline": "source-snapshot-v0.1-design-fixture"
+  },
+  "input": {
+    "snapshotRef": "examples/nexus-atlas-source-snapshot-v0.1.json",
+    "policyVersion": "github-context-import-policy-v1",
+    "projectId": "project:nexus-atlas",
+    "scopeKey": "project:nexus-atlas"
+  },
+  "plan": {
+    "planVersion": "0.1",
+    "policyVersion": "github-context-import-policy-v1",
+    "generatedAt": "2026-08-07T12:00:00Z",
+    "sourceSnapshot": {
+      "snapshotVersion": "0.1",
+      "adapter": "github",
+      "capturedAt": "2026-08-07T12:00:00Z",
+      "repositoryRef": "cyrilla-mist/nexus-ai",
+      "recordIds": [
+        "github:repo:cyrilla-mist/nexus-ai",
+        "github:branch:cyrilla-mist/nexus-ai:main",
+        "github:commit:cyrilla-mist/nexus-ai:2222222222222222222222222222222222222222",
+        "github:commit:cyrilla-mist/nexus-ai:3333333333333333333333333333333333333333",
+        "github:issue:cyrilla-mist/nexus-ai:17",
+        "github:pr:cyrilla-mist/nexus-ai:23",
+        "github:release:cyrilla-mist/nexus-ai:release-7",
+        "github:tag:cyrilla-mist/nexus-ai:v0.1.0"
+      ]
+    },
+    "target": {
+      "projectId": "project:nexus-atlas",
+      "scopeKey": "project:nexus-atlas"
+    },
+    "candidates": [
+      {
+        "candidateId": "candidate:evidence:github:repo:cyrilla-mist/nexus-ai",
+        "targetKind": "evidence",
+        "sourceRecordIds": [
+          "github:repo:cyrilla-mist/nexus-ai"
+        ],
+        "mappingRule": "github-repository-state-to-evidence",
+        "title": "GitHub repository observation",
+        "summary": "GitHub repository cyrilla-mist/nexus-ai is available.",
+        "proposedPayload": {
+          "claim": "GitHub repository cyrilla-mist/nexus-ai is available.",
+          "sourceRef": "github:repo:cyrilla-mist/nexus-ai",
+          "observedAt": "2026-08-07T11:00:00Z",
+          "appliesToVersion": null,
+          "verificationMethod": "github-source-snapshot-v0.1",
+          "result": "available"
+        },
+        "provenance": {
+          "provider": "github",
+          "reference": "https://github.com/cyrilla-mist/nexus-ai",
+          "capturedAt": "2026-08-07T12:00:00Z",
+          "retrievalMode": "read-only-api",
+          "authority": "github-repository-state"
+        },
+        "admission": {
+          "stage": "candidate",
+          "canonicalWriteAllowed": false,
+          "confirmationRequirement": "source-authority-sufficient"
+        }
+      },
+      {
+        "candidateId": "candidate:evidence:github:branch:cyrilla-mist/nexus-ai:main",
+        "targetKind": "evidence",
+        "sourceRecordIds": [
+          "github:branch:cyrilla-mist/nexus-ai:main"
+        ],
+        "mappingRule": "github-branch-state-to-evidence",
+        "title": "GitHub default branch observation",
+        "summary": "GitHub default branch main points to commit 1111111111111111111111111111111111111111.",
+        "proposedPayload": {
+          "claim": "GitHub default branch main points to commit 1111111111111111111111111111111111111111.",
+          "sourceRef": "github:branch:cyrilla-mist/nexus-ai:main",
+          "observedAt": null,
+          "appliesToVersion": null,
+          "verificationMethod": "github-source-snapshot-v0.1",
+          "result": "present"
+        },
+        "provenance": {
+          "provider": "github",
+          "reference": "https://github.com/cyrilla-mist/nexus-ai/tree/main",
+          "capturedAt": "2026-08-07T12:00:00Z",
+          "retrievalMode": "read-only-api",
+          "authority": "github-ref-state"
+        },
+        "admission": {
+          "stage": "candidate",
+          "canonicalWriteAllowed": false,
+          "confirmationRequirement": "source-authority-sufficient"
+        }
+      },
+      {
+        "candidateId": "candidate:evidence:github:commit:cyrilla-mist/nexus-ai:2222222222222222222222222222222222222222",
+        "targetKind": "evidence",
+        "sourceRecordIds": [
+          "github:commit:cyrilla-mist/nexus-ai:2222222222222222222222222222222222222222"
+        ],
+        "mappingRule": "github-commit-state-to-evidence",
+        "title": "GitHub commit observation",
+        "summary": "GitHub commit 2222222222222222222222222222222222222222 is present.",
+        "proposedPayload": {
+          "claim": "GitHub commit 2222222222222222222222222222222222222222 is present.",
+          "sourceRef": "github:commit:cyrilla-mist/nexus-ai:2222222222222222222222222222222222222222",
+          "observedAt": "2026-08-06T10:00:00Z",
+          "appliesToVersion": null,
+          "verificationMethod": "github-source-snapshot-v0.1",
+          "result": "present"
+        },
+        "provenance": {
+          "provider": "github",
+          "reference": "https://github.com/cyrilla-mist/nexus-ai/commit/2222222222222222222222222222222222222222",
+          "capturedAt": "2026-08-07T12:00:00Z",
+          "retrievalMode": "read-only-api",
+          "authority": "github-commit-state"
+        },
+        "admission": {
+          "stage": "candidate",
+          "canonicalWriteAllowed": false,
+          "confirmationRequirement": "source-authority-sufficient"
+        }
+      },
+      {
+        "candidateId": "candidate:evidence:github:commit:cyrilla-mist/nexus-ai:3333333333333333333333333333333333333333",
+        "targetKind": "evidence",
+        "sourceRecordIds": [
+          "github:commit:cyrilla-mist/nexus-ai:3333333333333333333333333333333333333333"
+        ],
+        "mappingRule": "github-commit-state-to-evidence",
+        "title": "GitHub commit observation",
+        "summary": "GitHub commit 3333333333333333333333333333333333333333 is present.",
+        "proposedPayload": {
+          "claim": "GitHub commit 3333333333333333333333333333333333333333 is present.",
+          "sourceRef": "github:commit:cyrilla-mist/nexus-ai:3333333333333333333333333333333333333333",
+          "observedAt": "2026-08-05T10:00:00Z",
+          "appliesToVersion": null,
+          "verificationMethod": "github-source-snapshot-v0.1",
+          "result": "present"
+        },
+        "provenance": {
+          "provider": "github",
+          "reference": "https://github.com/cyrilla-mist/nexus-ai/commit/3333333333333333333333333333333333333333",
+          "capturedAt": "2026-08-07T12:00:00Z",
+          "retrievalMode": "read-only-api",
+          "authority": "github-commit-state"
+        },
+        "admission": {
+          "stage": "candidate",
+          "canonicalWriteAllowed": false,
+          "confirmationRequirement": "source-authority-sufficient"
+        }
+      },
+      {
+        "candidateId": "candidate:evidence:github:issue:cyrilla-mist/nexus-ai:17",
+        "targetKind": "evidence",
+        "sourceRecordIds": [
+          "github:issue:cyrilla-mist/nexus-ai:17"
+        ],
+        "mappingRule": "github-issue-state-to-evidence",
+        "title": "GitHub issue #17 observation",
+        "summary": "GitHub issue #17 is open.",
+        "proposedPayload": {
+          "claim": "GitHub issue #17 is open.",
+          "sourceRef": "github:issue:cyrilla-mist/nexus-ai:17",
+          "observedAt": "2026-08-04T12:00:00Z",
+          "appliesToVersion": null,
+          "verificationMethod": "github-source-snapshot-v0.1",
+          "result": "open"
+        },
+        "provenance": {
+          "provider": "github",
+          "reference": "https://github.com/cyrilla-mist/nexus-ai/issues/17",
+          "capturedAt": "2026-08-07T12:00:00Z",
+          "retrievalMode": "read-only-api",
+          "authority": "github-issue-state"
+        },
+        "admission": {
+          "stage": "candidate",
+          "canonicalWriteAllowed": false,
+          "confirmationRequirement": "source-authority-sufficient"
+        }
+      },
+      {
+        "candidateId": "candidate:evidence:github:pr:cyrilla-mist/nexus-ai:23",
+        "targetKind": "evidence",
+        "sourceRecordIds": [
+          "github:pr:cyrilla-mist/nexus-ai:23"
+        ],
+        "mappingRule": "github-pull-request-state-to-evidence",
+        "title": "GitHub pull request #23 observation",
+        "summary": "GitHub pull request #23 is merged.",
+        "proposedPayload": {
+          "claim": "GitHub pull request #23 is merged.",
+          "sourceRef": "github:pr:cyrilla-mist/nexus-ai:23",
+          "observedAt": "2026-08-04T14:00:00Z",
+          "appliesToVersion": null,
+          "verificationMethod": "github-source-snapshot-v0.1",
+          "result": "merged"
+        },
+        "provenance": {
+          "provider": "github",
+          "reference": "https://github.com/cyrilla-mist/nexus-ai/pull/23",
+          "capturedAt": "2026-08-07T12:00:00Z",
+          "retrievalMode": "read-only-api",
+          "authority": "github-pull-request-state"
+        },
+        "admission": {
+          "stage": "candidate",
+          "canonicalWriteAllowed": false,
+          "confirmationRequirement": "source-authority-sufficient"
+        }
+      },
+      {
+        "candidateId": "candidate:evidence:github:release:cyrilla-mist/nexus-ai:release-7",
+        "targetKind": "evidence",
+        "sourceRecordIds": [
+          "github:release:cyrilla-mist/nexus-ai:release-7"
+        ],
+        "mappingRule": "github-release-state-to-evidence",
+        "title": "GitHub release observation",
+        "summary": "GitHub release v0.1.0 is published.",
+        "proposedPayload": {
+          "claim": "GitHub release v0.1.0 is published.",
+          "sourceRef": "github:release:cyrilla-mist/nexus-ai:release-7",
+          "observedAt": "2026-08-01T12:00:00Z",
+          "appliesToVersion": null,
+          "verificationMethod": "github-source-snapshot-v0.1",
+          "result": "published"
+        },
+        "provenance": {
+          "provider": "github",
+          "reference": "https://github.com/cyrilla-mist/nexus-ai/releases/tag/v0.1.0",
+          "capturedAt": "2026-08-07T12:00:00Z",
+          "retrievalMode": "read-only-api",
+          "authority": "github-release-state"
+        },
+        "admission": {
+          "stage": "candidate",
+          "canonicalWriteAllowed": false,
+          "confirmationRequirement": "source-authority-sufficient"
+        }
+      },
+      {
+        "candidateId": "candidate:evidence:github:tag:cyrilla-mist/nexus-ai:v0.1.0",
+        "targetKind": "evidence",
+        "sourceRecordIds": [
+          "github:tag:cyrilla-mist/nexus-ai:v0.1.0"
+        ],
+        "mappingRule": "github-tag-state-to-evidence",
+        "title": "GitHub tag observation",
+        "summary": "GitHub tag v0.1.0 points to commit 5555555555555555555555555555555555555555.",
+        "proposedPayload": {
+          "claim": "GitHub tag v0.1.0 points to commit 5555555555555555555555555555555555555555.",
+          "sourceRef": "github:tag:cyrilla-mist/nexus-ai:v0.1.0",
+          "observedAt": null,
+          "appliesToVersion": null,
+          "verificationMethod": "github-source-snapshot-v0.1",
+          "result": "present"
+        },
+        "provenance": {
+          "provider": "github",
+          "reference": "https://github.com/cyrilla-mist/nexus-ai/releases/tag/v0.1.0",
+          "capturedAt": "2026-08-07T12:00:00Z",
+          "retrievalMode": "read-only-api",
+          "authority": "github-ref-state"
+        },
+        "admission": {
+          "stage": "candidate",
+          "canonicalWriteAllowed": false,
+          "confirmationRequirement": "source-authority-sufficient"
+        }
+      }
+    ],
+    "exclusions": [],
+    "diagnostics": {
+      "coverageComplete": true,
+      "sourceRecordCount": 8,
+      "candidateCount": 8,
+      "exclusionCount": 0,
+      "byTargetKind": {
+        "evidence": 8
+      },
+      "byConfirmationRequirement": {
+        "source-authority-sufficient": 8
+      }
+    }
+  }
+}
+

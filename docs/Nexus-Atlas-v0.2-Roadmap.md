@@ -1,7 +1,7 @@
 # Nexus Atlas v0.2 — Personal Context Foundation
 
 **Status:** Active
-**Implementation:** Phase 3 generalized context package complete
+**Implementation:** Phase 4 first Source Adapter foundation complete
 
 ## 1. Executive Summary
 
@@ -186,9 +186,110 @@ Phase 3 已完成通用 Context Package contract、Builder、Adapter、双版本
 - fast-forward merge
 - no Phase 4 work
 
-### Phase 4 — First Source Adapter — Planned
+### Phase 4 — First Source Adapter — Complete
 
-优先评估 GitHub Adapter，仅读取 repository metadata、commits、issues and pull request references、release and version context。GitHub 只对其可验证的仓库状态具有权威，不是用户身份、偏好和全部决策的权威来源。
+Phase 4 is complete and frozen at the bounded first Source Adapter foundation. GitHub is the first implemented Source Adapter profile/core for explicit repository state, not a canonical authority for user identity, preference, rationale or confirmed Decisions.
+
+#### Phase 4A — Source Adapter Entry Audit — Complete
+
+- architecture boundary audit;
+- GitHub candidate assessment;
+- DataHub precedent review;
+- no Runtime implementation.
+
+#### Phase 4B — Source Snapshot Contract — Complete
+
+- generic Source Snapshot v0.1;
+- GitHub Source Profile v1;
+- explicit repository scope;
+- source-native stable identity;
+- time, error and pagination semantics;
+- privacy and authority boundaries;
+- 36-case contract catalog and test matrix;
+- no Runtime implementation.
+
+#### Phase 4C — GitHub Read-only Adapter — Complete
+
+- generic validator runtime and GitHub profile normalization;
+- explicit single-repository scope and injected read-only client;
+- bounded read limits and deterministic immutable Snapshot;
+- privacy allowlist and SourceAdapterError taxonomy;
+- automated 36-case suite;
+- no concrete HTTP/auth transport, Graph mutation or Planner integration.
+
+#### Phase 4D — Context Import Planner — Complete
+
+Contract Design — Complete / Accepted
+
+- Context Import Plan v0.1;
+- Candidate Evidence contract;
+- one-source-record-to-one-candidate v1 mapping;
+- candidate-only admission boundary;
+- provenance / authority preservation;
+- coverage invariant;
+- 32-case catalog;
+- Import Plan v0.1 Validator;
+- deterministic Planner;
+- Evidence-only Candidate mapping;
+- one-source-record-to-one-candidate;
+- complete coverage partition;
+- provenance/source authority preserved;
+- semantic promotion prohibited;
+- 32-case automated suite;
+- no Canonical Graph mutation;
+- no Provider integration.
+
+Planner Runtime — Complete
+
+#### Phase 4E — Canonical Integration — Complete
+
+Contract Design — Complete / Accepted
+
+- Canonical Admission v0.1;
+- explicit authorization boundary;
+- deterministic Evidence node identity;
+- source observation history preservation;
+- insert/noop/conflict/deferred reconciliation;
+- conservative canonical epistemic/governance defaults;
+- atomic Graph application contract;
+- no Edge creation;
+- no ContextPackage mutation;
+- 32-case catalog;
+- no Runtime yet.
+- apply re-accepts the validated Import Plan;
+- exact sourcePlan and Candidate-to-proposal binding;
+- apply-time explicit authorization rebinding;
+- independent provenance and authorization proofs;
+- apply-time reconciliation race semantics;
+- 16-code non-retryable error vocabulary;
+- Contract and Matrix Accepted.
+
+Phase 4E authorization binding closure complete: Apply independently re-accepts `authorizedCandidateIds`, treats the selection as a set normalized in Import Plan order, and rejects any Decision/proposal authorization partition mismatch before reconciliation.
+
+Canonical Admission Runtime — Complete
+
+- build, validate and apply Runtime;
+- explicit authorization rebinding and upstream Candidate binding;
+- strict target Project scope policy;
+- deterministic Evidence identity and insert/noop/conflict/deferred reconciliation;
+- atomic pure in-memory Graph application;
+- automated 32-case suite and Accepted Example compatibility;
+- no persistent write, source re-read, Edge or ContextPackage mutation.
+
+#### Phase 4F — Acceptance and Policy Hardening — Complete / Accepted
+
+- dedicated Phase 4F cross-layer acceptance contract and 38-case matrix;
+- 30 dedicated executable checks across fixture stability, source failure policy, privacy, explicit authorization review and end-to-end Graph application;
+- Source Snapshot 36-case, Context Import Plan 32-case and Canonical Admission 32-case closures retained;
+- auth, forbidden, rate-limit, unavailable and not-found source failure semantics proven without successful/partial error Snapshots;
+- privacy sentinel proven absent across Snapshot, Import Plan, Admission Plan and applied Graph;
+- reviewed subset authorization, Apply-time authorization rebinding, Evidence-only admission, atomicity, idempotence and source observation history proven across layers;
+- root `package-lock.json` excluded; no dependency introduced;
+- clean-checkout GitHub Actions gate executes dedicated Phase 4F verification, full Node tests and full repository check;
+- acceptance run `31399296273` completed all 12 workflow/job steps successfully;
+- frozen-boundary review found no Phase 4B–4E Runtime, accepted JSON fixture/catalog, Context Graph Validator, Provider, UI, live transport or persistence reopening.
+
+Phase 4 completion preserves the original bounded architecture: transport/source normalization, candidate planning and canonical admission remain independently testable; GitHub-derived observations can enter only as explicitly reviewed Evidence, not as silently promoted personal or project truth.
 
 ### Phase 5 — Product Surface — Planned
 
@@ -218,3 +319,5 @@ v0.2 暂不做：多用户协作平台、全量 Notion 同步、全量 Google Dr
 ## 9. v0.3 Direction
 
 后续方向仅包括 multiple real projects、additional source adapters、user-controlled context capture、outcome write-back、cross-territory views 和 richer agent assistance；这些不是 v0.2 已承诺功能。
+
+Phase 4 is complete at the first bounded Source Adapter foundation. Source Snapshot, Import Planning and Canonical Admission remain separated by explicit contracts and authority boundaries. Phase 5 remains planned and must not reinterpret Phase 4 completion as authorization for live persistent writes, semantic promotion or UI integration.

@@ -1,0 +1,117 @@
+{
+  "exampleMetadata": {
+    "example": true,
+    "runtimeEvidence": false,
+    "sourceBaseline": "design-fixture",
+    "capturedAt": "2026-08-07T12:00:00Z"
+  },
+  "snapshot": {
+    "snapshotVersion": "0.1",
+    "adapter": "github",
+    "capturedAt": "2026-08-07T12:00:00Z",
+    "scope": {
+      "type": "repository",
+      "repositoryRef": "cyrilla-mist/nexus-ai",
+      "requestedLimits": {"commits": 2, "issues": 1, "pullRequests": 1, "releases": 1, "tags": 1}
+    },
+    "source": {
+      "provider": "github",
+      "reference": "cyrilla-mist/nexus-ai",
+      "retrievalMode": "read-only-api",
+      "authority": "github-repository-state",
+      "state": "available"
+    },
+    "records": [
+      {
+        "sourceRecordId": "github:repo:cyrilla-mist/nexus-ai",
+        "sourceType": "repository",
+        "externalId": "cyrilla-mist/nexus-ai",
+        "observedState": "available",
+        "observedAt": "2026-08-07T11:00:00Z",
+        "reference": "https://github.com/cyrilla-mist/nexus-ai",
+        "authority": "github-repository-state",
+        "payload": {"name": "nexus-ai", "fullName": "cyrilla-mist/nexus-ai", "defaultBranch": "main", "archived": false, "visibility": "public", "updatedAt": "2026-08-07T11:00:00Z"}
+      },
+      {
+        "sourceRecordId": "github:branch:cyrilla-mist/nexus-ai:main",
+        "sourceType": "branch",
+        "externalId": "main",
+        "observedState": "present",
+        "observedAt": null,
+        "reference": "https://github.com/cyrilla-mist/nexus-ai/tree/main",
+        "authority": "github-ref-state",
+        "payload": {"name": "main", "headSha": "1111111111111111111111111111111111111111"}
+      },
+      {
+        "sourceRecordId": "github:commit:cyrilla-mist/nexus-ai:2222222222222222222222222222222222222222",
+        "sourceType": "commit",
+        "externalId": "2222222222222222222222222222222222222222",
+        "observedState": "present",
+        "observedAt": "2026-08-06T10:00:00Z",
+        "reference": "https://github.com/cyrilla-mist/nexus-ai/commit/2222222222222222222222222222222222222222",
+        "authority": "github-commit-state",
+        "payload": {"sha": "2222222222222222222222222222222222222222", "authoredAt": "2026-08-06T09:00:00Z", "committedAt": "2026-08-06T10:00:00Z", "messageHeadline": "Define source snapshot boundary"}
+      },
+      {
+        "sourceRecordId": "github:commit:cyrilla-mist/nexus-ai:3333333333333333333333333333333333333333",
+        "sourceType": "commit",
+        "externalId": "3333333333333333333333333333333333333333",
+        "observedState": "present",
+        "observedAt": "2026-08-05T10:00:00Z",
+        "reference": "https://github.com/cyrilla-mist/nexus-ai/commit/3333333333333333333333333333333333333333",
+        "authority": "github-commit-state",
+        "payload": {"sha": "3333333333333333333333333333333333333333", "authoredAt": "2026-08-05T09:00:00Z", "committedAt": "2026-08-05T10:00:00Z", "messageHeadline": "Preserve source authority boundaries"}
+      },
+      {
+        "sourceRecordId": "github:issue:cyrilla-mist/nexus-ai:17",
+        "sourceType": "issue",
+        "externalId": "17",
+        "observedState": "open",
+        "observedAt": "2026-08-04T12:00:00Z",
+        "reference": "https://github.com/cyrilla-mist/nexus-ai/issues/17",
+        "authority": "github-issue-state",
+        "payload": {"number": 17, "title": "Review source boundary", "state": "open", "createdAt": "2026-08-03T12:00:00Z", "updatedAt": "2026-08-04T12:00:00Z", "closedAt": null}
+      },
+      {
+        "sourceRecordId": "github:pr:cyrilla-mist/nexus-ai:23",
+        "sourceType": "pull_request",
+        "externalId": "23",
+        "observedState": "merged",
+        "observedAt": "2026-08-04T14:00:00Z",
+        "reference": "https://github.com/cyrilla-mist/nexus-ai/pull/23",
+        "authority": "github-pull-request-state",
+        "payload": {"number": 23, "title": "Document source snapshot contract", "state": "closed", "draft": false, "merged": true, "createdAt": "2026-08-02T12:00:00Z", "updatedAt": "2026-08-04T14:00:00Z", "closedAt": "2026-08-04T14:00:00Z", "mergedAt": "2026-08-04T14:00:00Z", "headSha": "4444444444444444444444444444444444444444", "baseRef": "main"}
+      },
+      {
+        "sourceRecordId": "github:release:cyrilla-mist/nexus-ai:release-7",
+        "sourceType": "release",
+        "externalId": "release-7",
+        "observedState": "published",
+        "observedAt": "2026-08-01T12:00:00Z",
+        "reference": "https://github.com/cyrilla-mist/nexus-ai/releases/tag/v0.1.0",
+        "authority": "github-release-state",
+        "payload": {"immutableId": "release-7", "tagName": "v0.1.0", "name": "Snapshot contract design fixture", "draft": false, "prerelease": false, "createdAt": "2026-08-01T10:00:00Z", "publishedAt": "2026-08-01T12:00:00Z"}
+      },
+      {
+        "sourceRecordId": "github:tag:cyrilla-mist/nexus-ai:v0.1.0",
+        "sourceType": "tag",
+        "externalId": "v0.1.0",
+        "observedState": "present",
+        "observedAt": null,
+        "reference": "https://github.com/cyrilla-mist/nexus-ai/releases/tag/v0.1.0",
+        "authority": "github-ref-state",
+        "payload": {"name": "v0.1.0", "targetSha": "5555555555555555555555555555555555555555"}
+      }
+    ],
+    "diagnostics": {
+      "complete": true,
+      "collections": {
+        "commits": {"requestedLimit": 2, "appliedLimit": 2, "itemsRead": 2, "pagesRead": 1, "truncated": false, "continuationAvailable": false},
+        "issues": {"requestedLimit": 1, "appliedLimit": 1, "itemsRead": 1, "pagesRead": 1, "truncated": false, "continuationAvailable": false},
+        "pullRequests": {"requestedLimit": 1, "appliedLimit": 1, "itemsRead": 1, "pagesRead": 1, "truncated": false, "continuationAvailable": false},
+        "releases": {"requestedLimit": 1, "appliedLimit": 1, "itemsRead": 1, "pagesRead": 1, "truncated": false, "continuationAvailable": false},
+        "tags": {"requestedLimit": 1, "appliedLimit": 1, "itemsRead": 1, "pagesRead": 1, "truncated": false, "continuationAvailable": false}
+      }
+    }
+  }
+}
