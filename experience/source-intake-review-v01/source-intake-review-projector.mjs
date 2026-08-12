@@ -63,13 +63,14 @@ function proposalPreview(candidate) {
 }
 
 function preview(candidates, selected, deferred, graph, plan) {
-  let reconciliation = "not-run"; let insertCount = null; let noopCount = null; let conflictCount = null; let proposals;
+  let reconciliation = "not-run"; let insertCount = null; let noopCount = null; let conflictCount = null; let decisions = []; let proposals;
   if (graph !== undefined) {
     if (!object(graph)) fail("SOURCE_INTAKE_PREVIEW_INVALID", "Optional Context Graph must be an object");
     let admissionPlan;
     try { admissionPlan = buildCanonicalAdmissionPlanV01({ graph, plan, policyVersion: GITHUB_EVIDENCE_CANONICAL_ADMISSION_POLICY_V1, authorizedCandidateIds: selected }); } catch (error) { throw new SourceIntakeReviewError("SOURCE_INTAKE_PREVIEW_INVALID", `Canonical Admission preview failed: ${error.code || error.message}`); }
     reconciliation = "admission-plan";
     insertCount = admissionPlan.diagnostics.insertCount; noopCount = admissionPlan.diagnostics.noopCount; conflictCount = admissionPlan.diagnostics.conflictCount;
+    decisions = admissionPlan.decisions.map(({ candidateId, disposition, reason }) => ({ candidateId, disposition, reason }));
     proposals = candidates.filter(candidate => selected.includes(candidate.candidateId)).map(proposalPreview);
   } else {
     proposals = candidates.filter(candidate => selected.includes(candidate.candidateId)).map(proposalPreview);
@@ -77,6 +78,7 @@ function preview(candidates, selected, deferred, graph, plan) {
   return {
     selectedCandidateIds: [...selected],
     proposals,
+    decisions,
     deferredCandidateIds: [...deferred],
     diagnostics: { candidateCount: candidates.length, authorizedCount: selected.length, deferredCount: deferred.length, proposalCount: proposals.length, insertCount, noopCount, conflictCount, applyAllowed: false },
     resultMode: "in-memory-preview",

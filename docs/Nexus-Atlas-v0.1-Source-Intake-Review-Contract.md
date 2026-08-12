@@ -117,6 +117,13 @@ Selection is explicit-only:
 {
   selectedCandidateIds,
   proposals,
+  decisions: [
+    {
+      candidateId,
+      disposition,
+      reason
+    }
+  ],
   deferredCandidateIds,
   diagnostics: {
     candidateCount,
@@ -137,7 +144,9 @@ Selection is explicit-only:
 }
 ```
 
-When no Context Graph is injected, the preview is explicitly `reconciliation: "not-run"`: it may display selected Candidate-derived Evidence proposal summaries, but it must not invent `insert`, `noop` or `conflict` dispositions. When an optional validated Context Graph is injected, the projector may reuse the accepted pure Canonical Admission builder and set `reconciliation: "admission-plan"`; it must still not call Apply. In both modes it must not apply anything to a persistent or shared Graph, and `applyAllowed` is fixed to `false` at the Product Surface boundary even when the underlying pure in-memory admission plan has no conflict.
+When no Context Graph is injected, the preview is explicitly `reconciliation: "not-run"`: `decisions` is empty, and it may display selected Candidate-derived Evidence proposal summaries without inventing `insert`, `noop` or `conflict` dispositions. Selection/deferred presentation remains separate: unselected Candidates are deferred with `not-authorized` in the review selection state, not Graph reconciliation.
+
+When an optional validated Context Graph is injected, the projector reuses the accepted pure Canonical Admission builder and mechanically projects its per-Candidate `decisions` as exactly `{ candidateId, disposition, reason }`, including `deferred` / `not-authorized` decisions. Phase 5E must not calculate or normalize `insert`, `noop` or `conflict` itself, and it must not call Apply. In both modes it must not apply anything to a persistent or shared Graph, and `applyAllowed` is fixed to `false` at the Product Surface boundary even when the underlying pure in-memory admission plan has no conflict.
 
 No preview proposal may create or modify an Edge, Project, Identity, Decision, Memory, Action or other canonical semantic record. A later write flow, if ever proposed, requires a separate accepted contract and explicit authorization boundary.
 
@@ -145,7 +154,7 @@ No preview proposal may create or modify an Edge, Project, Identity, Decision, M
 
 - Preserve source provider, bounded reference, capture time, retrieval mode and source-local authority independently from selection state.
 - Display source-local authority as authority over the observed source state only; never label it user-confirmed, human-confirmed or canonical.
-- Preserve sensitivity and omission. Restricted/private payloads, credentials, tokens, local paths, issue/PR bodies, comments and reviews are not review fields.
+- Preserve sensitivity and omission. The current accepted Phase 4 Snapshot / Import Plan does not supply a sensitivity classification, so `privacy.sensitivity === null` means **upstream sensitivity classification unavailable / not supplied**. It does not mean public, non-sensitive, safe or user-approved. Restricted/private payloads, credentials, tokens, local paths, issue/PR bodies, comments and reviews are not review fields.
 - A missing or omitted field remains missing; the surface must not infer source facts or personal meaning.
 - Safe references must follow the existing Product Surface privacy sanitizer and must not contain query fragments, credentials or local filesystem paths.
 

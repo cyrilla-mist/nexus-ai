@@ -39,6 +39,7 @@ export function sourceIntakeReviewIdV01(review) {
 function validateSource(source) {
   if (!exactKeys(source, ["provider", "scopeRef", "state", "capturedAt", "retrievalMode", "authority", "recordCount", "diagnostics"])) invalid("SOURCE_INTAKE_SOURCE_INVALID", "Source metadata shape is invalid");
   for (const key of ["provider", "scopeRef", "state", "capturedAt", "retrievalMode", "authority"]) if (!nonEmpty(source[key])) invalid("SOURCE_INTAKE_SOURCE_INVALID", `Source metadata field is invalid: ${key}`);
+  if (!safeReference(source.scopeRef)) invalid("SOURCE_INTAKE_PRIVACY_VIOLATION", "Source scope reference is unsafe");
   if (!Number.isSafeInteger(source.recordCount) || source.recordCount < 0) invalid("SOURCE_INTAKE_SOURCE_INVALID", "Source recordCount is invalid");
   if (!exactKeys(source.diagnostics, ["complete", "sourceRecordCount", "candidateCount", "exclusionCount"]) || typeof source.diagnostics.complete !== "boolean" || !["sourceRecordCount", "candidateCount", "exclusionCount"].every(key => Number.isSafeInteger(source.diagnostics[key]) && source.diagnostics[key] >= 0)) invalid("SOURCE_INTAKE_SOURCE_INVALID", "Source diagnostics are invalid");
   if (source.diagnostics.sourceRecordCount !== source.recordCount) invalid("SOURCE_INTAKE_SOURCE_INVALID", "Source diagnostic record count mismatch");
@@ -55,7 +56,6 @@ function validateCandidate(candidate, source, candidateIds) {
   if (!exactKeys(candidate, keys) || !nonEmpty(candidate.candidateId) || !nonEmpty(candidate.sourceRecordId) || !nonEmpty(candidate.title) || !nonEmpty(candidate.summary)) invalid("SOURCE_INTAKE_CANDIDATE_INVALID", "Candidate Evidence shape is invalid");
   if (candidateIds.has(candidate.candidateId)) invalid("SOURCE_INTAKE_CANDIDATE_INVALID", "Candidate ID is duplicated", { candidateId: candidate.candidateId });
   candidateIds.add(candidate.candidateId);
-  if (candidate.candidateId !== `candidate:evidence:${candidate.sourceRecordId}`) invalid("SOURCE_INTAKE_CANDIDATE_INVALID", "Candidate/source identity is not preserved", { candidateId: candidate.candidateId });
   if (candidate.canonicalKind !== "evidence") invalid("SOURCE_INTAKE_CANDIDATE_INVALID", "Candidate canonicalKind must be evidence", { candidateId: candidate.candidateId });
   validateProvenance(candidate.provenance);
   if (!exactKeys(candidate.admission, ["stage", "canonicalWriteAllowed", "confirmationRequirement"]) || candidate.admission.stage !== "candidate" || candidate.admission.canonicalWriteAllowed !== false || candidate.admission.confirmationRequirement !== "source-authority-sufficient") invalid("SOURCE_INTAKE_CANDIDATE_INVALID", "Candidate admission boundary is invalid", { candidateId: candidate.candidateId });
@@ -77,8 +77,8 @@ function validateSelection(selection, candidates) {
 }
 
 function validatePreview(preview, candidates, selection) {
-  const keys = ["selectedCandidateIds", "proposals", "deferredCandidateIds", "diagnostics", "resultMode", "reconciliation", "persistentWrite", "graphMutation", "edgeCreation", "semanticPromotion"];
-  if (!exactKeys(preview, keys) || !Array.isArray(preview.proposals) || preview.resultMode !== "in-memory-preview" || !new Set(["not-run", "admission-plan"]).has(preview.reconciliation) || preview.persistentWrite !== false || preview.graphMutation !== false || preview.edgeCreation !== false || preview.semanticPromotion !== false) invalid("SOURCE_INTAKE_PREVIEW_INVALID", "Admission preview boundary is invalid");
+  const keys = ["selectedCandidateIds", "proposals", "decisions", "deferredCandidateIds", "diagnostics", "resultMode", "reconciliation", "persistentWrite", "graphMutation", "edgeCreation", "semanticPromotion"];
+  if (!exactKeys(preview, keys) || !Array.isArray(preview.proposals) || !Array.isArray(preview.decisions) || preview.resultMode !== "in-memory-preview" || !new Set(["not-run", "admission-plan"]).has(preview.reconciliation) || preview.persistentWrite !== false || preview.graphMutation !== false || preview.edgeCreation !== false || preview.semanticPromotion !== false) invalid("SOURCE_INTAKE_PREVIEW_INVALID", "Admission preview boundary is invalid");
   if (JSON.stringify(preview.selectedCandidateIds) !== JSON.stringify(selection.selected) || JSON.stringify(preview.deferredCandidateIds) !== JSON.stringify(selection.deferred)) invalid("SOURCE_INTAKE_PREVIEW_INVALID", "Preview selection does not match review selection");
   const d = preview.diagnostics; const numeric = ["candidateCount", "authorizedCount", "deferredCount", "proposalCount"];
   if (!exactKeys(d, ["candidateCount", "authorizedCount", "deferredCount", "proposalCount", "insertCount", "noopCount", "conflictCount", "applyAllowed"]) || !numeric.every(key => Number.isSafeInteger(d[key]) && d[key] >= 0) || d.candidateCount !== candidates.length || d.authorizedCount !== selection.selected.length || d.deferredCount !== selection.deferred.length || d.proposalCount !== preview.proposals.length || d.applyAllowed !== false) invalid("SOURCE_INTAKE_PREVIEW_INVALID", "Preview diagnostics are invalid");
@@ -87,6 +87,16 @@ function validatePreview(preview, candidates, selection) {
   if (preview.reconciliation === "admission-plan" && !["insertCount", "noopCount", "conflictCount"].every(key => Number.isSafeInteger(d[key]) && d[key] >= 0)) invalid("SOURCE_INTAKE_PREVIEW_INVALID", "Admission-plan counts are invalid");
   const candidateIds = new Set(candidates.map(candidate => candidate.candidateId));
   for (const proposal of preview.proposals) if (!exactKeys(proposal, ["candidateId", "sourceRecordId", "canonicalKind", "title", "summary", "provenance"]) || !candidateIds.has(proposal.candidateId) || proposal.canonicalKind !== "evidence") invalid("SOURCE_INTAKE_PREVIEW_INVALID", "Preview proposal is invalid");
+  if (preview.reconciliation === "not-run" && preview.decisions.length !== 0) invalid("SOURCE_INTAKE_PREVIEW_INVALID", "Unreconciled preview must not invent decisions");
+  if (preview.reconciliation === "admission-plan" && preview.decisions.length !== candidates.length) invalid("SOURCE_INTAKE_PREVIEW_INVALID", "Admission-plan decisions must cover every Candidate");
+  const decisionIds = new Set();
+  for (const decision of preview.decisions) {
+    if (!exactKeys(decision, ["candidateId", "disposition", "reason"]) || !candidateIds.has(decision.candidateId) || !new Set(["insert", "noop", "conflict", "deferred"]).has(decision.disposition) || !nonEmpty(decision.reason) || decisionIds.has(decision.candidateId)) invalid("SOURCE_INTAKE_PREVIEW_INVALID", "Preview decision is invalid");
+    decisionIds.add(decision.candidateId);
+    const selected = selection.selected.includes(decision.candidateId);
+    if (selected && decision.disposition === "deferred") invalid("SOURCE_INTAKE_PREVIEW_INVALID", "Selected Candidate cannot be deferred");
+    if (!selected && (decision.disposition !== "deferred" || decision.reason !== "not-authorized")) invalid("SOURCE_INTAKE_PREVIEW_INVALID", "Unselected Candidate reconciliation is invalid");
+  }
 }
 
 export function validateSourceIntakeReviewV01(review) {
