@@ -1,7 +1,7 @@
 # Nexus Atlas v0.2 — Personal Context Foundation
 
 **Status:** Active
-**Implementation:** Phase 4 first Source Adapter foundation complete
+**Implementation:** Phase 5 Product Surface in progress
 
 ## 1. Executive Summary
 
@@ -291,9 +291,45 @@ Canonical Admission Runtime — Complete
 
 Phase 4 completion preserves the original bounded architecture: transport/source normalization, candidate planning and canonical admission remain independently testable; GitHub-derived observations can enter only as explicitly reviewed Evidence, not as silently promoted personal or project truth.
 
-### Phase 5 — Product Surface — Planned
+### Phase 5 — Product Surface — In Progress
 
-待底层模型稳定后再决定 Identity view、generalized project selector、personal Context Inspector、source controls 和 capture/confirmation flow。
+Phase 5 turns the accepted Context foundation into a truthful product surface without reopening authority, transport or persistence boundaries. The existing Archive Cartography Atlas shell is retained; the first migrated product slice is Nexus Self-Context Desk.
+
+#### Phase 5A — Product Surface Entry Audit — Complete / Accepted
+
+- retained `atlas.html` as the permanent Desk / Map / Workspace shell;
+- identified Verity/competition hard-coding in the current Atlas application;
+- confirmed Archive Cartography as the binding visual direction;
+- classified conflicting Star Map / deep-space material as historical/non-authoritative for new Phase 5 work;
+- separated Phase 4 capabilities that are safe to surface from unsupported live transport/persistence claims;
+- selected Nexus Self-Context Desk as the first Product Surface slice.
+
+#### Phase 5B — Product Surface Contract — Complete / Accepted
+
+- provider-neutral Product Surface Model v0.1;
+- Project, Identity, Decision, Memory, Evidence, Risk and Action surface sections;
+- explicit lifecycle / verification / freshness preservation;
+- safe provenance and governance projection;
+- deterministic Inspector index and source summary;
+- optional Source Intake Review remains Evidence-only and in-memory preview only;
+- 40-case blocking contract matrix;
+- accepted source mapping from Self-Context Provider `graph + decisionMemoryLedger + generalizedContextPackage + sourceInfo`;
+- frozen historical self-context fixture is not rewritten for UI convenience;
+- Phase 5C will introduce a Phase-5-specific validated self-context fixture/version through the existing Provider `fixturePath` boundary.
+
+#### Phase 5C — Nexus Self-Context Desk — Next
+
+- implement deterministic Product Surface projector/adapter;
+- create and validate a Phase-5-specific Nexus self-context fixture/version without rewriting the historical v0.2 fixture;
+- migrate the Desk route from Verity Scenario fields to Product Surface v0.1;
+- keep existing Verity Re-entry and competition routes functional during incremental migration;
+- no live GitHub transport, persistent write or semantic promotion.
+
+#### Phase 5D — Canonical Inspector and Identity Context — Planned
+
+#### Phase 5E — Source Intake Review — Planned
+
+#### Phase 5F — Acceptance and Product Boundary Hardening — Planned
 
 ## 7. Explicit Non-Goals
 
@@ -320,4 +356,4 @@ v0.2 暂不做：多用户协作平台、全量 Notion 同步、全量 Google Dr
 
 后续方向仅包括 multiple real projects、additional source adapters、user-controlled context capture、outcome write-back、cross-territory views 和 richer agent assistance；这些不是 v0.2 已承诺功能。
 
-Phase 4 is complete at the first bounded Source Adapter foundation. Source Snapshot, Import Planning and Canonical Admission remain separated by explicit contracts and authority boundaries. Phase 5 remains planned and must not reinterpret Phase 4 completion as authorization for live persistent writes, semantic promotion or UI integration.
+Phase 4 is complete at the first bounded Source Adapter foundation. Source Snapshot, Import Planning and Canonical Admission remain separated by explicit contracts and authority boundaries. Phase 5 is in progress through a provider-neutral read-only Product Surface boundary and must not reinterpret Phase 4 completion as authorization for live persistent writes or semantic promotion.
