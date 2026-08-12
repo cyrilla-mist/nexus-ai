@@ -329,9 +329,21 @@ Phase 5 turns the accepted Context foundation into a truthful product surface wi
 - clean-checkout GitHub Actions run `31617142528` passes Phase 4F dedicated acceptance, full Node tests and full repository check;
 - Phase 4 Runtime and historical Verity Re-entry behavior remain outside the migrated Desk slice.
 
-#### Phase 5D — Canonical Inspector and Identity Context — Planned
+#### Phase 5D — Canonical Inspector and Identity Context — Complete / Accepted
 
-#### Phase 5E — Source Intake Review — Planned
+- canonical `inspectorIndex` is the sole accepted Desk Inspector resolution authority; valid descriptors resolve exactly one matching Product Surface record;
+- unknown, duplicate, malformed, section-mismatched and kind-mismatched Inspector targets resolve to a bounded unavailable state without raw Graph, Provider or source fallback;
+- related-context navigation uses the same canonical Inspector resolver and cannot bypass the accepted index;
+- Identity Context renders only accepted Product Surface Identity records while preserving confirmation state, freshness, provenance, sensitivity, inheritance and confirmation requirements;
+- Phase 5D remains read-only: no Identity capture/edit/promotion, live source read, persistent write, canonical Graph mutation, or semantic re-resolution was introduced;
+- frozen Phase 5D Contract and Test Matrix remain the binding scope; the accepted Product Surface snapshot and Phase 4B–4F runtime contracts remain unchanged;
+- dedicated Phase 5D acceptance passes 8/8;
+- Phase 5C Product Surface / Desk regression passes 16/16;
+- full Node suite passes 1151/1151, `npm run check` passes, and Phase 4F dedicated acceptance passes 30/30;
+- clean-checkout GitHub Actions acceptance remains green;
+- Phase 5D is accepted and frozen at the Phase 5D closure commit.
+
+#### Phase 5E — Source Intake Review — Planned / Next
 
 #### Phase 5F — Acceptance and Product Boundary Hardening — Planned
 
