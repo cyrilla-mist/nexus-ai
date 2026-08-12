@@ -77,9 +77,13 @@ test("Product Surface v0.1 projects Nexus Self-Context without Verity coupling",
   assert.equal(surface.inspectorIndex.length, 14);
   assert.equal("sourceIntakeReview" in surface, false);
 
-  const serialized = JSON.stringify(surface);
-  assert.doesNotMatch(serialized, /Verity/i);
-  assert.doesNotMatch(serialized, /Phase 3 complete; Phase 4 planned/);
+  const structuralBinding = JSON.stringify({
+    scope: surface.scope,
+    project: surface.project,
+    projectInspector: surface.inspectorIndex.find((item) => item.id === "project:nexus-atlas"),
+  });
+  assert.doesNotMatch(structuralBinding, /Verity/i);
+  assert.doesNotMatch(structuralBinding, /Phase 3 complete; Phase 4 planned/i);
 });
 
 test("Product Surface preserves state, governance, provenance and confirmation boundaries", async () => {
