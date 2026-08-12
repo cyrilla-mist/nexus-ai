@@ -317,13 +317,17 @@ Phase 5 turns the accepted Context foundation into a truthful product surface wi
 - frozen historical self-context fixture is not rewritten for UI convenience;
 - Phase 5C will introduce a Phase-5-specific validated self-context fixture/version through the existing Provider `fixturePath` boundary.
 
-#### Phase 5C — Nexus Self-Context Desk — Next
+#### Phase 5C — Nexus Self-Context Desk — Complete / Accepted
 
-- implement deterministic Product Surface projector/adapter;
-- create and validate a Phase-5-specific Nexus self-context fixture/version without rewriting the historical v0.2 fixture;
-- migrate the Desk route from Verity Scenario fields to Product Surface v0.1;
-- keep existing Verity Re-entry and competition routes functional during incremental migration;
-- no live GitHub transport, persistent write or semantic promotion.
+- deterministic Product Surface v0.1 projector implemented over the accepted Self-Context Provider result without re-resolving governance;
+- Phase-5-specific Nexus self-context fixture validates through the frozen Context validators while the historical v0.2 fixture remains unchanged for regression evidence;
+- accepted browser Product Surface snapshot is mechanically locked to the Node projector output by deep equality testing;
+- `atlas.html` now enters through a route boundary: Desk uses Product Surface v0.1 while Map, Workspace and Re-entry continue through the legacy Atlas application during incremental migration;
+- Nexus Self-Context Desk is read-only, browser-local and does not invent live connector, OAuth, persistent-write or semantic-promotion capabilities;
+- dedicated Product Surface projector acceptance passes 8/8 on Windows;
+- dedicated Atlas Desk browser acceptance passes 7/7 on Windows;
+- clean-checkout GitHub Actions run `31617142528` passes Phase 4F dedicated acceptance, full Node tests and full repository check;
+- Phase 4 Runtime and historical Verity Re-entry behavior remain outside the migrated Desk slice.
 
 #### Phase 5D — Canonical Inspector and Identity Context — Planned
 
