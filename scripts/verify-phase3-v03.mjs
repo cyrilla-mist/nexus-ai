@@ -89,7 +89,7 @@ assert.match(roadmapText, /Phase 4F.*Complete \/ Accepted/);
 assert.match(roadmapText, /Phase 5.*In Progress/);
 assert.match(roadmapText, /Phase 5A.*Complete \/ Accepted/);
 assert.match(roadmapText, /Phase 5B.*Complete \/ Accepted/);
-assert.match(roadmapText, /Phase 5C.*Next/);
+assert.match(roadmapText, /Phase 5C.*Complete/);
 assert.match(contractText, /\*\*Status:\*\* Accepted/);
 assert.match(contractText, /\*\*Target:\*\* Stable v0\.3 package baseline/);
 assert.match(contractText, /Phase 3 Generalized Context Package Complete/);
