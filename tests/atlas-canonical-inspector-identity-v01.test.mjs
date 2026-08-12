@@ -61,7 +61,7 @@ test("unknown or malformed Inspector targets do not fall back to raw Graph or so
 });
 
 test("related-context navigation is filtered through the same canonical Inspector resolver", () => {
-  assert.match(desk, /\(record\.relatedIds \|\| \[\]\)\.map\(surfaceRecordById\)\.filter\(Boolean\)/);
+  assert.ok(desk.includes("(record.relatedIds || []).map(surfaceRecordById).filter(Boolean)"));
   assert.match(desk, /data-inspect-entity/);
 });
 
