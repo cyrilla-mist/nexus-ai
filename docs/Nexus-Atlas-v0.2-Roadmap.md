@@ -343,9 +343,22 @@ Phase 5 turns the accepted Context foundation into a truthful product surface wi
 - clean-checkout GitHub Actions acceptance remains green;
 - Phase 5D is accepted and frozen at the Phase 5D closure commit.
 
-#### Phase 5E — Source Intake Review — Planned / Next
+#### Phase 5E — Source Intake Review — Complete / Accepted
 
-#### Phase 5F — Acceptance and Product Boundary Hardening — Planned
+- Source Intake Review v0.1 contract, validator and deterministic projector are accepted and frozen;
+- Source Snapshot and Context Import Plan remain explicit injected inputs, and accepted upstream Candidate identity is preserved without provider-specific re-derivation;
+- optional injected Context Graph is used only for pure Canonical Admission plan preview; Apply is never called;
+- omitted selection remains empty, unselected Candidates remain deferred / not-authorized, and no implicit select-all behavior exists;
+- Phase 5E projector/validator Runtime is frozen at `87abd8cf878cd4086c7257b29170579e02f4c0b1`;
+- browser route `#source-intake` consumes only an accepted review snapshot that is mechanically locked to frozen projector output by deep equality testing;
+- the accepted browser review fixture exercises real `noop`, `conflict`, `insert` and `deferred` admission dispositions;
+- browser checkbox selection is ephemeral in-memory review state and does not recalculate or alter the accepted canonical preview;
+- the browser slice introduces no live OAuth/transport, source refresh, Apply, persistence, Graph mutation, Edge creation or semantic promotion;
+- frozen-boundary comparison from the Phase 5E Runtime SHA to the accepted browser head contains only browser/product-surface files and no Phase 5E Runtime or Phase 4 Runtime drift;
+- Phase 5E Runtime behavioral matrix passes 40/40; browser snapshot/integration acceptance passes 16/16;
+- clean-checkout GitHub Actions run `31965303560` passes Phase 4F dedicated acceptance, full Node tests and full repository check.
+
+#### Phase 5F — Acceptance and Product Boundary Hardening — Planned / Next
 
 ## 7. Explicit Non-Goals
 
