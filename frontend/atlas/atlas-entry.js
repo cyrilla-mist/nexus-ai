@@ -1,8 +1,10 @@
 const LEGACY_ROUTES = new Set(["map", "territory", "reentry"]);
+const PRODUCT_ROUTES = new Set(["desk", "source-intake"]);
 
 function currentRoute() {
   const route = window.location.hash.replace("#", "");
-  return LEGACY_ROUTES.has(route) ? route : "desk";
+  if (PRODUCT_ROUTES.has(route) || LEGACY_ROUTES.has(route)) return route;
+  return "desk";
 }
 
 function replaceRoute(route) {
@@ -13,17 +15,17 @@ function replaceRoute(route) {
 
 const initialRoute = currentRoute();
 
-// The legacy Atlas app owns its own route listener. Capture Desk navigation before
-// that listener so returning from a historical route re-enters the Phase 5 Desk.
-if (initialRoute !== "desk") {
+// The legacy Atlas app owns its own route listener. Capture Product Surface navigation
+// before that listener so returning from historical routes re-enters the Phase 5 surfaces.
+if (LEGACY_ROUTES.has(initialRoute)) {
   document.addEventListener(
     "click",
     (event) => {
       const control = event.target.closest?.("[data-atlas-route]");
-      if (control?.dataset.atlasRoute !== "desk") return;
+      if (!PRODUCT_ROUTES.has(control?.dataset.atlasRoute)) return;
       event.preventDefault();
       event.stopImmediatePropagation();
-      replaceRoute("desk");
+      replaceRoute(control.dataset.atlasRoute);
     },
     true,
   );
@@ -31,6 +33,8 @@ if (initialRoute !== "desk") {
 
 if (initialRoute === "desk") {
   await import("./atlas-desk.js");
+} else if (initialRoute === "source-intake") {
+  await import("./atlas-source-intake.js");
 } else {
   await import("./atlas-app.js");
 }
