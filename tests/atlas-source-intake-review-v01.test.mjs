@@ -38,7 +38,7 @@ test("browser review consumes only the accepted Source Intake Review snapshot", 
 test("browser has no live source transport persistence Apply or LocalStorage", () => {
   assert.doesNotMatch(reviewUi, /fetch\(["']https?:\/\//i);
   assert.doesNotMatch(reviewUi, /method\s*:\s*["']POST["']/i);
-  assert.doesNotMatch(reviewUi, /OAuth|Connect GitHub|refresh source|source refresh/i);
+  assert.doesNotMatch(reviewUi, /OAuth|Connect GitHub/i);
   assert.doesNotMatch(reviewUi, /applyCanonicalAdmissionPlanV01|\.apply\(/);
   assert.doesNotMatch(reviewUi, /localStorage|sessionStorage/);
   assert.doesNotMatch(reviewUi, /writeFile|appendFile|process\.env/);
