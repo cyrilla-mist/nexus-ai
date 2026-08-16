@@ -62,11 +62,11 @@ test("review selection and accepted canonical preview are visibly distinct", () 
   assert.match(reviewUi, /Choose what you are reviewing locally/);
   assert.match(reviewUi, /ACCEPTED CANONICAL PREVIEW/);
   assert.match(reviewUi, /accepted preview remains the original snapshot/i);
-  assert.match(reviewUi, /does not change when you adjust the temporary selection/i);
+  assert.match(reviewUi, /do not change when you adjust the temporary selection/i);
 });
 
 test("browser renders copied per-Candidate decisions without recalculation", () => {
-  assert.match(reviewUi, /state\.review\.admissionPreview\.decisions/);
+  assert.match(reviewUi, /state\.review\?\.admissionPreview\?\.decisions\.find/);
   assert.match(reviewUi, /decisionByCandidateId/);
   assert.doesNotMatch(reviewUi, /authorized-new-observation.*\?.*insert|authorized-existing-identical.*\?.*noop/);
   assert.deepEqual(
