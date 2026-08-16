@@ -1,7 +1,7 @@
 # Nexus Atlas v0.2 — Personal Context Foundation
 
 **Status:** Active
-**Implementation:** Phase 4 first Source Adapter foundation complete
+**Implementation:** Phase 5 Product Surface in progress
 
 ## 1. Executive Summary
 
@@ -291,9 +291,74 @@ Canonical Admission Runtime — Complete
 
 Phase 4 completion preserves the original bounded architecture: transport/source normalization, candidate planning and canonical admission remain independently testable; GitHub-derived observations can enter only as explicitly reviewed Evidence, not as silently promoted personal or project truth.
 
-### Phase 5 — Product Surface — Planned
+### Phase 5 — Product Surface — In Progress
 
-待底层模型稳定后再决定 Identity view、generalized project selector、personal Context Inspector、source controls 和 capture/confirmation flow。
+Phase 5 turns the accepted Context foundation into a truthful product surface without reopening authority, transport or persistence boundaries. The existing Archive Cartography Atlas shell is retained; the first migrated product slice is Nexus Self-Context Desk.
+
+#### Phase 5A — Product Surface Entry Audit — Complete / Accepted
+
+- retained `atlas.html` as the permanent Desk / Map / Workspace shell;
+- identified Verity/competition hard-coding in the current Atlas application;
+- confirmed Archive Cartography as the binding visual direction;
+- classified conflicting Star Map / deep-space material as historical/non-authoritative for new Phase 5 work;
+- separated Phase 4 capabilities that are safe to surface from unsupported live transport/persistence claims;
+- selected Nexus Self-Context Desk as the first Product Surface slice.
+
+#### Phase 5B — Product Surface Contract — Complete / Accepted
+
+- provider-neutral Product Surface Model v0.1;
+- Project, Identity, Decision, Memory, Evidence, Risk and Action surface sections;
+- explicit lifecycle / verification / freshness preservation;
+- safe provenance and governance projection;
+- deterministic Inspector index and source summary;
+- optional Source Intake Review remains Evidence-only and in-memory preview only;
+- 40-case blocking contract matrix;
+- accepted source mapping from Self-Context Provider `graph + decisionMemoryLedger + generalizedContextPackage + sourceInfo`;
+- frozen historical self-context fixture is not rewritten for UI convenience;
+- Phase 5C will introduce a Phase-5-specific validated self-context fixture/version through the existing Provider `fixturePath` boundary.
+
+#### Phase 5C — Nexus Self-Context Desk — Complete / Accepted
+
+- deterministic Product Surface v0.1 projector implemented over the accepted Self-Context Provider result without re-resolving governance;
+- Phase-5-specific Nexus self-context fixture validates through the frozen Context validators while the historical v0.2 fixture remains unchanged for regression evidence;
+- accepted browser Product Surface snapshot is mechanically locked to the Node projector output by deep equality testing;
+- `atlas.html` now enters through a route boundary: Desk uses Product Surface v0.1 while Map, Workspace and Re-entry continue through the legacy Atlas application during incremental migration;
+- Nexus Self-Context Desk is read-only, browser-local and does not invent live connector, OAuth, persistent-write or semantic-promotion capabilities;
+- dedicated Product Surface projector acceptance passes 8/8 on Windows;
+- dedicated Atlas Desk browser acceptance passes 7/7 on Windows;
+- clean-checkout GitHub Actions run `31617142528` passes Phase 4F dedicated acceptance, full Node tests and full repository check;
+- Phase 4 Runtime and historical Verity Re-entry behavior remain outside the migrated Desk slice.
+
+#### Phase 5D — Canonical Inspector and Identity Context — Complete / Accepted
+
+- canonical `inspectorIndex` is the sole accepted Desk Inspector resolution authority; valid descriptors resolve exactly one matching Product Surface record;
+- unknown, duplicate, malformed, section-mismatched and kind-mismatched Inspector targets resolve to a bounded unavailable state without raw Graph, Provider or source fallback;
+- related-context navigation uses the same canonical Inspector resolver and cannot bypass the accepted index;
+- Identity Context renders only accepted Product Surface Identity records while preserving confirmation state, freshness, provenance, sensitivity, inheritance and confirmation requirements;
+- Phase 5D remains read-only: no Identity capture/edit/promotion, live source read, persistent write, canonical Graph mutation, or semantic re-resolution was introduced;
+- frozen Phase 5D Contract and Test Matrix remain the binding scope; the accepted Product Surface snapshot and Phase 4B–4F runtime contracts remain unchanged;
+- dedicated Phase 5D acceptance passes 8/8;
+- Phase 5C Product Surface / Desk regression passes 16/16;
+- full Node suite passes 1151/1151, `npm run check` passes, and Phase 4F dedicated acceptance passes 30/30;
+- clean-checkout GitHub Actions acceptance remains green;
+- Phase 5D is accepted and frozen at the Phase 5D closure commit.
+
+#### Phase 5E — Source Intake Review — Complete / Accepted
+
+- Source Intake Review v0.1 contract, validator and deterministic projector are accepted and frozen;
+- Source Snapshot and Context Import Plan remain explicit injected inputs, and accepted upstream Candidate identity is preserved without provider-specific re-derivation;
+- optional injected Context Graph is used only for pure Canonical Admission plan preview; Apply is never called;
+- omitted selection remains empty, unselected Candidates remain deferred / not-authorized, and no implicit select-all behavior exists;
+- Phase 5E projector/validator Runtime is frozen at `87abd8cf878cd4086c7257b29170579e02f4c0b1`;
+- browser route `#source-intake` consumes only an accepted review snapshot that is mechanically locked to frozen projector output by deep equality testing;
+- the accepted browser review fixture exercises real `noop`, `conflict`, `insert` and `deferred` admission dispositions;
+- browser checkbox selection is ephemeral in-memory review state and does not recalculate or alter the accepted canonical preview;
+- the browser slice introduces no live OAuth/transport, source refresh, Apply, persistence, Graph mutation, Edge creation or semantic promotion;
+- frozen-boundary comparison from the Phase 5E Runtime SHA to the accepted browser head contains only browser/product-surface files and no Phase 5E Runtime or Phase 4 Runtime drift;
+- Phase 5E Runtime behavioral matrix passes 40/40; browser snapshot/integration acceptance passes 16/16;
+- clean-checkout GitHub Actions run `31965303560` passes Phase 4F dedicated acceptance, full Node tests and full repository check.
+
+#### Phase 5F — Acceptance and Product Boundary Hardening — Planned / Next
 
 ## 7. Explicit Non-Goals
 
@@ -320,4 +385,4 @@ v0.2 暂不做：多用户协作平台、全量 Notion 同步、全量 Google Dr
 
 后续方向仅包括 multiple real projects、additional source adapters、user-controlled context capture、outcome write-back、cross-territory views 和 richer agent assistance；这些不是 v0.2 已承诺功能。
 
-Phase 4 is complete at the first bounded Source Adapter foundation. Source Snapshot, Import Planning and Canonical Admission remain separated by explicit contracts and authority boundaries. Phase 5 remains planned and must not reinterpret Phase 4 completion as authorization for live persistent writes, semantic promotion or UI integration.
+Phase 4 is complete at the first bounded Source Adapter foundation. Source Snapshot, Import Planning and Canonical Admission remain separated by explicit contracts and authority boundaries. Phase 5 is in progress through a provider-neutral read-only Product Surface boundary and must not reinterpret Phase 4 completion as authorization for live persistent writes or semantic promotion.
