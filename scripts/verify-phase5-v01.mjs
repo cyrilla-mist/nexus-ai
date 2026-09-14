@@ -1,7 +1,7 @@
 import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 
-const repoRoot = new URL("../", import.meta.url);
-const cwd = repoRoot.pathname;
+const cwd = fileURLToPath(new URL("../", import.meta.url));
 
 function run(command, args, label, options = {}) {
   const result = spawnSync(command, args, {
