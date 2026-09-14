@@ -15,6 +15,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./frontend/atlas/atlas.css" />
+    <link rel="stylesheet" href="./frontend/atlas/atlas-source-intake.css" />
   </head>
   <body>
     <div class="atlas-paper" aria-hidden="true"></div>
@@ -28,6 +29,9 @@
       <nav class="atlas-primary-nav" aria-label="Nexus Atlas">
         <button type="button" data-atlas-route="desk" aria-current="page">
           <span>Desk</span><small>Overview</small>
+        </button>
+        <button type="button" data-atlas-route="source-intake">
+          <span>Review</span><small>Sources</small>
         </button>
         <button type="button" data-atlas-route="map">
           <span>Map</span><small>Relations</small>
@@ -57,7 +61,7 @@
         <nav id="territory-navigation"></nav>
         <section class="index-note">
           <span>YOU ARE HERE</span>
-          <strong id="active-route-label">Innovation / Verity / Desk</strong>
+          <strong id="active-route-label">Innovation / Nexus Atlas / Desk</strong>
         </section>
       </aside>
 
@@ -82,7 +86,7 @@
     </footer>
 
     <p id="atlas-announcement" class="visually-hidden" aria-live="polite"></p>
-    <script type="module" src="./frontend/atlas/atlas-app.js"></script>
+    <script type="module" src="./frontend/atlas/atlas-entry.js"></script>
     <script type="module" src="./frontend/atlas/atlas-governance.js"></script>
   </body>
 </html>

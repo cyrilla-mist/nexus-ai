@@ -6,6 +6,10 @@ const html = await readFile(new URL("../atlas.html", import.meta.url), "utf8");
 const landing = await readFile(new URL("../index.html", import.meta.url), "utf8");
 const guide = await readFile(new URL("../docs/nexus-atlas-guide-zh.md", import.meta.url), "utf8");
 const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+const entry = await readFile(
+  new URL("../frontend/atlas/atlas-entry.js", import.meta.url),
+  "utf8",
+);
 const app = await readFile(
   new URL("../frontend/atlas/atlas-app.js", import.meta.url),
   "utf8",
@@ -19,8 +23,11 @@ const governance = await readFile(
   "utf8",
 );
 
-test("Atlas loads one normal JavaScript module", () => {
-  assert.match(html, /frontend\/atlas\/atlas-app\.js/);
+test("Atlas loads one normal JavaScript entry module and preserves the legacy app behind routing", () => {
+  assert.match(html, /frontend\/atlas\/atlas-entry\.js/);
+  assert.doesNotMatch(html, /<script[^>]+src="\.\/frontend\/atlas\/atlas-app\.js"/);
+  assert.match(entry, /await import\("\.\/atlas-desk\.js"\)/);
+  assert.match(entry, /await import\("\.\/atlas-app\.js"\)/);
   assert.doesNotMatch(html, /frontend\/atlas\/atlas\.js/);
   assert.doesNotMatch(app, /URL\.createObjectURL|new Blob\(/);
   assert.doesNotMatch(app, /atlas\.part-0[0-2]\.js/);
