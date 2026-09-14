@@ -1,0 +1,42 @@
+name: Phase 6B Acceptance
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'experience/continuity-loop-v01/**'
+      - 'tests/trusted-checkpoint-v01.test.mjs'
+      - 'tests/file-trusted-checkpoint-store-v01.test.mjs'
+      - 'docs/Nexus-Atlas-v0.1-Trusted-Checkpoint-Contract.md'
+      - '.github/workflows/phase6b-acceptance.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checkpoint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Environment
+        run: node --version
+
+      - name: Syntax boundary
+        run: |
+          node --check experience/continuity-loop-v01/trusted-checkpoint-validator.mjs
+          node --check experience/continuity-loop-v01/initial-alignment.mjs
+          node --check experience/continuity-loop-v01/trusted-checkpoint-store.mjs
+          node --check experience/continuity-loop-v01/file-trusted-checkpoint-store.mjs
+
+      - name: Phase 6B dedicated acceptance
+        run: node --test tests/trusted-checkpoint-v01.test.mjs tests/file-trusted-checkpoint-store-v01.test.mjs
