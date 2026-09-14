@@ -1,7 +1,7 @@
 # Nexus Atlas v0.2 — Personal Context Foundation
 
-**Status:** Active
-**Implementation:** Phase 5 Product Surface in progress
+**Status:** Phase 5 Complete / Accepted
+**Implementation:** Phase 5 Product Surface complete / accepted
 
 ## 1. Executive Summary
 
@@ -291,7 +291,7 @@ Canonical Admission Runtime — Complete
 
 Phase 4 completion preserves the original bounded architecture: transport/source normalization, candidate planning and canonical admission remain independently testable; GitHub-derived observations can enter only as explicitly reviewed Evidence, not as silently promoted personal or project truth.
 
-### Phase 5 — Product Surface — In Progress
+### Phase 5 — Product Surface — Complete / Accepted
 
 Phase 5 turns the accepted Context foundation into a truthful product surface without reopening authority, transport or persistence boundaries. The existing Archive Cartography Atlas shell is retained; the first migrated product slice is Nexus Self-Context Desk.
 
@@ -358,7 +358,17 @@ Phase 5 turns the accepted Context foundation into a truthful product surface wi
 - Phase 5E Runtime behavioral matrix passes 40/40; browser snapshot/integration acceptance passes 16/16;
 - clean-checkout GitHub Actions run `31965303560` passes Phase 4F dedicated acceptance, full Node tests and full repository check.
 
-#### Phase 5F — Acceptance and Product Boundary Hardening — Planned / Next
+#### Phase 5F — Acceptance and Product Boundary Hardening — Complete / Accepted
+
+- Phase 5F Re-entry Audit confirmed the accepted Phase 5 working state remained `VALID` and required no recovery before final acceptance;
+- binding Phase 5 Acceptance Contract v0.1 defines the cross-layer authority, state-truth, provenance/privacy, browser-capability, route, snapshot-equivalence and frozen-boundary invariants;
+- 48 blocking cases cover Phase 4/5 frozen integrity, Self-Context Product Surface semantics, Inspector/Identity governance, Source Intake Review/admission-preview boundaries, browser capabilities/routes and final regression/merge readiness;
+- dedicated `verify:phase5-v01` performs full-history `git diff --quiet` frozen-boundary checks against accepted Phase 4, Phase 5D, Phase 5E Runtime and Phase 5E browser baselines before running the cross-layer and dedicated regression suites;
+- accepted Product Surface and Source Intake Review browser snapshots remain mechanically deep-equal to their accepted Node projection pipelines;
+- Phase 5F introduces no new Product Surface schema, live transport, persistence, Apply, semantic promotion, trusted checkpoint, Outcome Write-back, multi-project or Territory capability;
+- the dedicated Phase 5 Acceptance GitHub Actions workflow uses full git history and runs Phase 5F acceptance, the full Node suite, the full repository check and Phase 4F frozen regression;
+- pre-closure Phase 5 Acceptance run `34842409053` completed all gates successfully;
+- final Phase 5 closure remains subject to clean-checkout success on the exact Roadmap closure SHA before PR #13 leaves Draft and merges to `main`.
 
 ## 7. Explicit Non-Goals
 
@@ -381,8 +391,22 @@ v0.2 暂不做：多用户协作平台、全量 Notion 同步、全量 Google Dr
 - 原有测试全部继续通过；
 - 不破坏 v0.1 页面和运行时。
 
-## 9. v0.3 Direction
+## 9. Post-Phase-5 Direction
 
-后续方向仅包括 multiple real projects、additional source adapters、user-controlled context capture、outcome write-back、cross-territory views 和 richer agent assistance；这些不是 v0.2 已承诺功能。
+Phase 5 closes the read-only Product Surface foundation. The next product-definition cycle should not begin by expanding projects, sources or Territories.
 
-Phase 4 is complete at the first bounded Source Adapter foundation. Source Snapshot, Import Planning and Canonical Admission remain separated by explicit contracts and authority boundaries. Phase 5 is in progress through a provider-neutral read-only Product Surface boundary and must not reinterpret Phase 4 completion as authorization for live persistent writes or semantic promotion.
+The candidate long-term order is:
+
+1. **Real Continuity Loop** over one real project;
+2. **Fresh verification and adversarial evaluation** with replayable runtime evidence;
+3. **Outcome / Trusted-State Write-back**;
+4. **Multi-project Atlas**;
+5. **Additional Sources, Territories and richer Agent interfaces**.
+
+The governing development principle is:
+
+> **Single real loop first. Generalize second. Expand last.**
+
+These are post-Phase-5 directions only. Phase 6 implementation is not authorized by the Phase 5 closure.
+
+Phase 4 remains frozen at the first bounded Source Adapter foundation. Source Snapshot, Import Planning and Canonical Admission remain separated by explicit contracts and authority boundaries. Phase 5 is complete and accepted through a provider-neutral read-only Product Surface boundary and does not reinterpret Phase 4 completion as authorization for live persistent writes or semantic promotion.
