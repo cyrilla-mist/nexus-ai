@@ -140,7 +140,12 @@ function validateReplacement(raw, bound) {
   if (!exact(raw, REPLACEMENT_KEYS) || raw.proposalVersion !== REPLACEMENT_ACTION_PROPOSAL_VERSION_V01) fail(code, "replacementActionProposal field set/version is invalid.");
   if (raw.assessmentRef !== bound.assessment.assessmentId) fail("REENTRY_BINDING_MISMATCH", "replacementActionProposal targets another assessment.");
   boundedText(raw.explanation, EXPLANATION_MAX, "replacementActionProposal.explanation", code);
-  const action = validateAction(raw, {
+  const action = validateAction({
+    actionRef: raw.actionRef,
+    summary: raw.summary,
+    basisRefs: raw.basisRefs,
+    evidenceRefs: raw.evidenceRefs,
+  }, {
     allowedBasis: authorityBasisSet(bound.checkpoint),
     windowIds: windowEvidenceSet(bound.window),
     assessmentIds: assessmentEvidenceSet(bound.assessment),
