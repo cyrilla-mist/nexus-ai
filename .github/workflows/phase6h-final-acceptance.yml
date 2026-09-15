@@ -1,0 +1,73 @@
+name: Phase 6H Final Acceptance
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'docs/Nexus-Atlas-Phase6G-Acceptance.md'
+      - 'docs/Nexus-Atlas-Phase6H-Final-Acceptance-Gate.md'
+      - 'evaluation/phase6h/**'
+      - '.github/workflows/phase6h-final-acceptance.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  final-acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate user observation boundary
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const observation = JSON.parse(fs.readFileSync('evaluation/phase6h/user-observation.json', 'utf8'));
+          if (observation.observationVersion !== 'nexus-atlas.phase6h-user-observation.v0.1') throw new Error('unexpected observation version');
+          if (observation.projectRef !== 'project:nexus-atlas') throw new Error('unexpected projectRef');
+          if (observation.category !== 'materially-reduced') throw new Error('final user category not recorded');
+          if (observation.source !== 'explicit-project-owner-observation') throw new Error('user observation source is not explicit');
+          if (observation.isGitHubSourceEvidence !== false) throw new Error('user observation must not become GitHub source evidence');
+          if (observation.isGeneralProductivityClaim !== false) throw new Error('single-run observation must not be generalized');
+          if (typeof observation.note !== 'string' || observation.note.length < 20) throw new Error('sanitized user note missing');
+          NODE
+
+      - name: Require final acceptance documentation
+        shell: bash
+        run: |
+          grep -F '**Status:** Complete / Accepted' docs/Nexus-Atlas-Phase6H-Final-Acceptance-Gate.md
+          grep -F 'materially-reduced' docs/Nexus-Atlas-Phase6H-Final-Acceptance-Gate.md
+          grep -F 'Phase 7 — Outcome / Trusted-State Write-back Generalization' docs/Nexus-Atlas-Phase6H-Final-Acceptance-Gate.md
+
+      - name: Phase 6B checkpoint and persistence regression
+        run: node --test tests/trusted-checkpoint-v01.test.mjs tests/file-trusted-checkpoint-store-v01.test.mjs
+
+      - name: Phase 6C fresh evidence and assessment regression
+        run: node --test tests/fresh-evidence-window-v01.test.mjs tests/continuity-assessment-v01.test.mjs
+
+      - name: Phase 6D authority and re-entry regression
+        run: node --test tests/human-authority-reentry-v01.test.mjs
+
+      - name: Phase 6E outcome verification regression
+        run: node --test tests/outcome-verification-v01.test.mjs
+
+      - name: Phase 6F continuity closure regression
+        run: node --test tests/continuity-closure-v01.test.mjs
+
+      - name: Phase 5 frozen regression
+        run: npm run verify:phase5-v01
+
+      - name: Phase 4 frozen regression
+        run: npm run verify:phase4-v01

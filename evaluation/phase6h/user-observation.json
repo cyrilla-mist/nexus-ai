@@ -1,0 +1,11 @@
+{
+  "observationVersion": "nexus-atlas.phase6h-user-observation.v0.1",
+  "projectRef": "project:nexus-atlas",
+  "phase": "6H",
+  "category": "materially-reduced",
+  "note": "The continuity flow materially reduced reconstruction effort because the assistant already had the development progress and subsequent plan available; the user judged this beneficial to development efficiency and quality.",
+  "scope": "single-real-nexus-continuity-run",
+  "source": "explicit-project-owner-observation",
+  "isGitHubSourceEvidence": false,
+  "isGeneralProductivityClaim": false
+}
