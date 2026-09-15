@@ -1,6 +1,6 @@
 {
   "manifestVersion": "nexus-atlas.phase6g-real-run-manifest.v0.1",
-  "stage": "pre-action",
+  "stage": "armed",
   "projectRef": "project:nexus-atlas",
   "repositoryRef": "cyrilla-mist/nexus-ai",
   "alignment": {
@@ -10,7 +10,7 @@
     "activeObjective": "Run Phase 6G adversarial evaluation and the first real Nexus continuity-run evidence.",
     "acceptedNextAction": {
       "actionRef": "action:phase6g-adversarial-real-run",
-      "summary": "Implement and execute the bounded Phase 6G adversarial evaluation and first real continuity-run evidence flow.",
+      "summary": "Implement and execute the bounded Phase 6G adversarial evaluation and first real Nexus continuity-run evidence flow.",
       "basisRefs": [
         "decision:phase6-single-real-loop",
         "decision:validate-before-recover"
@@ -42,5 +42,5 @@
     "actorRef": "user:cyrilla",
     "confirmedAt": "2026-09-15T13:39:00Z"
   },
-  "preActionRunId": null
+  "preActionRunId": 34977525471
 }
