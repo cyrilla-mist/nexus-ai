@@ -1,0 +1,8 @@
+{
+  "intentVersion": "nexus-atlas.phase6g-acceptance-intent.v0.1",
+  "realAction": "merge-phase6g-evaluation-pr",
+  "expectedPostcondition": "github-default-branch-head-advanced",
+  "verificationMustBeFresh": true,
+  "outcomeMustBeVerifiedBeforeCheckpointAdvance": true,
+  "nextReentryMustStartFromVerifiedCheckpoint": true
+}
