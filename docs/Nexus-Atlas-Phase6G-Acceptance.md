@@ -132,11 +132,11 @@ All Phase 6G adversarial jobs completed successfully in both the pre-action and 
 Observed real-run blocking metrics:
 
 ```text
-false continuity claims           = 0
-unverified successful outcomes    = 0
+false continuity claims            = 0
+unverified successful outcomes     = 0
 silent protected-authority guesses = 0
-consequential evidence linkage    = present
-human authority questions         = 0 / <=1
+consequential evidence linkage     = present
+human authority questions          = 0 / <=1
 ```
 
 ---
@@ -147,18 +147,24 @@ One packaging mismatch was detected during acceptance review: the Stage-B artifa
 
 This did **not** affect runtime truth, verification, persistence, or closure. Both Stage-A and Stage-B artifacts are immutable, independently hashed, and together contain the complete transaction.
 
-Phase 6H must treat the two artifact digests above as one accepted replay set and must not claim that Artifact `10400615165` alone contains the complete pre/post transaction.
+Phase 6H treats the two artifact digests above as one accepted replay set and does not claim that Artifact `10400615165` alone contains the complete pre/post transaction.
 
 ---
 
-## 8. Remaining boundary
+## 8. User-observed usefulness
 
-Phase 6G does not infer whether the experience was useful to the user.
+The previously pending user usefulness boundary has now been resolved by an explicit post-run observation.
 
-The runtime explicitly recorded:
+Recorded category:
 
 ```text
-userJudgment = null
+materially-reduced
 ```
 
-That is intentional. Phase 6H final acceptance must collect one explicit user judgment about whether this continuity flow materially reduced reconstruction effort. No positive result may be invented from test success.
+Sanitized observation note:
+
+> The continuity flow materially reduced reconstruction effort because the assistant already had the development progress and subsequent plan available; the user judged this beneficial to development efficiency and quality.
+
+This is one user's observation from one real Nexus run. It is not converted into a productivity percentage, generalized causal claim, or source-evidence identity.
+
+With this observation recorded, Phase 6G has no remaining user-evidence blocker and Phase 6H final acceptance may complete after its frozen regression gate passes.
