@@ -1,8 +1,9 @@
 # Nexus Atlas — Phase 6H Final Acceptance Gate
 
-**Status:** Blocked only on explicit user usefulness judgment  
+**Status:** Complete / Accepted  
 **Parent:** Phase 6 — Real Continuity Loop  
-**Accepted runtime through:** Phase 6G
+**Accepted runtime through:** Phase 6G  
+**Final acceptance branch:** `feature/phase6h-final-acceptance`
 
 ---
 
@@ -22,37 +23,105 @@
 | 10. subsequent re-entry begins from next checkpoint | PASS | next assessment `VALID` from checkpoint v2 |
 | 11. adversarial/failure tests prove safety boundaries | PASS | Phase 6G adversarial job green |
 | 12. sanitized replayable evidence exists | PASS WITH PACKAGING NOTE | accepted Stage-A + Stage-B artifact pair and digests |
-| 13. Phase 4 / Phase 5 regressions remain green | PASS | Phase 6G workflow |
-| 14. user can state whether reconstruction effort was reduced | PENDING | explicit user judgment required |
+| 13. Phase 4 / Phase 5 regressions remain green | PASS | Phase 6G workflow + Phase 6H final gate |
+| 14. user can state whether reconstruction effort was reduced | PASS | explicit category `materially-reduced` |
 
 ---
 
-## 2. Final user-evidence boundary
+## 2. Final user-observed product evidence
 
-Phase 6H needs one direct product observation from the user. It is not a permission to change protected product direction and is not used as GitHub source evidence.
-
-Accepted response categories:
+The project owner supplied an explicit post-run judgment after the first real continuity transaction.
 
 ```text
-materially-reduced
-partly-reduced
-not-reduced
+category = materially-reduced
 ```
 
-An optional short note may explain why.
+Sanitized observation:
 
-The final report must preserve the response as an observed single-run judgment only. It must not convert one user's answer into a general productivity percentage or causal claim.
+> The continuity flow materially reduced reconstruction effort because the assistant already had the development progress and subsequent plan available; the user judged this beneficial to development efficiency and quality.
+
+This observation is intentionally bounded:
+
+- it is one user's judgment from one real run;
+- it is not GitHub source evidence;
+- it is not a general productivity percentage;
+- it does not authorize a change to protected product direction;
+- it does not replace the technical correctness gates.
 
 ---
 
-## 3. Final acceptance rule
+## 3. Accepted real-run evidence
 
-After an explicit user response is recorded:
+### Stage A — pre-action
 
-1. record the category and optional note without reinterpretation;
-2. update the Phase 6G run summary / final acceptance record as user-observed product evidence;
-3. run frozen Phase 6G / Phase 5 / Phase 4 gates once more;
-4. mark Phase 6 **Complete / Accepted** only if no regression appears;
-5. freeze Phase 6 runtime semantics before any Phase 7 write-back generalization begins.
+```text
+workflow run = 34977525471
+artifact     = 10399629296
+digest       = sha256:001bee0b832c8da894d174d2870ece20e15e9f658153b456b9d3c2d33f37f239
+checkpoint   = checkpoint:77b7379f2946ea4c875b1dbe
+assessment   = VALID
+questions    = 0
+```
 
-Until then, Phase 6H remains pending rather than assuming a positive usefulness result.
+### Stage B — post-action closure
+
+```text
+workflow run = 34977754315
+artifact     = 10400615165
+digest       = sha256:f257ca53a417665548730ea7ab5f5257083fd7e41d43a8cd3b0eeda69473a7ea
+outcome      = outcome:527d0373e75cadcd166e22b0
+state        = verified
+checkpoint   = checkpoint:ffdbd0c35aa03628a8df2442
+version      = 2
+closure      = continuity-closure:da325c65143af997730c7a43
+next reentry = VALID
+```
+
+The two immutable workflow artifacts together form the accepted replay set. The Stage-B artifact alone is not represented as containing the complete Stage-A evidence.
+
+---
+
+## 4. Final Phase 6 decision
+
+Phase 6 — Real Continuity Loop is **Complete / Accepted** when the Phase 6H final regression workflow is green.
+
+The accepted product proof is narrow and explicit:
+
+1. Nexus restored a durable human-confirmed Trusted Checkpoint.
+2. Nexus read fresh GitHub reality through the bounded source adapter.
+3. Nexus produced an evidence-linked Continuity Assessment.
+4. Nexus asked no unnecessary authority question.
+5. A genuine project action occurred outside autonomous Nexus control.
+6. Nexus independently re-read GitHub after the action rather than trusting the action report.
+7. Nexus recorded success only after fresh authoritative evidence proved the expected postcondition.
+8. Nexus persisted the verified Outcome and next Trusted Checkpoint with exact read-after-write verification.
+9. A later re-entry began from the new checkpoint without reconstructing the prior checkpoint history.
+10. The user reported materially reduced reconstruction effort in this observed run.
+
+This proves one real continuity transaction. It does **not** prove generalized multi-project write-back, cross-provider outcome verification, autonomous execution, or universal productivity improvement.
+
+---
+
+## 5. Frozen Phase 6 semantics
+
+After final acceptance, the following Phase 6 semantics are frozen unless a genuine defect is proven:
+
+- Validate before Recover;
+- `VALID / INVALID / AMBIGUOUS` continuation semantics;
+- fresh evidence cannot become authorization;
+- protected ambiguity crosses only the Human Authority Gate;
+- external action reports cannot prove success;
+- success requires a fresh authoritative postcondition read;
+- failed / indeterminate outcomes cannot advance Trusted Checkpoint state;
+- checkpoint advancement requires `verified-outcome` authority;
+- Outcome and Trusted Checkpoint writes require exact read-after-write verification;
+- the continuity layer cannot mutate Canonical Context as a side effect;
+- the next real re-entry begins from the latest verified checkpoint rather than replaying old conversation history.
+
+---
+
+## 6. Next authorized phase
+
+After this gate is merged, the next product phase is **Phase 7 — Outcome / Trusted-State Write-back Generalization**.
+
+Phase 7 may generalize storage and write-back policy only downstream of the accepted Phase 6 proof. It must not reopen the Phase 4 / Phase 5 truth and authority boundaries or weaken the frozen Phase 6 verification rules for convenience.
