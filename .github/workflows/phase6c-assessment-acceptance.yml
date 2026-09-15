@@ -1,0 +1,56 @@
+name: Phase 6C Assessment Acceptance
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'experience/continuity-loop-v01/fresh-evidence-window-validator.mjs'
+      - 'experience/continuity-loop-v01/continuity-assessment.mjs'
+      - 'tests/continuity-assessment-v01.test.mjs'
+      - 'docs/Nexus-Atlas-v0.1-Continuity-Assessment-Contract.md'
+      - 'docs/Nexus-Atlas-v0.1-Continuity-Assessment-Test-Matrix.md'
+      - '.github/workflows/phase6c-assessment-acceptance.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  continuity-assessment:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Environment
+        run: node --version
+
+      - name: Assessment syntax boundary
+        run: |
+          node --check experience/continuity-loop-v01/fresh-evidence-window-validator.mjs
+          node --check experience/continuity-loop-v01/continuity-assessment.mjs
+          node --check tests/continuity-assessment-v01.test.mjs
+
+      - name: Dedicated continuity-assessment acceptance
+        run: node --test tests/continuity-assessment-v01.test.mjs
+
+      - name: Fresh Evidence Window regression
+        run: node --test tests/fresh-evidence-window-v01.test.mjs
+
+      - name: Phase 6B frozen regression
+        run: node --test tests/trusted-checkpoint-v01.test.mjs tests/file-trusted-checkpoint-store-v01.test.mjs
+
+      - name: Phase 5 frozen regression
+        run: npm run verify:phase5-v01
+
+      - name: Phase 4 frozen regression
+        run: npm run verify:phase4-v01
