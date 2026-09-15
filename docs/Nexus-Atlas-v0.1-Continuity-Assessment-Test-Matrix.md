@@ -136,7 +136,8 @@
 | 6C-CA-I04 | tampered capability/status pairing | validator rejects |
 | 6C-CA-I05 | duplicate source record identity | validator rejects |
 | 6C-CA-I06 | commit count diagnostics mismatch | validator rejects |
-| 6C-CA-I07 | source/policy/cursor scope mismatch inside artifact | validator rejects |
+| 6C-CA-I07 | builder-produced scope mismatch with `blockedReason=evidence-scope-violation` | validator accepts artifact; assessment blocks |
+| 6C-CA-I08 | source/policy/cursor scope mismatch without the dedicated blocker | validator rejects |
 
 ---
 
