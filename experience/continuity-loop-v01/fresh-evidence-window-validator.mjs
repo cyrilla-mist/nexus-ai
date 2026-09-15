@@ -181,7 +181,16 @@ export function validateFreshEvidenceWindowV01(window) {
 
   if (!exact(window.capabilities, CAPABILITY_KEYS) || typeof window.capabilities.assessmentAllowed !== "boolean" || window.capabilities.assessmentAllowed !== (window.status === "complete")) fail("assessment capability does not match window status.");
 
-  if (window.projectRef !== window.policy.projectRef || repositoryRef !== window.policy.repositoryRef || repositoryRef !== window.cursorFrom.scopeRef || repositoryRef !== window.cursorTo.scopeRef) fail("window project/source/policy/cursor scope binding is invalid.");
+  const scopeBound = window.projectRef === window.policy.projectRef
+    && repositoryRef === window.policy.repositoryRef
+    && repositoryRef === window.cursorFrom.scopeRef
+    && repositoryRef === window.cursorTo.scopeRef;
+  if (window.blockedReason === "evidence-scope-violation") {
+    if (scopeBound) fail("evidence-scope-violation requires an actual project/source/policy/cursor scope mismatch.");
+  } else if (!scopeBound) {
+    fail("window project/source/policy/cursor scope binding is invalid.");
+  }
+
   const branch = branchRecords[0];
   if (branch.payload.headSha !== window.cursorTo.value) fail("cursorTo does not match branch head evidence.");
   if (window.lineage === "identical" && window.cursorFrom.value !== window.cursorTo.value) fail("identical lineage requires the same cursor SHA.");
