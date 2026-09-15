@@ -8,6 +8,7 @@ on:
       - 'experience/continuity-loop-v01/fresh-evidence-window-validator.mjs'
       - 'experience/continuity-loop-v01/continuity-assessment.mjs'
       - 'tests/continuity-assessment-v01.test.mjs'
+      - 'tests/fresh-evidence-window-validator-v01.test.mjs'
       - 'docs/Nexus-Atlas-v0.1-Continuity-Assessment-Contract.md'
       - 'docs/Nexus-Atlas-v0.1-Continuity-Assessment-Test-Matrix.md'
       - '.github/workflows/phase6c-assessment-acceptance.yml'
@@ -39,9 +40,10 @@ jobs:
           node --check experience/continuity-loop-v01/fresh-evidence-window-validator.mjs
           node --check experience/continuity-loop-v01/continuity-assessment.mjs
           node --check tests/continuity-assessment-v01.test.mjs
+          node --check tests/fresh-evidence-window-validator-v01.test.mjs
 
       - name: Dedicated continuity-assessment acceptance
-        run: node --test tests/continuity-assessment-v01.test.mjs
+        run: node --test tests/continuity-assessment-v01.test.mjs tests/fresh-evidence-window-validator-v01.test.mjs
 
       - name: Fresh Evidence Window regression
         run: node --test tests/fresh-evidence-window-v01.test.mjs
