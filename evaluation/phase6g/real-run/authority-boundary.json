@@ -1,0 +1,9 @@
+{
+  "authorityVersion": "nexus-atlas.phase6g-authority-boundary.v0.1",
+  "authority": "human",
+  "actorRef": "user:cyrilla",
+  "scope": "initial-trusted-checkpoint-only",
+  "protectedIntentMutationAllowed": false,
+  "freshSourceEvidence": false,
+  "canonicalContextWriteAllowed": false
+}

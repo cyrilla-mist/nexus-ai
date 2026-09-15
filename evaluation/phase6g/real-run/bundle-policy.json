@@ -1,0 +1,10 @@
+{
+  "policyVersion": "nexus-atlas.phase6g-bundle-policy.v0.1",
+  "allowCredentials": false,
+  "allowTokens": false,
+  "allowLocalMachinePaths": false,
+  "allowPrivateChatContent": false,
+  "allowAuthorEmailOrProfilePayload": false,
+  "sourceEvidenceProvider": "github",
+  "runtimeArtifactsAreFreshSourceEvidence": false
+}

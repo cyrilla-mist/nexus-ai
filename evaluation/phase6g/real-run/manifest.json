@@ -1,0 +1,46 @@
+{
+  "manifestVersion": "nexus-atlas.phase6g-real-run-manifest.v0.1",
+  "stage": "armed",
+  "projectRef": "project:nexus-atlas",
+  "repositoryRef": "cyrilla-mist/nexus-ai",
+  "alignment": {
+    "projectRef": "project:nexus-atlas",
+    "proposedAt": "2026-09-15T13:38:00Z",
+    "trustedDirection": "Prove one real continuity loop before generalizing Nexus Atlas.",
+    "activeObjective": "Run Phase 6G adversarial evaluation and the first real Nexus continuity-run evidence.",
+    "acceptedNextAction": {
+      "actionRef": "action:phase6g-adversarial-real-run",
+      "summary": "Implement and execute the bounded Phase 6G adversarial evaluation and first real Nexus continuity-run evidence flow.",
+      "basisRefs": [
+        "decision:phase6-single-real-loop",
+        "decision:validate-before-recover"
+      ]
+    },
+    "evidenceCursor": {
+      "provider": "github",
+      "scopeRef": "cyrilla-mist/nexus-ai",
+      "cursorType": "default-branch-head",
+      "value": "a9f431c675a5aa1183a06c9131def863ad8e5e69",
+      "capturedAt": "2026-09-15T13:37:47Z"
+    },
+    "governingRefs": [
+      "decision:phase6-single-real-loop",
+      "decision:validate-before-recover"
+    ],
+    "unresolvedProtectedAmbiguities": [],
+    "provenance": {
+      "provider": "nexus-phase6g-bootstrap",
+      "authority": "accepted-phase6-boundary-plus-human-confirmation",
+      "references": [
+        "docs:Nexus-Atlas-Phase6-Real-Continuity-Loop-Definition",
+        "commit:a9f431c675a5aa1183a06c9131def863ad8e5e69"
+      ]
+    }
+  },
+  "confirmation": {
+    "accepted": true,
+    "actorRef": "user:cyrilla",
+    "confirmedAt": "2026-09-15T13:39:00Z"
+  },
+  "preActionRunId": 34977525471
+}
