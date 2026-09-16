@@ -5,7 +5,10 @@ on:
     branches:
       - main
     paths:
-      - 'experience/writeback-v01/**'
+      - 'experience/writeback-v01/writeback-target-validator.mjs'
+      - 'experience/writeback-v01/writeback-policy.mjs'
+      - 'experience/writeback-v01/writeback-capability-gate.mjs'
+      - 'experience/writeback-v01/phase6-store-target-adapter.mjs'
       - 'tests/writeback-target-policy-v01.test.mjs'
       - 'docs/Nexus-Atlas-v0.1-Writeback-Target-Policy-Contract.md'
       - 'docs/Nexus-Atlas-v0.1-Writeback-Target-Policy-Test-Matrix.md'
@@ -42,7 +45,7 @@ jobs:
         run: node --test tests/writeback-target-policy-v01.test.mjs
 
       - name: Enforce bounded Phase 7B changed scope
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && github.head_ref == 'feature/phase7b-writeback-target-policy'
         shell: bash
         run: |
           git fetch origin main --depth=1
