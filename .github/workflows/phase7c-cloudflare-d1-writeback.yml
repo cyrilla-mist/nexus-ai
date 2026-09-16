@@ -10,6 +10,7 @@ on:
       - 'tests/cloudflare-d1-writeback-v01.test.mjs'
       - 'docs/Nexus-Atlas-v0.1-Cloudflare-D1-Writeback-Contract.md'
       - 'docs/Nexus-Atlas-v0.1-Cloudflare-D1-Writeback-Test-Matrix.md'
+      - '.github/workflows/phase7b-writeback-target-policy.yml'
       - '.github/workflows/phase7c-cloudflare-d1-writeback.yml'
   workflow_dispatch:
 
@@ -45,7 +46,7 @@ jobs:
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
           import { D1_WRITEBACK_SCHEMA_SQL_V01 } from './experience/writeback-v01/cloudflare-d1-writeback-adapter.mjs';
-          const normalize = value => value.trim().replace(/\r\n/g, '\n');
+          const normalize = value => value.replace(/\s+/g, ' ').trim();
           const tracked = fs.readFileSync('migrations/phase7c-d1-writeback-v01.sql', 'utf8');
           if (normalize(tracked) !== normalize(D1_WRITEBACK_SCHEMA_SQL_V01)) {
             throw new Error('tracked D1 schema and runtime initializer schema differ');
@@ -57,7 +58,7 @@ jobs:
         shell: bash
         run: |
           git fetch origin main --depth=1
-          allowed='^(experience/writeback-v01/cloudflare-d1-writeback-adapter\.mjs|migrations/phase7c-d1-writeback-v01\.sql|tests/cloudflare-d1-writeback-v01\.test\.mjs|docs/Nexus-Atlas-v0\.1-Cloudflare-D1-Writeback-(Contract|Test-Matrix)\.md|\.github/workflows/phase7c-cloudflare-d1-writeback\.yml)$'
+          allowed='^(experience/writeback-v01/cloudflare-d1-writeback-adapter\.mjs|migrations/phase7c-d1-writeback-v01\.sql|tests/cloudflare-d1-writeback-v01\.test\.mjs|docs/Nexus-Atlas-v0\.1-Cloudflare-D1-Writeback-(Contract|Test-Matrix)\.md|\.github/workflows/phase7b-writeback-target-policy\.yml|\.github/workflows/phase7c-cloudflare-d1-writeback\.yml)$'
           changed="$(git diff --name-only origin/main...HEAD)"
           printf '%s\n' "$changed"
           unexpected="$(printf '%s\n' "$changed" | grep -Ev "$allowed" || true)"
