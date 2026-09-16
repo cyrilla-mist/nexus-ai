@@ -1,0 +1,91 @@
+name: Phase 7F Cross-source Postcondition
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'experience/writeback-v01/cross-source-postcondition.mjs'
+      - 'experience/writeback-v01/github-phase6-postcondition-proof.mjs'
+      - 'experience/writeback-v01/datahub-postcondition-proof.mjs'
+      - 'tests/cross-source-postcondition-v01.test.mjs'
+      - 'docs/Nexus-Atlas-v0.1-Cross-Source-Postcondition-Verification-Contract.md'
+      - 'docs/Nexus-Atlas-v0.1-Cross-Source-Postcondition-Verification-Test-Matrix.md'
+      - '.github/workflows/phase7f-cross-source-postcondition.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cross-source-postcondition:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Phase 7F syntax boundary
+        run: |
+          node --check experience/writeback-v01/cross-source-postcondition.mjs
+          node --check experience/writeback-v01/github-phase6-postcondition-proof.mjs
+          node --check experience/writeback-v01/datahub-postcondition-proof.mjs
+          node --check tests/cross-source-postcondition-v01.test.mjs
+
+      - name: Dedicated Phase 7F acceptance
+        run: node --test tests/cross-source-postcondition-v01.test.mjs
+
+      - name: Enforce bounded Phase 7F changed scope
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          git fetch origin main --depth=1
+          allowed='^(experience/writeback-v01/(cross-source-postcondition|github-phase6-postcondition-proof|datahub-postcondition-proof)\.mjs|tests/cross-source-postcondition-v01\.test\.mjs|docs/Nexus-Atlas-v0\.1-Cross-Source-Postcondition-Verification-(Contract|Test-Matrix)\.md|\.github/workflows/phase7f-cross-source-postcondition\.yml)$'
+          changed="$(git diff --name-only origin/main...HEAD)"
+          printf '%s\n' "$changed"
+          unexpected="$(printf '%s\n' "$changed" | grep -Ev "$allowed" || true)"
+          if [ -n "$unexpected" ]; then
+            echo 'Phase 7F modified files outside the accepted bounded scope:' >&2
+            printf '%s\n' "$unexpected" >&2
+            exit 1
+          fi
+
+      - name: Phase 7E Outcome category regression
+        run: node --test tests/writeback-outcome-category-v01.test.mjs
+
+      - name: Phase 7D history/retention regression
+        run: node --test tests/writeback-history-retention-v01.test.mjs
+
+      - name: Phase 7C D1 durable write-back regression
+        run: node --test tests/cloudflare-d1-writeback-v01.test.mjs
+
+      - name: Phase 7B target/policy regression
+        run: node --test tests/writeback-target-policy-v01.test.mjs
+
+      - name: Phase 6B checkpoint persistence regression
+        run: node --test tests/trusted-checkpoint-v01.test.mjs tests/file-trusted-checkpoint-store-v01.test.mjs
+
+      - name: Phase 6C fresh evidence and assessment regression
+        run: node --test tests/fresh-evidence-window-v01.test.mjs tests/continuity-assessment-v01.test.mjs
+
+      - name: Phase 6D authority and re-entry regression
+        run: node --test tests/human-authority-reentry-v01.test.mjs
+
+      - name: Phase 6E outcome verification regression
+        run: node --test tests/outcome-verification-v01.test.mjs
+
+      - name: Phase 6F continuity closure regression
+        run: node --test tests/continuity-closure-v01.test.mjs
+
+      - name: Phase 5 frozen regression
+        run: npm run verify:phase5-v01
+
+      - name: Phase 4 frozen regression
+        run: npm run verify:phase4-v01
