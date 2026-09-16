@@ -6,7 +6,7 @@ const read = path => readFileSync(new URL(`../${path}`, import.meta.url), "utf8"
 
 const target = read("experience/writeback-v01/writeback-target-validator.mjs");
 const policy = read("experience/writeback-v01/writeback-policy.mjs");
-const d1 = read("experience/writeback-v01/cloudflare-d1-writeback.mjs");
+const d1 = read("experience/writeback-v01/cloudflare-d1-writeback-adapter.mjs");
 const retention = read("experience/writeback-v01/writeback-retention-policy.mjs");
 const history = read("experience/writeback-v01/writeback-history.mjs");
 const category = read("experience/writeback-v01/writeback-outcome-category.mjs");
