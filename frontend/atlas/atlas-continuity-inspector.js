@@ -1,3 +1,5 @@
+import { loadContinuityLiveSurfaceIfRequested } from "./atlas-continuity-live-read.js";
+
 const CONTINUITY_URL = new URL("../../examples/nexus-atlas-continuity-product-surface-phase8-v0.1.json", import.meta.url);
 const CONTINUITY_VERSION = "nexus-atlas.continuity-product-surface.v0.1";
 
@@ -41,6 +43,9 @@ function assertSnapshot(value) {
 }
 
 async function loadSnapshot() {
+  const liveRead = await loadContinuityLiveSurfaceIfRequested();
+  if (liveRead) return liveRead.surface;
+
   const response = await fetch(CONTINUITY_URL, { cache: "no-store" });
   if (!response.ok) throw new Error(`Accepted Continuity snapshot unavailable (${response.status}).`);
   return assertSnapshot(await response.json());
