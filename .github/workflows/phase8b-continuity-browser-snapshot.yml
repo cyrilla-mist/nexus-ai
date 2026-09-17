@@ -1,0 +1,61 @@
+name: Phase 8B Continuity Browser Snapshot
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'tests/helpers/continuity-product-surface-browser-fixture.mjs'
+      - 'scripts/print-continuity-product-surface-snapshot.mjs'
+      - 'examples/nexus-atlas-continuity-product-surface-phase8-v0.1.json'
+      - 'tests/continuity-browser-snapshot-v01.test.mjs'
+      - 'docs/Nexus-Atlas-v0.1-Continuity-Browser-Snapshot-Contract.md'
+      - '.github/workflows/phase8b-continuity-browser-snapshot.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  continuity-browser-snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Fixture syntax boundary
+        run: |
+          node --check tests/helpers/continuity-product-surface-browser-fixture.mjs
+          node --check scripts/print-continuity-product-surface-snapshot.mjs
+
+      - name: Emit canonical snapshot candidate
+        run: node scripts/print-continuity-product-surface-snapshot.mjs
+
+      - name: Snapshot equivalence acceptance
+        if: ${{ hashFiles('examples/nexus-atlas-continuity-product-surface-phase8-v0.1.json') != '' }}
+        run: node --test tests/continuity-browser-snapshot-v01.test.mjs
+
+      - name: Phase 8A regression
+        run: node --test tests/continuity-product-surface-v01.test.mjs
+
+      - name: Phase 7G regression
+        run: node --test tests/writeback-management-surface-v01.test.mjs
+
+      - name: Phase 6 outcome/checkpoint regression
+        run: |
+          node --test tests/trusted-checkpoint-v01.test.mjs
+          node --test tests/outcome-verification-v01.test.mjs
+
+      - name: Phase 5 frozen regression
+        run: npm run verify:phase5-v01
+
+      - name: Phase 4 frozen regression
+        run: npm run verify:phase4-v01
