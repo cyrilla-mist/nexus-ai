@@ -1,0 +1,76 @@
+name: Phase 8D Continuity Inspector History
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'atlas.html'
+      - 'frontend/atlas/atlas-entry.js'
+      - 'frontend/atlas/atlas-continuity-inspector.js'
+      - 'frontend/atlas/atlas-continuity-inspector.css'
+      - 'tests/atlas-continuity-inspector-v01.test.mjs'
+      - 'docs/Nexus-Atlas-v0.1-Continuity-Inspector-History-Contract.md'
+      - '.github/workflows/phase8c-continuity-desk-route.yml'
+      - '.github/workflows/phase8d-continuity-inspector-history.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  continuity-inspector-history:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Phase 8D syntax boundary
+        run: |
+          node --check frontend/atlas/atlas-entry.js
+          node --check frontend/atlas/atlas-continuity-inspector.js
+          node --check tests/atlas-continuity-inspector-v01.test.mjs
+
+      - name: Dedicated Phase 8D acceptance
+        run: node --test tests/atlas-continuity-inspector-v01.test.mjs
+
+      - name: Enforce bounded Phase 8D changed scope
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          git fetch origin main --depth=1
+          allowed='^(atlas\.html|frontend/atlas/(atlas-entry\.js|atlas-continuity-inspector\.(js|css))|tests/atlas-continuity-inspector-v01\.test\.mjs|docs/Nexus-Atlas-v0\.1-Continuity-Inspector-History-Contract\.md|\.github/workflows/phase8c-continuity-desk-route\.yml|\.github/workflows/phase8d-continuity-inspector-history\.yml)$'
+          changed="$(git diff --name-only origin/main...HEAD)"
+          printf '%s\n' "$changed"
+          unexpected="$(printf '%s\n' "$changed" | grep -Ev "$allowed" || true)"
+          if [ -n "$unexpected" ]; then
+            echo 'Phase 8D modified files outside the accepted bounded scope:' >&2
+            printf '%s\n' "$unexpected" >&2
+            exit 1
+          fi
+
+      - name: Phase 8C route regression
+        run: node --test tests/atlas-continuity-surface-v01.test.mjs
+
+      - name: Phase 8B snapshot regression
+        run: node --test tests/continuity-browser-snapshot-v01.test.mjs
+
+      - name: Phase 8A projector regression
+        run: node --test tests/continuity-product-surface-v01.test.mjs
+
+      - name: Phase 7G management regression
+        run: node --test tests/writeback-management-surface-v01.test.mjs
+
+      - name: Phase 5 frozen regression
+        run: npm run verify:phase5-v01
+
+      - name: Phase 4 frozen regression
+        run: npm run verify:phase4-v01
