@@ -1,0 +1,57 @@
+name: Nexus Atlas CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nexus-atlas-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run full test suite
+        run: npm test
+
+      - name: Run repository checks
+        run: npm run check
+
+      - name: Verify security contracts
+        run: npm run verify:security-contracts
+
+      - name: Verify Verity continuity contracts
+        run: npm run verify:verity-continuity
+
+      - name: Verify Verity DataHub contracts
+        run: npm run verify:verity-datahub
+
+      - name: Verify ingestion dry-run
+        run: npm run verify:verity-ingestion
+
+      - name: Check generated diff hygiene
+        run: git diff --check
