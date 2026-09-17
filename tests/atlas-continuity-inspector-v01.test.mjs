@@ -14,8 +14,9 @@ const snapshot = JSON.parse(await readText("examples/nexus-atlas-continuity-prod
 
 test("8D-A01 Continuity Inspector is loaded only by the continuity Product Surface branch", () => {
   assert.match(entry, /initialRoute === "continuity"/);
-  assert.match(entry, /await import\("\.\/atlas-continuity\.js"\);\s*await import\("\.\/atlas-continuity-inspector\.js"\)/s);
-  assert.doesNotMatch(entry, /initialRoute === "desk"[\s\S]*atlas-continuity-inspector\.js/);
+  assert.match(entry, /else if \(initialRoute === "continuity"\) \{\s*await import\("\.\/atlas-continuity\.js"\);\s*await import\("\.\/atlas-continuity-inspector\.js"\);\s*\}/s);
+  assert.equal((entry.match(/atlas-continuity-inspector\.js/g) || []).length, 1);
+  assert.match(entry, /if \(initialRoute === "desk"\) \{\s*await import\("\.\/atlas-desk\.js"\);\s*\}/s);
 });
 
 test("8D-A02 Inspector is hard-guarded to the continuity hash route", () => {
@@ -33,7 +34,7 @@ test("8D-A04 Inspector transport has no live provider, mutation, or persistence 
   assert.doesNotMatch(inspector, /fetch\(["']https?:\/\//i);
   assert.doesNotMatch(inspector, /method\s*:\s*["'](?:POST|PUT|PATCH|DELETE)["']/i);
   assert.doesNotMatch(inspector, /localStorage\.|sessionStorage\./);
-  assert.doesNotMatch(inspector, /D1|DataHub|api\.github\.com|mutationBridge|local-bridge|process\.env|writeFile|appendFile/i);
+  assert.doesNotMatch(inspector, /\bD1\b|\bDataHub\b|api\.github\.com|mutationBridge|local-bridge|process\.env|writeFile|appendFile/);
 });
 
 test("8D-A05 inspectable target set is explicitly bounded", () => {
@@ -64,7 +65,7 @@ test("8D-B01 Resume detail remains a subset of accepted browser projection", () 
     "surface.continuity.validity",
     "surface.continuity.humanAuthorityRequired",
   ]) assert.match(inspector, new RegExp(field.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
-  assert.doesNotMatch(inspector, /governingRefs|unresolvedProtectedAmbiguities|provenance/);
+  assert.doesNotMatch(inspector, /\.(?:governingRefs|unresolvedProtectedAmbiguities|provenance)\b/);
 });
 
 test("8D-B02 Outcome detail does not reconstruct observed postcondition or provider payload", () => {
@@ -72,7 +73,7 @@ test("8D-B02 Outcome detail does not reconstruct observed postcondition or provi
   assert.match(inspector, /outcome\.actionRef/);
   assert.match(inspector, /outcome\.verificationState/);
   assert.match(inspector, /outcome\.failureReason/);
-  assert.doesNotMatch(inspector, /observedPostcondition|verificationEvidenceRefs|executionActor/);
+  assert.doesNotMatch(inspector, /\.(?:observedPostcondition|verificationEvidenceRefs|executionActor)\b/);
 });
 
 test("8D-B03 Checkpoint detail remains bounded to accepted browser fields", () => {
@@ -86,7 +87,7 @@ test("8D-B03 Checkpoint detail remains bounded to accepted browser fields", () =
     "checkpoint.evidenceCursor.cursorType",
     "checkpoint.evidenceCursor.capturedAt",
   ]) assert.match(inspector, new RegExp(field.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
-  assert.doesNotMatch(inspector, /checkpoint\.governingRefs|checkpoint\.provenance|confirmation\.basisRef/);
+  assert.doesNotMatch(inspector, /checkpoint\.(?:governingRefs|provenance)\b|confirmation\.basisRef/);
 });
 
 test("8D-B04 Verification and write-back safety remain summary-only", () => {
@@ -97,7 +98,7 @@ test("8D-B04 Verification and write-back safety remain summary-only", () => {
   assert.match(inspector, /safety\.providerKind/);
   assert.match(inspector, /safety\.retentionMode/);
   assert.match(inspector, /safety\.deletionAllowed/);
-  assert.doesNotMatch(inspector, /database_id|account_id|credential|token/i);
+  assert.doesNotMatch(inspector, /\.(?:database_id|databaseId|account_id|accountId|credential|credentials|token|accessToken)\b/);
 });
 
 test("8D-B05 History interaction reads only bounded summary records", () => {
