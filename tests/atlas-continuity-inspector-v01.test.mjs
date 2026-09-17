@@ -142,6 +142,6 @@ test("8D-C03 Inspector reuses existing Atlas design tokens and responsive assump
 });
 
 test("8D-C04 Phase 8C Continuity Desk remains the owner of overall rendering", () => {
-  assert.match(continuity, /function renderContinuity\(surface\)/);
+  assert.match(continuity, /function renderContinuity\(surface(?:,\s*[A-Za-z_$][\w$]*)?\)/);
   assert.doesNotMatch(inspector, /main\.innerHTML\s*=\s*renderContinuity/);
 });
