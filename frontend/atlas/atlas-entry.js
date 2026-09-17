@@ -37,6 +37,7 @@ if (initialRoute === "desk") {
   await import("./atlas-source-intake.js");
 } else if (initialRoute === "continuity") {
   await import("./atlas-continuity.js");
+  await import("./atlas-continuity-inspector.js");
 } else {
   await import("./atlas-app.js");
 }
