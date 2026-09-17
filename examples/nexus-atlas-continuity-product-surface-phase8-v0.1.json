@@ -1,0 +1,94 @@
+{
+  "version": "nexus-atlas.continuity-product-surface.v0.1",
+  "projectRef": "project:nexus-atlas",
+  "generatedAt": "2026-09-17T12:12:00Z",
+  "resumeState": {
+    "trustedDirection": "Make verified continuity state visible in Nexus Atlas before adding more backend breadth.",
+    "activeObjective": "Ship the accepted Continuity Product Surface and then expose it through a dedicated read-only Atlas route.",
+    "nextActionRef": "action:phase8b:accepted-browser-snapshot",
+    "nextActionSummary": "Freeze a deterministic browser snapshot that is mechanically equivalent to the accepted Continuity Product Surface projector."
+  },
+  "continuity": {
+    "assessmentRef": "continuity-assessment:6157bb11bec169921eee9249",
+    "validity": "VALID",
+    "humanAuthorityRequired": false,
+    "reentryPackageAllowed": true
+  },
+  "trustedCheckpoint": {
+    "checkpointRef": "checkpoint:phase8:continuity-product-surface",
+    "version": 1,
+    "createdAt": "2026-09-17T12:06:00Z",
+    "evidenceCursor": {
+      "provider": "github",
+      "scopeRef": "cyrilla-mist/nexus-ai",
+      "cursorType": "default-branch-head",
+      "capturedAt": "2026-09-17T12:06:00Z"
+    },
+    "confirmationAuthority": "verified-outcome"
+  },
+  "latestOutcome": {
+    "outcomeRef": "outcome:f1749e1bcdae4ae482d2b812",
+    "verificationState": "verified",
+    "recordedAt": "2026-09-17T12:10:00Z",
+    "actionRef": "action:phase8a:continuity-product-surface-projection",
+    "failureReason": null
+  },
+  "history": {
+    "outcomes": {
+      "historyRef": "writeback-history:106d5a3a70dddf0e09d4437a",
+      "count": 1,
+      "truncated": false,
+      "nextCursor": null,
+      "records": [
+        {
+          "outcomeRef": "outcome:f1749e1bcdae4ae482d2b812",
+          "verificationState": "verified",
+          "recordedAt": "2026-09-17T12:10:00Z",
+          "actionRef": "action:phase8a:continuity-product-surface-projection"
+        }
+      ]
+    },
+    "checkpoints": {
+      "historyRef": "writeback-history:a03be6aaab9339ad14ea0b90",
+      "count": 1,
+      "truncated": false,
+      "nextCursor": null,
+      "records": [
+        {
+          "checkpointRef": "checkpoint:phase8:continuity-product-surface",
+          "version": 1,
+          "createdAt": "2026-09-17T12:06:00Z",
+          "nextActionRef": "action:phase8b:accepted-browser-snapshot"
+        }
+      ]
+    }
+  },
+  "verification": {
+    "total": 0,
+    "states": {
+      "verified": 0,
+      "failed": 0,
+      "indeterminate": 0
+    },
+    "sourceProfiles": []
+  },
+  "writebackSafety": {
+    "targetRef": "writeback-target:d3a17c733a86e23f30928c68",
+    "providerKind": "accepted-static-browser-fixture",
+    "durability": "memory",
+    "requireVerifiedOutcomeForCheckpointAdvance": true,
+    "requireExactReadAfterWrite": true,
+    "retentionMode": "retain-all",
+    "deletionAllowed": false
+  },
+  "capabilities": {
+    "readOnly": true,
+    "writeAllowed": false,
+    "deleteAllowed": false,
+    "productionProvisioningAllowed": false,
+    "canonicalContextWriteAllowed": false,
+    "autonomousExecutionAllowed": false,
+    "humanAuthorityDecisionAllowed": false
+  },
+  "surfaceId": "continuity-product-surface:e28c855c84be2fc80b251d4e"
+}
