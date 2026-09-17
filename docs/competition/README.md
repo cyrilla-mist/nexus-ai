@@ -1,73 +1,51 @@
-# Nexus Atlas Competition Pack
+# Nexus Atlas Competition Archive
 
-This directory organizes reviewer-facing and submission-facing materials for the DataHub hackathon.
+> **Historical submission-preparation material.**
+>
+> This directory preserves the reviewer-facing and production-facing material created for the 2026 DataHub hackathon. The competition has been submitted and this directory is no longer an active checklist or roadmap.
 
-## Current documents
+The frozen competition build is preserved separately at:
 
-- [`Nexus-Atlas-Judge-QA.md`](Nexus-Atlas-Judge-QA.md) — concise and extended answers for likely reviewer questions.
-- [`Nexus-Atlas-Visual-Submission-Plan.md`](Nexus-Atlas-Visual-Submission-Plan.md) — cover, screenshots, thumbnail, capture, privacy, and truthfulness requirements.
-- [`Nexus-Atlas-Video-Production-Pack.md`](Nexus-Atlas-Video-Production-Pack.md) — final scene plan, recording sequence, editing rules, YouTube copy, and evidence checklist.
-- [`Nexus-Atlas-AI-Voiceover.txt`](Nexus-Atlas-AI-Voiceover.txt) — simple English narration for AI voice or personal recording.
-- [`nexus-atlas-demo-en.srt`](nexus-atlas-demo-en.srt) — editable English subtitle timeline for the demo video.
-- [`Nexus-Atlas-Codex-Local-Validation-Prompt.md`](Nexus-Atlas-Codex-Local-Validation-Prompt.md) — complete Windows/Codex workflow for branch safety, tests, DataHub, MCP, governed ownership repair, Context Package handoff, evidence capture, and final reporting.
+[`cyrilla-mist/nexus-atlas-datahub-2026`](https://github.com/cyrilla-mist/nexus-atlas-datahub-2026)
 
-## Source documents elsewhere in the repository
+Long-term Nexus Atlas development continues in the current repository.
 
-- [`../Nexus-Atlas-Architecture-Review-v1.0.md`](../Nexus-Atlas-Architecture-Review-v1.0.md) — canonical product and architecture baseline.
-- [`../Nexus-Atlas-Implementation-Audit-2026-07-31.md`](../Nexus-Atlas-Implementation-Audit-2026-07-31.md) — implementation readiness and merge blockers.
-- [`../Nexus-DataHub-Verity-Assets.md`](../Nexus-DataHub-Verity-Assets.md) — governed DataHub asset and bridge contract.
-- [`../../examples/README.md`](../../examples/README.md) — deterministic sample and planned-contract evidence boundary.
+## Archived Materials
 
-## Submission materials status
+- [`Nexus-Atlas-Judge-QA.md`](Nexus-Atlas-Judge-QA.md) — reviewer-question preparation.
+- [`Nexus-Atlas-Visual-Submission-Plan.md`](Nexus-Atlas-Visual-Submission-Plan.md) — cover, screenshot, thumbnail, capture, privacy, and truthfulness planning.
+- [`Nexus-Atlas-Video-Production-Pack.md`](Nexus-Atlas-Video-Production-Pack.md) — recording sequence, editing notes, YouTube copy, and evidence checklist.
+- [`Nexus-Atlas-AI-Voiceover.txt`](Nexus-Atlas-AI-Voiceover.txt) — English narration draft.
+- [`nexus-atlas-demo-en.srt`](nexus-atlas-demo-en.srt) — English subtitle timeline.
+- [`Nexus-Atlas-Codex-Local-Validation-Prompt.md`](Nexus-Atlas-Codex-Local-Validation-Prompt.md) — the local validation / DataHub / MCP workflow used during submission preparation.
 
-Prepared:
+## Related Technical References
 
-- Devpost project narrative draft;
-- simple English voice-over;
-- English SRT subtitle track;
-- under-three-minute recording sequence;
-- YouTube title, description, chapters, and tags;
-- cover, banner, thumbnail, and screenshot direction;
-- reviewer Q&A;
-- privacy and runtime-evidence checklists;
-- complete Codex local validation and repair instruction.
+Some competition work also produced reusable architecture and integration knowledge. Those documents remain elsewhere in `docs/` because their concepts extend beyond the competition:
 
-Still requiring verified runtime work:
+- [`../Nexus-Atlas-Architecture-Review-v1.0.md`](../Nexus-Atlas-Architecture-Review-v1.0.md)
+- [`../Nexus-DataHub-Verity-Assets.md`](../Nexus-DataHub-Verity-Assets.md)
+- [`../architecture/README.md`](../architecture/README.md)
+- [`../../examples/README.md`](../../examples/README.md)
 
-- public demo URL;
-- verified DataHub screenshots;
-- Missing Ownership `1 → 0` evidence;
-- final source-code and testing links;
-- final video export and public upload.
+## Historical Evidence Classes
 
-## Evidence classes
+The submission material distinguished three evidence classes. These definitions remain useful when reading the archived documents:
 
 ### Deterministic fixture
 
-A repeatable Nexus-owned scenario used to demonstrate Continuity logic. It does not prove that DataHub was available or mutated.
+A repeatable Nexus-owned scenario used to demonstrate continuity logic. It does not prove that an external provider was available or mutated.
 
 ### Planned contract
 
-A proposed structure such as Context Package or Outcome Write-back. It must not be described as implemented runtime behavior.
+A proposed structure such as Context Package or Outcome Write-back. A planned contract is not automatically implemented runtime behavior.
 
 ### Verified runtime
 
-Captured evidence from the target environment showing the real DataHub source, allowed mutation, fresh re-read, and resulting state.
+Captured evidence from a target environment showing the real external source, allowed mutation, fresh re-read, and resulting state.
 
-Only verified runtime evidence may support an end-to-end claim.
+## Reading the Old Checklists
 
-## Final submission checklist
+Unchecked boxes or “still requiring” sections in files in this directory describe the state **during submission preparation**. They should not be copied into the current Nexus backlog without first checking the present code, tests, and current product direction.
 
-- [ ] Repository branches validated locally.
-- [ ] Tests and checks pass.
-- [ ] DataHub assets ingested.
-- [ ] MCP ownership and lineage reads verified.
-- [ ] `add_owners` mutation verified.
-- [ ] Missing Ownership `1 → 0` captured.
-- [ ] Context Package handoff completed or truthfully scoped.
-- [ ] Outcome Write-back completed or truthfully scoped.
-- [ ] Public demo deployed.
-- [ ] Screenshots privacy-reviewed.
-- [ ] Video under three minutes with English subtitles.
-- [ ] Devpost text updated to match verified functionality.
-- [ ] Apache License 2.0 visible on the final public branch.
+For current project orientation, start at [`../README.md`](../README.md) and the repository root [`README.md`](../../README.md).
