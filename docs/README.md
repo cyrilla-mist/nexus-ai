@@ -1,18 +1,19 @@
 # Nexus Atlas Documentation
 
-This directory contains the long-term product, architecture, implementation, integration, evaluation, and historical competition documentation for Nexus Atlas.
+This directory contains the long-term product, architecture, implementation, integration, evaluation, maintenance, and historical competition documentation for Nexus Atlas.
 
 > **Repository status:** [`cyrilla-mist/nexus-ai`](https://github.com/cyrilla-mist/nexus-ai) is the canonical long-term Nexus Atlas repository. Documents in this directory span multiple development phases, so a file's age and purpose matter when interpreting it.
 
 ## Start Here
 
-For the current product, read these first:
+For the current product and repository state, read these first:
 
 1. [`../README.md`](../README.md) — current repository and product overview.
 2. [`Nexus-Atlas-Architecture-Review-v1.0.md`](Nexus-Atlas-Architecture-Review-v1.0.md) — canonical architecture and product baseline.
 3. [`architecture/README.md`](architecture/README.md) — architecture-document precedence and interpretation rules.
 4. [`Nexus-Atlas-Phase6-Real-Continuity-Loop-Definition.md`](Nexus-Atlas-Phase6-Real-Continuity-Loop-Definition.md) — later continuity-loop definition for real project re-entry.
 5. [`Nexus-DataHub-Verity-Assets.md`](Nexus-DataHub-Verity-Assets.md) — DataHub / Verity governed-asset integration contract.
+6. [`BRANCH_CLEANUP_AUDIT_2026-09-17.md`](BRANCH_CLEANUP_AUDIT_2026-09-17.md) — complete classification of all non-`main` branches for repository cleanup.
 
 The source code, tests, and current root README are the authority for what the repository actually implements today. A historical design document does not by itself prove that a capability remains implemented or verified.
 
@@ -27,6 +28,21 @@ These documents define durable product concepts and system boundaries:
 - `Nexus-Atlas-Phase6-Real-Continuity-Loop-Definition.md`
 
 Important long-term concepts include the Context Fabric, projections, Atlas Desk, route-first Atlas Map, human authority for consequential changes, evidence/provenance boundaries, and governed external-source adapters.
+
+### Repository Maintenance
+
+`BRANCH_CLEANUP_AUDIT_2026-09-17.md` records the branch state after the September 2026 repository cleanup.
+
+At audit time:
+
+```text
+main
++ 43 verified safe cleanup candidates
++ 2 preserved branches with unique commits
+= 46 total branches
+```
+
+Use that document before deleting historical branches. The two preserved branches contain unique Project Atlas work and should not be bulk-deleted with absorbed phase branches.
 
 ### Implementation and Phase Audits
 
@@ -88,6 +104,7 @@ Future documentation should state its role near the top when possible:
 
 - **Current baseline** — intended to guide future implementation.
 - **Integration contract** — defines a specific source/provider boundary.
+- **Repository maintenance** — records cleanup, branch, or structural state.
 - **Phase record** — a point-in-time implementation or acceptance snapshot.
 - **Historical / competition** — retained for provenance, not current planning.
 
