@@ -1,0 +1,82 @@
+name: Phase 8E Continuity Live Read
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'frontend/atlas/atlas-continuity.js'
+      - 'frontend/atlas/atlas-continuity-inspector.js'
+      - 'frontend/atlas/atlas-continuity-live-read.js'
+      - 'experience/product-surface-v01/continuity-product-surface-browser-validator.mjs'
+      - 'tests/continuity-live-read-v01.test.mjs'
+      - 'tests/atlas-continuity-live-wiring-v01.test.mjs'
+      - 'docs/Nexus-Atlas-v0.1-Continuity-Live-Read-Boundary.md'
+      - '.github/workflows/phase8e-continuity-live-read.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  continuity-live-read:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Phase 8E syntax boundary
+        run: |
+          node --check frontend/atlas/atlas-continuity.js
+          node --check frontend/atlas/atlas-continuity-inspector.js
+          node --check frontend/atlas/atlas-continuity-live-read.js
+          node --check experience/product-surface-v01/continuity-product-surface-browser-validator.mjs
+          node --check tests/continuity-live-read-v01.test.mjs
+          node --check tests/atlas-continuity-live-wiring-v01.test.mjs
+
+      - name: Dedicated Phase 8E transport acceptance
+        run: node --test tests/continuity-live-read-v01.test.mjs tests/atlas-continuity-live-wiring-v01.test.mjs
+
+      - name: Enforce bounded Phase 8E changed scope
+        if: github.event_name == 'pull_request' && github.head_ref == 'feature/phase8e-continuity-live-read-boundary'
+        shell: bash
+        run: |
+          git fetch origin main --depth=1
+          allowed='^(frontend/atlas/(atlas-continuity\.js|atlas-continuity-inspector\.js|atlas-continuity-live-read\.js)|experience/product-surface-v01/continuity-product-surface-browser-validator\.mjs|tests/(continuity-live-read-v01\.test\.mjs|atlas-continuity-live-wiring-v01\.test\.mjs)|docs/Nexus-Atlas-v0\.1-Continuity-Live-Read-Boundary\.md|\.github/workflows/phase8e-continuity-live-read\.yml)$'
+          changed="$(git diff --name-only origin/main...HEAD)"
+          printf '%s\n' "$changed"
+          unexpected="$(printf '%s\n' "$changed" | grep -Ev "$allowed" || true)"
+          if [ -n "$unexpected" ]; then
+            echo 'Phase 8E modified files outside the accepted bounded scope:' >&2
+            printf '%s\n' "$unexpected" >&2
+            exit 1
+          fi
+
+      - name: Phase 8D Inspector regression
+        run: node --test tests/atlas-continuity-inspector-v01.test.mjs
+
+      - name: Phase 8C route regression
+        run: node --test tests/atlas-continuity-surface-v01.test.mjs
+
+      - name: Phase 8B snapshot regression
+        run: node --test tests/continuity-browser-snapshot-v01.test.mjs
+
+      - name: Phase 8A projector regression
+        run: node --test tests/continuity-product-surface-v01.test.mjs
+
+      - name: Phase 7G management regression
+        run: node --test tests/writeback-management-surface-v01.test.mjs
+
+      - name: Phase 5 frozen regression
+        run: npm run verify:phase5-v01
+
+      - name: Phase 4 frozen regression
+        run: npm run verify:phase4-v01
