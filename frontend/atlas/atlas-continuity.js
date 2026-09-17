@@ -1,3 +1,5 @@
+import { loadContinuityLiveSurfaceIfRequested } from "./atlas-continuity-live-read.js";
+
 const CONTINUITY_URL = new URL("../../examples/nexus-atlas-continuity-product-surface-phase8-v0.1.json", import.meta.url);
 const CONTINUITY_VERSION = "nexus-atlas.continuity-product-surface.v0.1";
 
@@ -74,9 +76,21 @@ function assertBrowserSnapshot(value) {
 }
 
 async function loadContinuitySnapshot() {
+  const liveRead = await loadContinuityLiveSurfaceIfRequested();
+  if (liveRead) return liveRead;
+
   const response = await fetch(CONTINUITY_URL, { cache: "no-store" });
   if (!response.ok) throw new Error(`Accepted Continuity snapshot unavailable (${response.status}).`);
-  return assertBrowserSnapshot(await response.json());
+  return {
+    surface: assertBrowserSnapshot(await response.json()),
+    sourceInfo: deepFreeze({
+      mode: "static",
+      label: "ACCEPTED STATIC SNAPSHOT",
+      fetchedAt: null,
+      readOnly: true,
+      mutationEnabled: false,
+    }),
+  };
 }
 
 function continuityTone(validity) {
@@ -112,14 +126,15 @@ function renderContextPath() {
     </nav>`;
 }
 
-function renderHeading(surface) {
+function renderHeading(surface, sourceInfo) {
   const validity = surface.continuity.validity;
+  const sourceLabel = sourceInfo.mode === "live" ? "VALIDATED LOOPBACK LIVE READ" : "ACCEPTED STATIC SNAPSHOT";
   return `
     <header class="view-heading continuity-heading">
       <div>
-        <span class="eyebrow">CONTINUITY / ACCEPTED STATIC SNAPSHOT</span>
+        <span class="eyebrow">CONTINUITY / ${sourceLabel}</span>
         <h1>Resume without reconstructing the project.</h1>
-        <p>This desk shows the accepted continuity projection for Nexus Atlas: what is trusted, what was verified, and whether human authority is currently required. It does not write, execute, or refresh external sources.</p>
+        <p>This desk shows the accepted continuity projection for Nexus Atlas: what is trusted, what was verified, and whether human authority is currently required. It does not write or execute. Live mode accepts only the same bounded Product Surface schema over an allow-listed loopback read.</p>
       </div>
       <div class="view-heading-tools">
         <span class="continuity-status-pill" data-tone="${continuityTone(validity)}">${escapeHtml(validity)}</span>
@@ -128,11 +143,12 @@ function renderHeading(surface) {
     </header>`;
 }
 
-function renderBoundaryStrip(surface) {
+function renderBoundaryStrip(surface, sourceInfo) {
   const authority = surface.continuity.humanAuthorityRequired ? "Human decision required" : "No human decision pending";
+  const sourceLabel = sourceInfo.mode === "live" ? "VALIDATED LOOPBACK LIVE READ" : "ACCEPTED STATIC SNAPSHOT";
   return `
     <section class="continuity-boundary" aria-label="Continuity browser boundary">
-      <strong>ACCEPTED STATIC SNAPSHOT</strong>
+      <strong>${sourceLabel}</strong>
       <span>${escapeHtml(authority)}</span>
       <span>No external execution</span>
       <span>No checkpoint write</span>
@@ -297,11 +313,11 @@ function renderVerification(surface) {
     </section>`;
 }
 
-function renderContinuity(surface) {
+function renderContinuity(surface, sourceInfo) {
   return `
     ${renderContextPath()}
-    ${renderHeading(surface)}
-    ${renderBoundaryStrip(surface)}
+    ${renderHeading(surface, sourceInfo)}
+    ${renderBoundaryStrip(surface, sourceInfo)}
     ${renderSignalStrip(surface)}
     <div class="continuity-grid">
       ${renderResumeCard(surface)}
@@ -313,10 +329,11 @@ function renderContinuity(surface) {
     </div>`;
 }
 
-function renderSourceHealth(surface) {
+function renderSourceHealth(surface, sourceInfo) {
+  const live = sourceInfo.mode === "live";
   sourceSummary.innerHTML = `
-    <span class="source-primary"><span class="source-name">CONTINUITY SNAPSHOT</span><span class="source-state">STATIC</span></span>
-    <span class="source-detail">Accepted read-only browser projection · no live store connection</span>
+    <span class="source-primary"><span class="source-name">CONTINUITY ${live ? "LIVE READ" : "SNAPSHOT"}</span><span class="source-state">${live ? "LIVE" : "STATIC"}</span></span>
+    <span class="source-detail">${live ? "Validated loopback Product Surface · read-only · no raw store access" : "Accepted read-only browser projection · no live store connection"}</span>
     <span class="source-count">${escapeHtml(surface.continuity.validity)} · ${escapeHtml(surface.latestOutcome?.verificationState || "no outcome")}</span>`;
 }
 
@@ -345,12 +362,12 @@ function renderUnavailable(error) {
   main.innerHTML = `
     <section class="continuity-unavailable" role="alert">
       <span class="eyebrow">CONTINUITY / UNAVAILABLE</span>
-      <h1>The accepted continuity snapshot could not be opened.</h1>
-      <p>${escapeHtml(error?.message || "Unknown snapshot error.")}</p>
+      <h1>The accepted continuity source could not be opened.</h1>
+      <p>${escapeHtml(error?.message || "Unknown continuity source error.")}</p>
       <p>No fallback source was used. Legacy Re-entry and external providers were not queried.</p>
     </section>`;
   sourceSummary.innerHTML = `
-    <span class="source-primary"><span class="source-name">CONTINUITY SNAPSHOT</span><span class="source-state">UNAVAILABLE</span></span>
+    <span class="source-primary"><span class="source-name">CONTINUITY SOURCE</span><span class="source-state">UNAVAILABLE</span></span>
     <span class="source-detail">No silent fallback attempted</span>`;
 }
 
@@ -363,10 +380,10 @@ async function start() {
   renderTray();
 
   try {
-    const surface = await loadContinuitySnapshot();
-    renderSourceHealth(surface);
-    main.innerHTML = renderContinuity(surface);
-    announcement.textContent = `Continuity Desk opened. ${surface.continuity.validity} continuity, ${surface.latestOutcome?.verificationState || "no"} latest Outcome.`;
+    const { surface, sourceInfo } = await loadContinuitySnapshot();
+    renderSourceHealth(surface, sourceInfo);
+    main.innerHTML = renderContinuity(surface, sourceInfo);
+    announcement.textContent = `Continuity Desk opened from ${sourceInfo.mode} source. ${surface.continuity.validity} continuity, ${surface.latestOutcome?.verificationState || "no"} latest Outcome.`;
   } catch (error) {
     renderUnavailable(error);
     announcement.textContent = "Continuity Desk unavailable. No fallback source was used.";

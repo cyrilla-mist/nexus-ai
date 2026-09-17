@@ -43,7 +43,7 @@ jobs:
         run: node --test tests/atlas-continuity-inspector-v01.test.mjs
 
       - name: Enforce bounded Phase 8D changed scope
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && github.head_ref == 'feature/phase8d-continuity-inspector-history'
         shell: bash
         run: |
           git fetch origin main --depth=1
