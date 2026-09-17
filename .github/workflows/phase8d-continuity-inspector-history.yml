@@ -11,6 +11,7 @@ on:
       - 'frontend/atlas/atlas-continuity-inspector.css'
       - 'tests/atlas-continuity-inspector-v01.test.mjs'
       - 'docs/Nexus-Atlas-v0.1-Continuity-Inspector-History-Contract.md'
+      - '.github/workflows/phase8c-continuity-desk-route.yml'
       - '.github/workflows/phase8d-continuity-inspector-history.yml'
   workflow_dispatch:
 
@@ -46,7 +47,7 @@ jobs:
         shell: bash
         run: |
           git fetch origin main --depth=1
-          allowed='^(atlas\.html|frontend/atlas/(atlas-entry\.js|atlas-continuity-inspector\.(js|css))|tests/atlas-continuity-inspector-v01\.test\.mjs|docs/Nexus-Atlas-v0\.1-Continuity-Inspector-History-Contract\.md|\.github/workflows/phase8d-continuity-inspector-history\.yml)$'
+          allowed='^(atlas\.html|frontend/atlas/(atlas-entry\.js|atlas-continuity-inspector\.(js|css))|tests/atlas-continuity-inspector-v01\.test\.mjs|docs/Nexus-Atlas-v0\.1-Continuity-Inspector-History-Contract\.md|\.github/workflows/phase8c-continuity-desk-route\.yml|\.github/workflows/phase8d-continuity-inspector-history\.yml)$'
           changed="$(git diff --name-only origin/main...HEAD)"
           printf '%s\n' "$changed"
           unexpected="$(printf '%s\n' "$changed" | grep -Ev "$allowed" || true)"
