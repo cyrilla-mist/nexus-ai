@@ -11,6 +11,7 @@ on:
       - 'experience/product-surface-v01/continuity-product-surface-browser-validator.mjs'
       - 'tests/continuity-live-read-v01.test.mjs'
       - 'tests/atlas-continuity-live-wiring-v01.test.mjs'
+      - 'tests/atlas-continuity-inspector-v01.test.mjs'
       - 'docs/Nexus-Atlas-v0.1-Continuity-Live-Read-Boundary.md'
       - '.github/workflows/phase8e-continuity-live-read.yml'
   workflow_dispatch:
@@ -41,6 +42,7 @@ jobs:
           node --check experience/product-surface-v01/continuity-product-surface-browser-validator.mjs
           node --check tests/continuity-live-read-v01.test.mjs
           node --check tests/atlas-continuity-live-wiring-v01.test.mjs
+          node --check tests/atlas-continuity-inspector-v01.test.mjs
 
       - name: Dedicated Phase 8E transport acceptance
         run: node --test tests/continuity-live-read-v01.test.mjs tests/atlas-continuity-live-wiring-v01.test.mjs
@@ -50,7 +52,7 @@ jobs:
         shell: bash
         run: |
           git fetch origin main --depth=1
-          allowed='^(frontend/atlas/(atlas-continuity\.js|atlas-continuity-inspector\.js|atlas-continuity-live-read\.js)|experience/product-surface-v01/continuity-product-surface-browser-validator\.mjs|tests/(continuity-live-read-v01\.test\.mjs|atlas-continuity-live-wiring-v01\.test\.mjs)|docs/Nexus-Atlas-v0\.1-Continuity-Live-Read-Boundary\.md|\.github/workflows/phase8e-continuity-live-read\.yml)$'
+          allowed='^(frontend/atlas/(atlas-continuity\.js|atlas-continuity-inspector\.js|atlas-continuity-live-read\.js)|experience/product-surface-v01/continuity-product-surface-browser-validator\.mjs|tests/(continuity-live-read-v01\.test\.mjs|atlas-continuity-live-wiring-v01\.test\.mjs|atlas-continuity-inspector-v01\.test\.mjs)|docs/Nexus-Atlas-v0\.1-Continuity-Live-Read-Boundary\.md|\.github/workflows/phase8e-continuity-live-read\.yml)$'
           changed="$(git diff --name-only origin/main...HEAD)"
           printf '%s\n' "$changed"
           unexpected="$(printf '%s\n' "$changed" | grep -Ev "$allowed" || true)"
