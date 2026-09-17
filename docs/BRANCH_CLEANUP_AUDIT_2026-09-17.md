@@ -50,32 +50,41 @@ The following branches were directly compared with `main` during this audit and 
 
 | Branch | Result |
 | --- | --- |
-| `feature/phase8f-continuity-visual-acceptance` | identical to `main` at audit time |
+| `feature/generalized-context-package` | `ahead_by=0`; behind `main` |
+| `feature/generalized-decision-memory` | `ahead_by=0`; behind `main` |
+| `feature/personal-context-foundation` | `ahead_by=0`; behind `main` |
+| `feature/source-adapter-foundation` | `ahead_by=0`; behind `main` |
+| `feature/phase4f-acceptance` | `ahead_by=0`; behind `main` |
+| `feature/phase5-product-surface` | `ahead_by=0`; behind `main` |
+| `feature/phase6b-trusted-checkpoint` | `ahead_by=0`; behind `main` |
+| `feature/phase6c-continuity-assessment` | `ahead_by=0`; behind `main` |
+| `feature/phase6c-fresh-evidence-window` | `ahead_by=0`; behind `main` |
+| `feature/phase6d-human-authority-reentry` | `ahead_by=0`; behind `main` |
+| `feature/phase6e-outcome-verification` | `ahead_by=0`; behind `main` |
+| `feature/phase6f-continuity-closure` | `ahead_by=0`; behind `main` |
+| `feature/phase6f-continuity-closure-backup` | `ahead_by=0`; behind `main` |
+| `feature/phase6f-continuity-closure-runtime` | `ahead_by=0`; behind `main` |
+| `feature/phase6f-continuity-closure-work` | `ahead_by=0`; behind `main` |
+| `feature/phase7g-writeback-management-proof-copy` | `ahead_by=0`; behind `main` |
 | `feature/phase7h-final-acceptance` | `ahead_by=0`; behind `main` |
+| `feature/phase8f-continuity-visual-acceptance` | identical to `main` at audit time |
 | `agent/nexus-atlas-shell` | `ahead_by=0`; behind `main` |
 | `agent/verity-datahub-assets` | `ahead_by=0`; behind `main` |
 | `repair/nexus-atlas-integration-v1` | `ahead_by=0`; behind `main` |
-| `feature/phase6f-continuity-closure-backup` | `ahead_by=0`; behind `main` |
-| `feature/phase6f-continuity-closure-work` | `ahead_by=0`; behind `main` |
-| `feature/phase7g-writeback-management-proof-copy` | `ahead_by=0`; behind `main` |
 | `docs/nexus-portfolio-extraction` | `ahead_by=0`; behind `main` |
-| `feature/personal-context-foundation` | `ahead_by=0`; behind `main` |
-| `feature/source-adapter-foundation` | `ahead_by=0`; behind `main` |
 
 These branches can be removed after a final GitHub UI sanity check if desired. Their branch names do not need to be preserved for product history because the relevant commits are already reachable from `main`.
 
 ## Remaining Branches
 
-The repository still contains many unverified branches, including additional:
+The repository still contains unverified branches, including additional:
 
 - `agent/*`
 - `docs/*`
-- `feature/phase4*`
-- `feature/phase5*`
-- `feature/phase6*`
+- `feature/phase6g*`
+- `feature/phase6h*`
 - `feature/phase7*`
 - `feature/phase8*`
-- generalized context / decision branches
 
 Do **not** bulk-delete all of them based only on naming. Continue using `main...branch` comparison and classify each branch by `ahead_by` before deletion.
 
