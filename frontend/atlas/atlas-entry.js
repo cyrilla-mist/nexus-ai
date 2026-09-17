@@ -1,5 +1,5 @@
 const LEGACY_ROUTES = new Set(["map", "territory", "reentry"]);
-const PRODUCT_ROUTES = new Set(["desk", "source-intake"]);
+const PRODUCT_ROUTES = new Set(["desk", "source-intake", "continuity"]);
 
 function currentRoute() {
   const route = window.location.hash.replace("#", "");
@@ -16,7 +16,7 @@ function replaceRoute(route) {
 const initialRoute = currentRoute();
 
 // The legacy Atlas app owns its own route listener. Capture Product Surface navigation
-// before that listener so returning from historical routes re-enters the Phase 5 surfaces.
+// before that listener so returning from historical routes re-enters accepted surfaces.
 if (LEGACY_ROUTES.has(initialRoute)) {
   document.addEventListener(
     "click",
@@ -35,6 +35,8 @@ if (initialRoute === "desk") {
   await import("./atlas-desk.js");
 } else if (initialRoute === "source-intake") {
   await import("./atlas-source-intake.js");
+} else if (initialRoute === "continuity") {
+  await import("./atlas-continuity.js");
 } else {
   await import("./atlas-app.js");
 }
