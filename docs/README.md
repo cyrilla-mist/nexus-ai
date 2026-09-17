@@ -15,7 +15,19 @@ For the current product and repository state, read these first:
 5. [`Nexus-DataHub-Verity-Assets.md`](Nexus-DataHub-Verity-Assets.md) — DataHub / Verity governed-asset integration contract.
 6. [`BRANCH_CLEANUP_AUDIT_2026-09-17.md`](BRANCH_CLEANUP_AUDIT_2026-09-17.md) — complete classification of all non-`main` branches for repository cleanup.
 
-The source code, tests, and current root README are the authority for what the repository actually implements today. A historical design document does not by itself prove that a capability remains implemented or verified.
+The source code, tests, and current root README are the authority for what the repository actually implements today. A historical design document or GitHub release does not by itself prove that a capability remains implemented or current.
+
+## Release History Note
+
+The repository currently has one GitHub release:
+
+```text
+v0.1.1 — Nexus AI / Project Atlas Experience
+```
+
+That July 2026 release is a **historical product milestone** from before the current Nexus Atlas architecture and identity stabilized. It should be preserved as provenance, not interpreted as the current Nexus Atlas product version or current roadmap.
+
+No newer GitHub release is required merely for repository cosmetics. If Nexus Atlas adopts a new release line later, it should start from an intentional product/versioning decision and describe the canonical Nexus Atlas architecture rather than continuing the old Nexus AI / Project Atlas release narrative by accident.
 
 ## Documentation Classes
 
