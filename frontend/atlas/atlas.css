@@ -82,7 +82,15 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--ochre); outline
 .atlas-context-path b { color: var(--line); font-weight: 400; }
 .atlas-context-path strong { color: var(--nexus-accent); font-weight: 600; }
 .atlas-loading { padding: 70px 0; font: 500 30px "Newsreader", serif; }
-.context-inspector { border-left: 1px solid var(--strong); background: rgba(251,250,245,.45); }
+.context-inspector {
+  position: sticky;
+  top: 74px;
+  align-self: start;
+  max-height: calc(100vh - 130px);
+  overflow-y: auto;
+  border-left: 1px solid var(--strong);
+  background: rgba(251,250,245,.45);
+}
 .context-inspector > header button { width: 28px; height: 28px; border: 0; background: transparent; font-size: 20px; }
 #inspector-content { padding: 20px; }
 .inspector-empty { margin: 0; font-size: 12px; line-height: 1.65; color: var(--muted); }
