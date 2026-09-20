@@ -1,0 +1,58 @@
+{
+  "observationVersion": "nexus-atlas.phase8g-local-visual-acceptance.v0.1",
+  "projectRef": "project:nexus-atlas",
+  "phase": "8F",
+  "environment": {
+    "os": "Windows",
+    "browser": "Chrome"
+  },
+  "acceptedFixHead": "6ddc5a19a68c06e6b60e6f56ddfa6639500fc72c",
+  "mergedFixCommit": "79e8a7d615006e680aaef0cde2ac81e9477ec465",
+  "initialValidation": {
+    "staticContinuity": "PASS",
+    "inspector": "FAIL",
+    "liveFailClosed": "PASS",
+    "repositoryIntegrity": "PASS",
+    "blockingIssues": [
+      "desktop-inspector-not-visually-usable-from-lower-page-cards"
+    ],
+    "exactResponsiveViewports": {
+      "1024x768": "NOT_VERIFIED",
+      "390x844": "NOT_VERIFIED"
+    }
+  },
+  "blockerRevalidation": {
+    "result": "PASS",
+    "testedWhilePageScrolledDown": true,
+    "verificationInspector": "PASS",
+    "writebackSafetyInspector": "PASS",
+    "outcomeHistoryInspector": "PASS",
+    "checkpointHistoryInspector": "PASS",
+    "inspectorBlankStateObserved": false,
+    "requiredScrollBackToPageTop": false,
+    "horizontalOverflowIntroduced": false,
+    "closeReopenBehavior": "PASS",
+    "topPageInspectorRegression": {
+      "resume": "PASS",
+      "outcome": "PASS",
+      "checkpoint": "PASS"
+    },
+    "liveFailClosedSmoke": "PASS",
+    "staticFallbackObserved": false,
+    "repositoryWorkingTreeClean": true,
+    "exactResponsiveViewports": {
+      "1024x768": "NOT_VERIFIED",
+      "390x844": "NOT_VERIFIED"
+    },
+    "remainingIssues": {
+      "blocking": [],
+      "important": [],
+      "polish": []
+    },
+    "recommendation": "PASS_WITH_LIMITATIONS"
+  },
+  "limitation": "Exact 1024x768 and 390x844 viewport overrides were unavailable in local automation; this is recorded as a coverage limitation rather than a discovered responsive defect.",
+  "source": "explicit-local-codex-browser-validation-report",
+  "isGitHubSourceEvidence": false,
+  "isGeneralProductivityClaim": false
+}
